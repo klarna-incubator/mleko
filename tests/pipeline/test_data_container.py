@@ -19,4 +19,7 @@ class TestBaseDataContainer:
         """Should match string representation."""
         data = [Path()]
         container = DataContainer(data)
-        assert f"{container!r}" == "<DataContainer: data_type=list, data=[PosixPath('.')]>"
+        assert f"{container!r}" in {
+            "<DataContainer: data_type=list, data=[PosixPath('.')]>",
+            "<DataContainer: data_type=list, data=[WindowsPath('.')]>",
+        }

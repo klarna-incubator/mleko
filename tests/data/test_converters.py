@@ -25,7 +25,6 @@ class TestBaseDataConverter:
         """Should return vaex dataframe from convert method."""
         test_derived_data_converter = self.DerivedDataConverter(temporary_directory)
 
-        # should not raise any error
         df = test_derived_data_converter.convert([])
         assert df.shape == (3, 2)
         assert df.column_names == ["a", "b"]
@@ -86,6 +85,7 @@ class TestCsvToArrowConverter:
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
             patched_convert.assert_not_called()
+        df.close()
 
     def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
@@ -95,11 +95,13 @@ class TestCsvToArrowConverter:
 
         n_files = 1
         file_paths = generate_csv_files(temporary_directory, n_files, gzipped=True)
-        csv_to_arrow_converter.convert(file_paths, force_recompute=False)
+        df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory, downcast_float=False, workers=1, max_cache_entries=2
         )
-        new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
+        df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 2
+        df.close()
+        df_new.close()
