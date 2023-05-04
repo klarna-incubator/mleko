@@ -1,1 +1,1 @@
-"""Test suite for the mleko package."""
+"""Test suite for the library."""
