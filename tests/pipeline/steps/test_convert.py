@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
 import vaex
 
 from mleko.data.converters import BaseDataConverter
@@ -37,3 +38,14 @@ class TestConvertStep:
         assert result.data == df
 
         converter.convert.assert_called_once_with(file_paths)
+
+    def test_wrong_data_type(self):
+        """Should throw ValueError if not recieving list[Path]."""
+        file_paths = [str]
+        data_container = DataContainer(data=file_paths)  # type: ignore
+
+        converter = MagicMock(spec=BaseDataConverter)
+        convert_step = ConvertStep(converter=converter)
+
+        with pytest.raises(ValueError):
+            convert_step.execute(data_container)
