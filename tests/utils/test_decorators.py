@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import inspect
+from time import perf_counter, sleep
 from unittest.mock import MagicMock
 
 from mleko.utils.decorators import auto_repr, timing
@@ -127,6 +128,26 @@ class TestTiming:
 
         assert result == 18
         assert self.CustomLoggerMock.debug.called
+
+    def test_elapsed_time(self):
+        """Should log the correct elapsed time."""
+
+        @timing
+        def sample_function(sleep_time):
+            sleep(sleep_time)
+
+        sample_function.__globals__["logger"] = self.CustomLoggerMock()
+        sleep_time = 0.1
+        tolerance = 0.05
+        ts = perf_counter()
+        sample_function(sleep_time)
+        te = perf_counter()
+        elapsed_time = te - ts
+
+        assert self.CustomLoggerMock.debug.called
+        logged_time = float(self.CustomLoggerMock.debug.call_args[0][0].split()[-1].strip("s"))
+        assert sleep_time - tolerance < logged_time < sleep_time + tolerance
+        assert elapsed_time - tolerance < logged_time < elapsed_time + tolerance
 
     def test_preserve_signature(self):
         """Should preserve the signature of the wrapped function."""

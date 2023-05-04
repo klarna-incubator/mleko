@@ -6,7 +6,7 @@ from typing import Callable
 from tqdm import tqdm
 
 
-def set_tqdm_percent_wrapper(pbar: tqdm) -> Callable[[float], None]:  # type: ignore
+def set_tqdm_percent_wrapper(pbar: tqdm) -> Callable[[float], None]:
     """Return function for `tqdm` to set value instead of increment.
 
     Args:
