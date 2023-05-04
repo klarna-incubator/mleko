@@ -60,7 +60,7 @@ class S3DataSource(BaseDataSource):
         destination_dir: str | Path,
         s3_bucket_name: str,
         s3_key_prefix: str,
-        aws_profile_name: str = "default",
+        aws_profile_name: str | None = None,
         aws_region_name: str = "eu-west-1",
         num_workers: int = 64,
         manifest_file_name: str = "manifest",
@@ -72,7 +72,7 @@ class S3DataSource(BaseDataSource):
             destination_dir: Destination directory to store the fetched data.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
-            aws_profile_name: AWS profile name to use. Defaults to "default".
+            aws_profile_name: AWS profile name to use. Defaults to None.
             aws_region_name: AWS region name where the S3 bucket is located. Defaults to "eu-west-1".
             num_workers: Number of workers to use for concurrent downloads. Defaults to 64.
             manifest_file_name: Name of the manifest file. Defaults to "manifest".
@@ -164,7 +164,7 @@ class S3DataSource(BaseDataSource):
 
     def _get_s3_client(  # type: ignore
         self,
-        aws_profile_name: str,
+        aws_profile_name: str | None,
         aws_region_name: str,
     ):
         """Creates an S3 client using the provided AWS profile and region.
