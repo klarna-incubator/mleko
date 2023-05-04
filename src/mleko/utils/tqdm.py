@@ -1,12 +1,12 @@
 """Docstring."""
 from __future__ import annotations
 
-from typing import Callable, NoReturn
+from typing import Callable
 
 from tqdm import tqdm
 
 
-def set_tqdm_percent_wrapper(pbar: tqdm[NoReturn]) -> Callable[[float], None]:
+def set_tqdm_percent_wrapper(pbar: tqdm) -> Callable[[float], None]:  # type: ignore
     """Return function for `tqdm` to set value instead of increment.
 
     Args:

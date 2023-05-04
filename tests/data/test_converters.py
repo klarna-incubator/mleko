@@ -51,6 +51,7 @@ class TestCsvToArrowConverter:
             assert df.column_names == ["Time", "Count", "Name", "Is Best"]
             assert df.shape == (3, 4)
             assert df.Name.countna() == 1
+            df.close()
 
     def test_cache_hit(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and return cached values on second call."""
