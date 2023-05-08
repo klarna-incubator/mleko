@@ -1,7 +1,8 @@
-"""This module defines the abstract base class for pipeline steps.
+"""This module defines the abstract base class for pipeline steps in a data processing pipeline.
 
-A PipelineStep is a unit of work in a data processing pipeline.
-Each step should have a specific purpose and should be able to run independently or as part of a larger pipeline.
+The module provides a standard interface for implementing data processing steps as part of a larger pipeline,
+via the `PipelineStep` abstract base class. Each `PipelineStep` subclass should have a specific purpose and
+should be able to run independently or as part of the pipeline.
 """
 from __future__ import annotations
 
@@ -11,27 +12,27 @@ from mleko.pipeline.data_container import DataContainer
 
 
 class PipelineStep(ABC):
-    """A base class for all pipeline steps, providing a standardized interface for implementing data processing.
+    """Base class for all pipeline steps, ensuring the standardized interface for performing data processing operations.
 
-    The `PipelineStep` class is an abstract base class (ABC),
-    which ensures that any subclass of this class must provide an implementation for the `execute` method.
-    This method is the core of each pipeline step, responsible for executing the data processing operation.
+    Descendants of this class must implement the `execute` method, which carries out the data processing operation
+    related to the step.
     """
 
     @abstractmethod
     def execute(self, data_container: DataContainer) -> DataContainer:
         """Execute the data processing operation associated with this pipeline step.
 
+        The input data to be processed is passed via `data_container`, and the structure depends on the specific
+        implementation. After the operation, the method returns the processed data in the form of a `DataContainer`,
+        which includes the data and an enum determining the data type.
+
         Args:
-            data_container: The input data to be processed by this step.
-                The format and structure of this data will depend on the specific pipeline step implementation.
+            data_container: Input data for this step's processing operation.
 
         Raises:
             NotImplementedError: Must be implemented by subclass.
 
         Returns:
-            The processed data after the operation is performed. The format and structure of this data will
-                depend on the specific pipeline step implementation. The `DataContainer` contains the data and
-                an enum determining the data type.
+            Processed data as a `DataContainer`.
         """
         raise NotImplementedError

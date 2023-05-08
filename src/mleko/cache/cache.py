@@ -1,4 +1,18 @@
-"""A module that provides a mixin for caching the results of method calls in a flexible way."""
+"""A mixin module that provides a flexible and configurable caching mechanism for method call results.
+
+This module contains mixin classes designed to cache method call results efficiently, reducing
+the overhead of repetitive calculations or data fetching. The CacheMixin class stores the results
+of method calls on a per-instance basis, based on user-defined cache keys and fingerprints. The
+LRUCacheMixin class extends the CacheMixin to implement a Least Recently Used (LRU) cache eviction
+mechanism that helps manage the cache size by evicting the least recently used cache entries when
+the specified maximum number of cache entries is exceeded.
+
+Usage:
+    CacheMixin should be subclassed by other classes that require caching capabilities for their method calls.
+    The subclass should implement the method logic inside a lambda function and pass it to the `_cached_execute`
+    method, along with any cache keys needed to identify unique results. For more advanced use cases,
+    the LRUCacheMixin can be employed to enable automatic cache eviction based on an LRU strategy.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -14,6 +28,7 @@ from mleko.utils.custom_logger import CustomLogger
 
 
 logger = CustomLogger()
+"""A CustomLogger instance that's used throughout the module for logging."""
 
 
 def get_frame_qualname(frame: inspect.FrameInfo) -> str:
@@ -36,7 +51,15 @@ def get_frame_qualname(frame: inspect.FrameInfo) -> str:
 
 
 class CacheMixin:
-    """A mixin class for caching the results of method calls based on user-defined cache keys and fingerprints."""
+    """A mixin class for caching the results of method calls based on user-defined cache keys and fingerprints.
+
+    Warning:
+        This class maintains an ever-growing cache, which means that the cache size may increase indefinitely
+        with new method calls, possibly consuming a large amount of disk space. It does not implement any
+        cache eviction strategy. It is recommended to either clear the cache manually when needed or
+        use the LRUCacheMixin class, which extends this class to provide an LRU cache mechanism with
+        eviction of least recently used cache entries based on a specified maximum number of cache entries.
+    """
 
     def __init__(self, cache_directory: str | Path, cache_file_suffix: str) -> None:
         """Initializes the CacheMixin with the provided cache directory.
@@ -175,8 +198,10 @@ class CacheMixin:
 class LRUCacheMixin(CacheMixin):
     """Least Recently Used Cache Mixin.
 
-    This mixin class extends the CacheMixin to provide an LRU cache mechanism,
-    evicting the least recently used cache entries when the maximum number of cache entries is exceeded.
+    This mixin class extends the CacheMixin to provide a Least Recently Used (LRU) cache mechanism.
+    It evicts the least recently used cache entries when the maximum number of cache entries is exceeded.
+    The LRU cache mechanism ensures that the most frequently accessed cache entries are retained,
+    while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.
     """
 
     def __init__(self, cache_directory: str | Path, cache_file_suffix: str, max_entries: int) -> None:

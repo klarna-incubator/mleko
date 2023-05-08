@@ -1,4 +1,8 @@
-"""Module defining the ConvertStep class for data conversion."""
+"""Module for data conversion as a part of the pipeline process.
+
+This module contains the `ConvertStep` class which is a specialized pipeline step for handling data format
+conversion. It uses the provided `BaseDataConverter` for converting the data into the desired format.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,29 +14,29 @@ from mleko.utils.decorators import auto_repr
 
 
 class ConvertStep(PipelineStep):
-    """ConvertStep is a pipeline step responsible for converting data from one format to another."""
+    """Pipeline step that manages data conversion from one format to another."""
 
     @auto_repr
     def __init__(self, converter: BaseDataConverter) -> None:
-        """Initialize the ConvertStep with the specified DataConverter.
+        """Initialize the ConvertStep with the specified data converter.
 
         Args:
-            converter: The DataConverter that will convert data formats.
+            converter: The DataConverter responsible for handling data format conversion.
         """
         super().__init__()
         self._converter = converter
 
     def execute(self, data_container: DataContainer) -> DataContainer:
-        """Convert the data format.
+        """Perform data format conversion using the configured converter.
 
         Args:
-            data_container: File Paths to read from.
+            data_container: Contains a list of file Paths to be converted.
 
         Raises:
-            ValueError: Invalid data container, should contain a list of Path instances.
+            ValueError: If data container contains invalid data - not a list of Paths.
 
         Returns:
-            A vaex dataframe on a converted format.
+            A DataContainer containing the converted data as a vaex dataframe.
         """
         if not isinstance(data_container.data, list) or not all(isinstance(e, Path) for e in data_container.data):
             raise ValueError

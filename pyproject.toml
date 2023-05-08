@@ -46,7 +46,6 @@ pyupgrade = ">=2.29.1"
 safety = ">=1.10.3"
 sphinx = ">=4.3.2"
 sphinx-autobuild = ">=2021.3.14"
-sphinx-click = ">=3.0.2"
 typeguard = ">=2.13.3"
 xdoctest = {extras = ["colors"], version = ">=0.15.10"}
 myst-parser = {version = ">=0.16.1"}
@@ -54,6 +53,8 @@ ipykernel = "^6.21.3"
 mypy-boto3-s3 = "^1.26.116"
 nox = "^2023.4.22"
 nox-poetry = "^1.0.2"
+sphinx-autodoc-typehints = "^1.23.0"
+sphinx-autoapi = "^2.1.0"
 
 [tool.poetry.scripts]
 mleko = "mleko.__main__:main"

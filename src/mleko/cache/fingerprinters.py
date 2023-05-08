@@ -1,7 +1,8 @@
 """This module provides Fingerprinter classes for generating unique fingerprints.
 
-It supports various data and file types, such as Vaex DataFrames. These fingerprints can be used
-to track changes in data and support caching mechanisms.
+Fingerprinters are used for generating unique fingerprints of various data and file types,
+such as Vaex DataFrames or CSV files. These fingerprints can be used to track changes in data and support
+caching mechanisms.
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ from typing import Any
 
 
 class Fingerprinter(ABC):
-    """Abstract base class for fingerprinters."""
+    """Abstract base class for creating specialized fingerprinters."""
 
     @abstractmethod
     def fingerprint(self, data: Any) -> str:
@@ -34,10 +35,7 @@ class Fingerprinter(ABC):
 
 
 class CsvFingerprinter(Fingerprinter):
-    """A fingerprinter for CSV files.
-
-    Supports Gzipped and raw CSV files.
-    """
+    """A fingerprinter for CSV files supporting Gzipped and raw CSV files."""
 
     def __init__(self, n_rows: int = 1000):
         """Initialize the CSVFingerprinter.

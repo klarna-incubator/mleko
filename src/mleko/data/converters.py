@@ -1,4 +1,9 @@
-"""Docstring."""
+"""The module provides functionality for converting data between different file formats.
+
+It includes a base class for data converters to support various file format conversions and caching mechanisms.
+While it primarily focuses on handling CSV files, the infrastructure allows for extending its
+capabilities to other formats as needed.
+"""
 from __future__ import annotations
 
 import multiprocessing
@@ -13,11 +18,16 @@ from tqdm import tqdm
 
 from mleko.cache.cache import LRUCacheMixin
 from mleko.cache.fingerprinters import CsvFingerprinter
+from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.tqdm import set_tqdm_percent_wrapper
 
 
+logger = CustomLogger()
+"""A CustomLogger instance that's used throughout the module for logging."""
+
 V_CPU_COUNT = multiprocessing.cpu_count()
+"""A module-level constant representing the total number of CPUs available on the current system."""
 
 
 class BaseDataConverter(ABC):
@@ -45,7 +55,7 @@ class BaseDataConverter(ABC):
 
 
 class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
-    """Converts CSV files to Arrow format using the vaex library and caches the resulting dataframes."""
+    """A class that converts CSV files to Arrow format using the vaex library and caches the resulting dataframes."""
 
     @auto_repr
     def __init__(
@@ -84,14 +94,14 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         workers: int = V_CPU_COUNT,
         max_cache_entries: int = 1,
     ) -> None:
-        """Initialize the CsvToArrowConverter with the necessary configurations and parameters.
+        """Initializes the CsvToArrowConverter with the necessary configurations and parameters.
 
         Args:
             output_directory: The directory where the converted files will be saved.
-            forced_datetime_columns: A sequence of column names to force as datetime.
-            forced_numerical_columns: A sequence of column names to force as numerical.
-            forced_categorical_columns: A sequence of column names to force as categorical.
-            forced_boolean_columns: A sequence of column names to force as boolean.
+            forced_datetime_columns: A sequence of column names to force as datetime type.
+            forced_numerical_columns: A sequence of column names to force as numerical type.
+            forced_categorical_columns: A sequence of column names to force as categorical type.
+            forced_boolean_columns: A sequence of column names to force as boolean type.
             drop_columns: A sequence of column names to drop during conversion.
             na_values: A sequence of strings to consider as NaN or missing values.
             true_values: A sequence of strings to consider as True values.
@@ -117,16 +127,16 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         self._random_state = random_state
 
     def convert(self, file_paths: list[Path] | list[str], force_recompute: bool = False) -> vaex.DataFrame:
-        """Converts a list of file paths to Arrow format and returns a vaex dataframe.
+        """Converts a list of CSV files to Arrow format and returns a vaex dataframe joined from the converted data.
 
-        If the cached result is available, it will use it unless force_recompute is set to True.
+        The method takes care of caching, and results will be reused accordingly unless force_recompute is set to True.
 
         Args:
             file_paths: A list of file paths to be converted.
             force_recompute: If set to True, forces recomputation and ignores the cache.
 
         Returns:
-            A DataFrame containing the converted data.
+            vaex.DataFrame: The resulting dataframe with the combined converted data.
         """
         return self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
@@ -161,6 +171,8 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         downcast_float: bool,
     ) -> None:
         """Converts a single CSV file to Arrow format using the provided options and saves it to the output directory.
+
+        This operation is done in chunks to optimize parallel processing.
 
         Args:
             file_path: The path of the CSV file to be converted.
@@ -210,15 +222,15 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         df_chunk.close()
 
     def _convert(self, file_paths: list[Path] | list[str]) -> vaex.DataFrame:
-        """Converts a list of CSV file paths to Arrow format using multiprocessing.
+        """Converts a list of CSV files to Arrow format using parallel processing.
 
-        Individual chunks of dataframes are saved to the output directory.
+        Chunks of files are processed in parallel and saved in the output directory.
 
         Args:
             file_paths: A list of file paths to be converted.
 
         Returns:
-            Converted DataFrame based on all chunks.
+            A DataFrame containing the merged chunks.
         """
         with tqdm(total=len(file_paths), desc="Converting CSV files") as pbar:
             with futures.ProcessPoolExecutor(max_workers=min(self._workers, len(file_paths))) as executor:
@@ -248,12 +260,12 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
             cache_file_path: The path of the cache file to be read.
 
         Returns:
-            A vaex dataframe containing the data from the cache file.
+            vaex.DataFrame: The contents of the cache file as a dataframe.
         """
         return vaex.open(cache_file_path)
 
     def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
-        """Writes a vaex dataframe to a cache file in Arrow format.
+        """Writes the results of the dataframe conversion to Arrow format in a cache file with arrow suffix.
 
         Args:
             cache_file_path: The path of the cache file to be written.

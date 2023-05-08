@@ -1,4 +1,10 @@
-"""Docstring."""
+"""Provides functionality for fetching data from various sources and storing it locally.
+
+This module contains classes designed to fetch data from different sources and store it
+locally in the specified destination directory. The main classes are 'BaseDataSource', an abstract base
+class for implementing specific data source classes, and several concrete implementations, such as
+'S3DataSource', which fetches data from an AWS S3 bucket and stores it locally.
+"""
 from __future__ import annotations
 
 import glob
@@ -20,33 +26,34 @@ from mleko.utils.file_helpers import clear_directory
 
 
 logger = CustomLogger()
+"""A CustomLogger instance that's used throughout the module for logging."""
 
 
 class BaseDataSource(ABC):
-    """Abstract base class for data sources used to fetch data."""
+    """An abstract base class implementing data source classes that fetch data and store it locally."""
 
     def __init__(self, destination_dir: str | Path) -> None:
-        """Initializes the data source and creates the destination directory if it does not exist.
+        """Initializes the data source and ensures the destination directory exists.
 
         Args:
-            destination_dir: Destination directory to store the fetched data.
+            destination_dir: Directory where the fetched data will be stored locally.
         """
         self._destination_dir = Path(destination_dir)
         self._destination_dir.mkdir(parents=True, exist_ok=True)
 
     @abstractmethod
     def fetch_data(self, use_cache: bool = True) -> list[Path]:
-        """Fetch the data to the `destination_dir` using the configured data source.
+        """Downloads and stores data in the 'destination_dir' using the specific data source implementation.
 
         Args:
-            use_cache: If available for the child class, will skip the data fetching if up-to-date data exists
-                inside the `destination_dir`. Defaults to True.
+            use_cache: If supported by the child class, skips data fetching when up-to-date data is already present
+                in 'destination_dir'. Defaults to True.
 
         Raises:
-            NotImplementedError: Needs to be implemented by the class inheriting the `BaseDataSource`.
+            NotImplementedError: Must be implemented in the child class that inherits from `BaseDataSource`.
 
         Returns:
-            List of Path objects to the data.
+            A list of Path objects pointing to the downloaded data files.
         """
         raise NotImplementedError
 
@@ -66,10 +73,10 @@ class S3DataSource(BaseDataSource):
         manifest_file_name: str = "manifest",
         check_s3_timestamps: bool = True,
     ) -> None:
-        """Initializes the S3 bucket client and prepares the destination directory.
+        """Initializes the S3 bucket client, configures the destination directory, and sets client-related parameters.
 
         Args:
-            destination_dir: Destination directory to store the fetched data.
+            destination_dir: Directory to store the fetched data locally.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
             aws_profile_name: AWS profile name to use. Defaults to None.
@@ -90,18 +97,20 @@ class S3DataSource(BaseDataSource):
         self._check_s3_timestamps = check_s3_timestamps
 
     def fetch_data(self, use_cache: bool = True) -> list[Path]:
-        """Fetches the data from the S3 bucket to the `destination_dir`.
+        """Downloads the data from the S3 bucket and stores it in the 'destination_dir'.
+
+        If 'use_cache' is True, verifies whether the data in the local 'destination_dir' is current with the
+        S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
-            use_cache: If True, checks if the local dataset is up-to-date with the S3 bucket contents
-                using the manifest file, and skips downloading if it is. Defaults to True.
+            use_cache: Whether to skip downloading if the local data is up to date. Defaults to True.
 
         Raises:
-            Exception: If the files in the S3 bucket are from multiple dates,
-                which might indicate data corruption or duplication.
+            Exception: If files in the S3 bucket have different last modified dates, indicating potential corruption
+                       or duplication.
 
         Returns:
-            List of Path objects of downloaded data.
+            A list of Path objects pointing to the downloaded data files.
         """
         resp = self._s3_client.list_objects(
             Bucket=self._s3_bucket_name,
@@ -152,7 +161,7 @@ class S3DataSource(BaseDataSource):
         return self._get_local_filenames()
 
     def _get_local_filenames(self) -> list[Path]:
-        """Get a list of local filenames for CSV and GZ files in the destination directory.
+        """Retrieves local filenames for CSV and GZ files in the destination directory.
 
         Returns:
             A list of Path objects for all CSV and GZ files in the destination directory.
@@ -216,7 +225,7 @@ class S3DataSource(BaseDataSource):
         keys: list[str],
         num_workers: int,
     ) -> None:
-        """Downloads all specified files from the S3 bucket to the local directory.
+        """Downloads all specified files from the S3 bucket to the local directory concurrently.
 
         Args:
             directory: Local destination directory to store the downloaded files.
