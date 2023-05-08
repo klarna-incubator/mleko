@@ -11,13 +11,12 @@ end-before: <!-- github-only -->
 ```{toctree}
 ---
 hidden:
-maxdepth: 1
+maxdepth: 3
 ---
 
+autoapi/index
 usage
-reference
 contributing
-Code of Conduct <codeofconduct>
 License <license>
 Changelog <https://github.com/ErikBavenstrand/mleko/releases>
 ```

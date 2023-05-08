@@ -23,11 +23,20 @@
 
 ## Features
 
-- TODO
+MLEKO is designed to streamline the model building process with its comprehensive set of features:
+
+- Data processing support for different data sources and formats, as well as feature engineering.
+- Customizable data processing pipelines with pre-built pipeline steps for various tasks.
+- Efficient caching of method call results using caching mixins and fingerprinting utilities.
+- Utility functions for logging, decorating, file management, and TQDM wrappers.
 
 ## Requirements
 
-- TODO
+- Python 3.8, 3.9, or 3.10
+- boto3 >= 1.26.91
+- botocore >= 1.29.91
+- tqdm >= 4.65.0
+- vaex >= 4.16.0
 
 ## Installation
 
@@ -39,7 +48,7 @@ $ pip install mleko
 
 ## Usage
 
-Please see the [Command-line Reference] for details.
+- TODO
 
 ## Contributing
 
@@ -56,18 +65,10 @@ _ML-Ekosystem_ is free and open source software.
 If you encounter any problems,
 please [file an issue] along with a detailed description.
 
-## Credits
-
-This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
-
-[@cjolowicz]: https://github.com/cjolowicz
-[pypi]: https://pypi.org/
-[hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
-[pip]: https://pip.pypa.io/
-
 <!-- github-only -->
 
+[pypi]: https://pypi.org/
+[pip]: https://pip.pypa.io/
+[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
 [license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
 [contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
-[command-line reference]: https://mleko.readthedocs.io/en/latest/usage.html

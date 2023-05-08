@@ -5,8 +5,23 @@ copyright = "2023, Erik Båvenstrand"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx_click",
     "myst_parser",
+    "sphinx_autodoc_typehints",
+    "autoapi.extension",
 ]
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 html_theme = "furo"
+autoapi_template_dir = "_templates/autoapi"
+autoapi_dirs = ["../src/mleko"]
+autoapi_type = "python"
+autoapi_options = [
+    "members",
+    "inherited-members",
+    "undoc-members",
+    "private-members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+]
+autoapi_python_class_content = "both"
+autoapi_member_order = "groupwise"

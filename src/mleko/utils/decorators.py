@@ -1,4 +1,4 @@
-"""Docstring."""
+"""This module provides utility decorators for classes and functions."""
 from __future__ import annotations
 
 import inspect
@@ -10,21 +10,27 @@ from mleko.utils.custom_logger import CustomLogger
 
 
 logger = CustomLogger()
+"""A CustomLogger instance that's used throughout the module for logging."""
 
 F = TypeVar("F", bound=Callable[..., Any])
+"""A TypeVar used as a generic function type throughout the module.
+
+This TypeVar is designed for type hinting in decorators in the module. It essentially states that F can be
+a function with any number of arguments and any return type.
+"""
 
 
 def auto_repr(init_method: F) -> F:
-    """Decorator to automatically generate a __repr__ method for a class.
+    """Decorator for generating a __repr__ method for a class automatically based on the __init__ method signature.
 
-    It uses the class's __init__ method signature to extract parameter names and values,
-    then stores this information to be used in the generated __repr__ method.
+    The decorator inspects the __init__ method's signature and uses parameter names and values to create a __repr__
+    method that represents the class instance.
 
     Args:
-        init_method: The __init__ method of the class being decorated.
+        init_method: The __init__ method of the class to be decorated.
 
     Returns:
-        The wrapped __init__ method.
+        The wrapped __init__ method with an automatically generated __repr__ method.
     """
 
     @wraps(init_method)

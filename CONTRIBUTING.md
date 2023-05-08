@@ -9,7 +9,6 @@ Here is a list of important resources for contributors:
 - [Source Code]
 - [Documentation]
 - [Issue Tracker]
-- [Code of Conduct]
 
 [mit license]: https://opensource.org/licenses/MIT
 [source code]: https://github.com/ErikBavenstrand/mleko
@@ -37,7 +36,7 @@ Request features on the [Issue Tracker].
 
 ## How to set up your development environment
 
-You need Python 3.7+ and the following tools:
+You need Python 3.8+ and the following tools:
 
 - [Poetry]
 - [Nox]
