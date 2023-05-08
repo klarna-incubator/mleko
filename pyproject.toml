@@ -70,7 +70,7 @@ source = ["mleko"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 100
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", '"""']
 
 [tool.isort]
 profile = "black"
