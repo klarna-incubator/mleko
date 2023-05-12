@@ -1,4 +1,4 @@
-"""Test suite for the `data.sources` module."""
+"""Test suite for the `data.sources.s3_data_source` module."""
 from __future__ import annotations
 
 import datetime
@@ -14,28 +14,11 @@ from botocore.exceptions import ProfileNotFound
 from moto.s3.models import s3_backends
 from mypy_boto3_s3.service_resource import Bucket
 
-from mleko.data.sources import BaseDataSource, S3DataSource
-
-
-class TestBaseDataSource:
-    """Test suite for `data.sources.BaseDataSource`."""
-
-    class DataSource(BaseDataSource):
-        """Test class inheriting from the `BaseDataSource`."""
-
-        def fetch_data(self, _use_cache):
-            """Fetch data."""
-            pass
-
-    def test_init(self, temporary_directory: Path):
-        """Should create the destination directory and sets _destination_dir attribute."""
-        test_data = self.DataSource(temporary_directory)
-        assert temporary_directory.exists()
-        assert test_data._destination_dir == temporary_directory
+from mleko.data.sources import S3DataSource
 
 
 class TestS3DataSource:
-    """Test suite for `data.sources.S3DataSource`."""
+    """Test suite for `data.sources.s3_data_source.S3DataSource`."""
 
     @pytest.fixture(scope="class")
     def s3_bucket(self) -> Generator[Bucket, None, None]:
@@ -51,7 +34,7 @@ class TestS3DataSource:
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
 
         test_data = S3DataSource(
-            destination_dir=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -74,7 +57,7 @@ class TestS3DataSource:
 
         with pytest.raises(Exception, match="Files in S3"):
             test_data = S3DataSource(
-                destination_dir=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -98,7 +81,7 @@ class TestS3DataSource:
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
         test_data = S3DataSource(
-            destination_dir=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -111,7 +94,7 @@ class TestS3DataSource:
 
         with patch.object(S3DataSource, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3DataSource(
-                destination_dir=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -136,7 +119,7 @@ class TestS3DataSource:
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
         test_data = S3DataSource(
-            destination_dir=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -159,7 +142,7 @@ class TestS3DataSource:
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO_NEW")
         with patch.object(S3DataSource, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3DataSource(
-                destination_dir=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -192,7 +175,7 @@ class TestS3DataSource:
             mocked_get_credentials.return_value = credentials
 
             S3DataSource(
-                destination_dir=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_profile_name="custom-profile-name",

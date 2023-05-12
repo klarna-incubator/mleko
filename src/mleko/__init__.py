@@ -20,3 +20,4 @@ The library is organized into various subpackages, each focusing on a specific a
 Each subpackage is designed to be modular and extensible, making it easy to customize and adapt the library to a wide
 range of model building processes and requirements.
 """
+__version__ = "0.1.0"

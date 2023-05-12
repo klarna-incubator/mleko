@@ -1,16 +1,13 @@
-"""Provides functionality for fetching data from various sources and storing it locally.
+"""Module for fetching data from AWS S3 and storing it locally using the S3DataSource class.
 
-This module contains classes designed to fetch data from different sources and store it
-locally in the specified destination directory. The main classes are 'BaseDataSource', an abstract base
-class for implementing specific data source classes, and several concrete implementations, such as
-'S3DataSource', which fetches data from an AWS S3 bucket and stores it locally.
+The S3DataSource class provides an interface for downloading specified data from an AWS S3 bucket.
+It allows users to specify the attributes related to the S3 system and configure concurrent downloads.
+This module uses boto3 library for interacting with the AWS API.
 """
 from __future__ import annotations
 
-import glob
 import json
 import os
-from abc import ABC, abstractmethod
 from concurrent import futures
 from pathlib import Path
 from typing import Any
@@ -20,6 +17,7 @@ from boto3.s3.transfer import TransferConfig as BotoTransferConfig
 from botocore.config import Config as BotoConfig
 from tqdm import tqdm
 
+from mleko.data.sources import BaseDataSource
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
@@ -29,42 +27,18 @@ logger = CustomLogger()
 """A CustomLogger instance that's used throughout the module for logging."""
 
 
-class BaseDataSource(ABC):
-    """An abstract base class implementing data source classes that fetch data and store it locally."""
-
-    def __init__(self, destination_dir: str | Path) -> None:
-        """Initializes the data source and ensures the destination directory exists.
-
-        Args:
-            destination_dir: Directory where the fetched data will be stored locally.
-        """
-        self._destination_dir = Path(destination_dir)
-        self._destination_dir.mkdir(parents=True, exist_ok=True)
-
-    @abstractmethod
-    def fetch_data(self, use_cache: bool = True) -> list[Path]:
-        """Downloads and stores data in the 'destination_dir' using the specific data source implementation.
-
-        Args:
-            use_cache: If supported by the child class, skips data fetching when up-to-date data is already present
-                in 'destination_dir'. Defaults to True.
-
-        Raises:
-            NotImplementedError: Must be implemented in the child class that inherits from `BaseDataSource`.
-
-        Returns:
-            A list of Path objects pointing to the downloaded data files.
-        """
-        raise NotImplementedError
-
-
 class S3DataSource(BaseDataSource):
-    """A class to handle fetching data from an AWS S3 bucket and storing it locally."""
+    """S3DataSource provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
+
+    This class extends interacts with AWS S3, allowing users to download specified data from an S3 bucket.
+    It supports manifest-based caching, enabling more efficient data fetching by verifying if the
+    local dataset is up-to-date before downloading.
+    """
 
     @auto_repr
     def __init__(
         self,
-        destination_dir: str | Path,
+        destination_directory: str | Path,
         s3_bucket_name: str,
         s3_key_prefix: str,
         aws_profile_name: str | None = None,
@@ -76,7 +50,7 @@ class S3DataSource(BaseDataSource):
         """Initializes the S3 bucket client, configures the destination directory, and sets client-related parameters.
 
         Args:
-            destination_dir: Directory to store the fetched data locally.
+            destination_directory: Directory to store the fetched data locally.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
             aws_profile_name: AWS profile name to use. Defaults to None.
@@ -85,7 +59,7 @@ class S3DataSource(BaseDataSource):
             manifest_file_name: Name of the manifest file. Defaults to "manifest".
             check_s3_timestamps: Whether to check if all S3 files have the same timestamp. Defaults to True.
         """
-        super().__init__(destination_dir=destination_dir)
+        super().__init__(destination_directory)
 
         self._s3_bucket_name = s3_bucket_name
         self._s3_key_prefix = s3_key_prefix
@@ -97,9 +71,9 @@ class S3DataSource(BaseDataSource):
         self._check_s3_timestamps = check_s3_timestamps
 
     def fetch_data(self, use_cache: bool = True) -> list[Path]:
-        """Downloads the data from the S3 bucket and stores it in the 'destination_dir'.
+        """Downloads the data from the S3 bucket and stores it in the 'destination_directory'.
 
-        If 'use_cache' is True, verifies whether the data in the local 'destination_dir' is current with the
+        If 'use_cache' is True, verifies whether the data in the local 'destination_directory' is current with the
         S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
@@ -134,16 +108,18 @@ class S3DataSource(BaseDataSource):
             self._s3_client.download_file(
                 Bucket=self._s3_bucket_name,
                 Key=manifest_file_key,
-                Filename=str(self._destination_dir / self._manifest_file_name),
+                Filename=str(self._destination_directory / self._manifest_file_name),
             )
-            with open(self._destination_dir / self._manifest_file_name) as f:
+            with open(self._destination_directory / self._manifest_file_name) as f:
                 manifest: dict[str, Any] = json.load(f)
                 if self._is_local_dataset_fresh(manifest):
                     logger.info("Local dataset is up to date with S3 bucket contents, skipping download.")
-                    return self._get_local_filenames()
+                    return self._get_local_filenames(["gz", "csv", "zip"])
 
-        logger.info(f"Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to {self._destination_dir} from S3.")
-        clear_directory(self._destination_dir)
+        logger.info(
+            f"Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to {self._destination_directory} from S3."
+        )
+        clear_directory(self._destination_directory)
         keys_to_download = [
             entry["Key"]
             for entry in resp["Contents"]
@@ -151,25 +127,10 @@ class S3DataSource(BaseDataSource):
         ]
 
         if keys_to_download:
-            self._s3_fetch_all(
-                self._destination_dir,
-                keys_to_download,
-                self._num_workers,
-            )
+            self._s3_fetch_all(keys_to_download)
             logger.info(f"Finished downloading {len(keys_to_download)} files from S3.")
 
-        return self._get_local_filenames()
-
-    def _get_local_filenames(self) -> list[Path]:
-        """Retrieves local filenames for CSV and GZ files in the destination directory.
-
-        Returns:
-            A list of Path objects for all CSV and GZ files in the destination directory.
-        """
-        return [
-            Path(filepath)
-            for filepath in glob.glob(f"{self._destination_dir}/*.csv") + glob.glob(f"{self._destination_dir}/*.gz")
-        ]
+        return self._get_local_filenames(["gz", "csv", "zip"])
 
     def _get_s3_client(  # type: ignore
         self,
@@ -199,19 +160,19 @@ class S3DataSource(BaseDataSource):
             config=client_config,
         )
 
-    def _s3_fetch_file(self, key: str, destination: Path) -> None:
-        """Downloads a single file from the S3 bucket to the specified destination.
+    def _s3_fetch_file(self, key: str) -> None:
+        """Downloads a single file from the S3 bucket to the destination specified in the constructor.
 
         Args:
             key: S3 key of the file to download.
-            destination: Local destination path to store the downloaded file.
         """
         gb = 1024**3
         transfer_config = BotoTransferConfig(
             use_threads=False,
             multipart_threshold=int(0.5 * gb),  # Multipart transfer if file > 500MB
         )
-        with open(destination, "wb") as data:
+        file_path = self._destination_directory / Path(key).name
+        with open(file_path, "wb") as data:
             self._s3_client.download_fileobj(
                 Bucket=self._s3_bucket_name,
                 Key=key,
@@ -219,25 +180,17 @@ class S3DataSource(BaseDataSource):
                 Config=transfer_config,
             )
 
-    def _s3_fetch_all(
-        self,
-        directory: Path,
-        keys: list[str],
-        num_workers: int,
-    ) -> None:
+    def _s3_fetch_all(self, keys: list[str]) -> None:
         """Downloads all specified files from the S3 bucket to the local directory concurrently.
 
         Args:
-            directory: Local destination directory to store the downloaded files.
             keys: List of S3 keys for the files to download.
-            num_workers: Number of workers to use for concurrent downloads.
         """
         with tqdm(total=len(keys), desc="Downloading CSV files from S3") as pbar:
-            with futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+            with futures.ThreadPoolExecutor(max_workers=self._num_workers) as executor:
                 for _ in executor.map(
                     self._s3_fetch_file,
                     keys,
-                    [(directory / Path(key).name) for key in keys],
                 ):
                     pbar.update(1)
 
@@ -253,7 +206,7 @@ class S3DataSource(BaseDataSource):
         for entry in manifest["entries"]:
             file_name: str = os.path.basename(entry["url"])
             file_size = int(entry["meta"]["content_length"])
-            local_file_path = self._destination_dir / file_name
+            local_file_path = self._destination_directory / file_name
             if not local_file_path.exists() or file_size != os.path.getsize(local_file_path):
                 return False
         return True

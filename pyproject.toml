@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mleko"
-version = "0.0.0"
+version = "0.1.0"
 description = "ML-Ekosystem"
 authors = ["Erik Båvenstrand <erik@bavenstrand.se>"]
 license = "MIT"
@@ -98,7 +98,9 @@ module = [
     "boto3",
     "boto3.s3.transfer",
     "botocore.config",
-    "pyarrow"
+    "pyarrow",
+    "requests",
+    "requests.auth"
 ]
 ignore_missing_imports = true
 
