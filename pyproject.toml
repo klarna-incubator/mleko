@@ -47,7 +47,6 @@ safety = ">=1.10.3"
 sphinx = ">=4.3.2"
 sphinx-autobuild = ">=2021.3.14"
 typeguard = ">=2.13.3"
-xdoctest = {extras = ["colors"], version = ">=0.15.10"}
 myst-parser = {version = ">=0.16.1"}
 ipykernel = "^6.21.3"
 mypy-boto3-s3 = "^1.26.116"

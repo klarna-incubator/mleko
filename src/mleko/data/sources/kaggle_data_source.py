@@ -251,7 +251,6 @@ class KaggleDataSource(BaseDataSource):
             A list of local file paths pointing to the downloaded files.
 
         Raises:
-            HTTPError: If there is an error in the HTTP response while requesting file list from Kaggle.
             ValueError: If Kaggle returns 0 files for the given dataset. This could occur if the API is broken.
         """
         dataset_path = f"{self._owner_slug}/{self._dataset_slug}"
@@ -283,6 +282,20 @@ class KaggleDataSource(BaseDataSource):
         return self._get_local_filenames(["gz", "csv", "zip"])
 
     def _kaggle_fetch_files_metadata(self, params: dict[str, str]) -> list[KaggleFileMetadata]:
+        """Fetch the metadata of the files in the dataset.
+
+        When fetching the metadata, the API returns a list of files in the dataset. The list contains the name of the
+        file, the creation date, and the file size.
+
+        Args:
+            params: A dictionary of query parameters to pass to the Kaggle API.
+
+        Raises:
+            HTTPError: If there is an error in the HTTP response while requesting file list from Kaggle.
+
+        Returns:
+            A list of KaggleFileMetadata objects containing the metadata of the files in the dataset.
+        """
         list_files_response = requests.get(
             f"{self._KAGGLE_DATASET_URL}/list/{self._owner_slug}/{self._dataset_slug}",
             params=params,
