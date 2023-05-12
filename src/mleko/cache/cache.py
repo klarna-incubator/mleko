@@ -220,14 +220,14 @@ class LRUCacheMixin(CacheMixin):
     def _load_cache_from_disk(self) -> None:
         """Loads the cache entries from the cache directory and initializes the LRU cache.
 
-        Cache entries are ordered by their creation time, and the cache is trimmed if needed.
+        Cache entries are ordered by their modification time, and the cache is trimmed if needed.
         """
         cache_files = [
             f
             for f in self._cache_directory.glob(f"*.{self._cache_file_suffix}")
             if re.search(r"^[a-fA-F\d]{32}$", str(f.stem))
         ]
-        ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_ctime)
+        ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_mtime)
 
         for i, cache_file in enumerate(ordered_cache_files):
             if i >= self._max_entries:
