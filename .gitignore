@@ -11,3 +11,4 @@ __pycache__/
 .venv/*
 .pytest_cache/
 examples/data
+.DS_Store

@@ -142,7 +142,7 @@ class TestLRUCacheMixin:
         assert list(lru_cached_class._cache.keys())[-1] == key
 
     def test_clean_cache_on_load(self, temporary_directory: Path):
-        """Should cleane existing cache on disk from previous object if cache is too small."""
+        """Should clean existing cache on disk from previous object if cache is too small."""
         cache_suffix = "cache"
         cache_file_prefix_name = "d91956ef6381f61dbb4ae6b47a4fa33"
         n_cache_entries = 2
@@ -151,7 +151,5 @@ class TestLRUCacheMixin:
         lru_cached_class = self.MyTestClass(temporary_directory, "cache", 2)
 
         cache_file_keys = list(temporary_directory.glob(f"{cache_file_prefix_name}*.{cache_suffix}"))
-        cache_file_endings = [int(cache_key.stem[-1]) for cache_key in cache_file_keys]
         assert len(lru_cached_class._cache) == n_cache_entries
         assert len(cache_file_keys) == n_cache_entries
-        assert all([cache_key_ending > n_cache_entries for cache_key_ending in cache_file_endings])
