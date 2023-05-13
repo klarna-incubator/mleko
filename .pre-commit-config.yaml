@@ -33,7 +33,7 @@ repos:
         language: system
         types: [text]
         stages: [commit, push, manual]
-        exclude: ^(CHANGELOG\.md|pyproject\.toml)$
+        exclude: ^CHANGELOG\.md$
       - id: flake8
         name: flake8
         entry: flake8
@@ -65,3 +65,4 @@ repos:
     rev: v2.6.0
     hooks:
       - id: prettier
+        exclude: ^CHANGELOG\.md$
