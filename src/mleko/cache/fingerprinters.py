@@ -34,7 +34,7 @@ class Fingerprinter(ABC):
         raise NotImplementedError
 
 
-class CsvFingerprinter(Fingerprinter):
+class CSVFingerprinter(Fingerprinter):
     """A fingerprinter for CSV files supporting Gzipped and raw CSV files."""
 
     def __init__(self, n_rows: int = 1000):
