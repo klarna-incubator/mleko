@@ -17,7 +17,7 @@ from pyarrow import csv as arrow_csv
 from tqdm import tqdm
 
 from mleko.cache.cache import LRUCacheMixin
-from mleko.cache.fingerprinters import CsvFingerprinter
+from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.tqdm import set_tqdm_percent_wrapper
@@ -150,7 +150,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
                 self._true_values,
                 self._false_values,
                 self._downcast_float,
-                (file_paths, CsvFingerprinter(n_rows=100_000 // len(file_paths))),
+                (file_paths, CSVFingerprinter(n_rows=100_000 // len(file_paths))),
             ],
             force_recompute=force_recompute,
         )
