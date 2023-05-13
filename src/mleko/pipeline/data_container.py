@@ -17,12 +17,10 @@ class DataContainer:
 
     This class serves as a common interface and can be extended to enforce
     a shared structure or behavior across different types of data.
-
-    Attributes:
-        data: The stored data.
     """
 
     data: list[Path] | vaex.DataFrame | None = None
+    """The data stored in the DataContainer."""
 
     def __repr__(self) -> str:
         """Get string representation of DataContainer.

@@ -54,9 +54,7 @@ nox = "^2023.4.22"
 nox-poetry = "^1.0.2"
 sphinx-autodoc-typehints = "^1.23.0"
 sphinx-autoapi = "^2.1.0"
-
-[tool.poetry.scripts]
-mleko = "mleko.__main__:main"
+python-semantic-release = "^7.33.3"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
@@ -106,3 +104,14 @@ ignore_missing_imports = true
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+branch = "main"
+version_variable = "src/mleko/__init__.py:__version__"
+version_toml = "pyproject.toml:tool.poetry.version"
+version_source = "tag"
+commit_version_number = true
+tag_commit = true
+upload_to_pypi = false
+upload_to_release = false
+hvcs = "github"
