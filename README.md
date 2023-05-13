@@ -49,7 +49,6 @@ $ pip install mleko
 ## Usage
 
 - TODO
-- TODO
 
 ## Contributing
 
