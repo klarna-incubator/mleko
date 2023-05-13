@@ -32,12 +32,17 @@ jobs:
           pip install --constraint=.github/workflows/constraints.txt poetry
           poetry --version
 
+      - name: Install development dependencies
+        run: |
+          poetry install --only dev
+
       - name: Check if there is a parent commit
         id: check-parent-commit
         run: |
           echo "::set-output name=sha::$(git rev-parse --verify --quiet HEAD^)"
 
       - name: Python Semantic Release
+        id: semantic-release
         if: steps.check-parent-commit.outputs.sha
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -48,45 +53,24 @@ jobs:
           git config --global user.email "github-actions@github.com"
           # Run semantic-release
           poetry run semantic-release publish -v DEBUG -D commit_author="github-actions <github-actions@github.com>"
-
-      - name: Detect and tag new version
-        id: check-version
-        if: steps.check-parent-commit.outputs.sha
-        uses: salsify/action-detect-and-tag-new-version@v2.0.1
-        with:
-          version-command: |
-            bash -o pipefail -c "poetry version | awk '{ print \$2 }'"
-
-      - name: Bump version for developmental release
-        if: "! steps.check-version.outputs.tag"
-        run: |
-          poetry version patch &&
-          version=$(poetry version | awk '{ print $2 }') &&
-          poetry version $version.dev.$(date +%s)
+          output_value=$(poetry version | awk "{print $2}")
+          echo "::set-output name=version::$output_value"
 
       - name: Build package
         run: |
           poetry build --ansi
 
       - name: Publish package on PyPI
-        if: steps.check-version.outputs.tag
+        if: steps.semantic-release.outputs.version
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
-      - name: Publish package on TestPyPI
-        if: "! steps.check-version.outputs.tag"
-        uses: pypa/gh-action-pypi-publish@v1.5.0
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
-
       - name: Publish the release notes
         uses: release-drafter/release-drafter@v5.20.0
         with:
-          publish: ${{ steps.check-version.outputs.tag != '' }}
-          tag: ${{ steps.check-version.outputs.tag }}
+          publish: ${{ steps.semantic-release.outputs.version != '' }}
+          tag: ${{ steps.semantic-release.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
