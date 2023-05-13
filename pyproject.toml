@@ -115,4 +115,4 @@ tag_commit = true
 upload_to_pypi = false
 upload_to_release = false
 hvcs = "github"
-commit_message = "chore(release): release {version} [skip ci]"
+commit_message = "chore(release): release {version}"
