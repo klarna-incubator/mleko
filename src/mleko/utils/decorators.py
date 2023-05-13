@@ -14,9 +14,6 @@ logger = CustomLogger()
 
 F = TypeVar("F", bound=Callable[..., Any])
 """A TypeVar used as a generic function type throughout the module.
-
-This TypeVar is designed for type hinting in decorators in the module. It essentially states that F can be
-a function with any number of arguments and any return type.
 """
 
 
