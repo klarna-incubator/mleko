@@ -21,10 +21,11 @@ import requests
 from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
 
-from mleko.data.sources import BaseDataSource
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
+
+from .base_data_source import BaseDataSource
 
 
 logger = CustomLogger()
