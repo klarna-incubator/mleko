@@ -106,11 +106,12 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
-version_variable = [
-    "src/mleko/__init__.py:__version__",
-    "pyproject.toml:tool.poetry.version"
-]
-version_source = "tag"
 branch = "main"
+version_variable = "src/mleko/__init__.py:__version__"
+version_toml = "pyproject.toml:tool.poetry.version"
+version_source = "tag"
+commit_version_number = true
+tag_commit = true
 upload_to_pypi = false
 upload_to_release = false
+hvcs = "github"
