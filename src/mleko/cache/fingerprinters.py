@@ -41,7 +41,7 @@ class CSVFingerprinter(Fingerprinter):
         """Initialize the CSVFingerprinter.
 
         Args:
-            n_rows: The number of rows to sample from each CSV file for fingerprinting. Defaults to 1000.
+            n_rows: The number of rows to sample from each CSV file for fingerprinting.
         """
         self._n_rows = n_rows
 

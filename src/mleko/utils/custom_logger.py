@@ -66,7 +66,7 @@ class CustomLogger(logging.Logger):
         """Set the global log level for all instances of CustomLogger.
 
         Args:
-            log_level: The minimum log level to output. Defaults to logging.INFO.
+            log_level: The minimum log level to output.
         """
         CustomLogger._global_log_level = log_level
         for instance in CustomLogger._instances:

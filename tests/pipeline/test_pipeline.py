@@ -14,19 +14,26 @@ class TestPipeline:
     class InputStep(PipelineStep):
         """Initial step."""
 
+        _num_inputs = 0
+        _num_outputs = 1
+
         def execute(self, _data_container: DataContainer) -> DataContainer:
             """Execute the step."""
-            return DataContainer(data=[Path()])
+            return DataContainer(data={"raw_data": [Path()]})
 
     class AppendStep(PipelineStep):
         """Append data with another Path step."""
 
+        _num_inputs = 1
+        _num_outputs = 1
+
         def execute(self, data_container: DataContainer) -> DataContainer:
             """Execute the step."""
-            if not isinstance(data_container.data, list) or not all(isinstance(e, Path) for e in data_container.data):
+            file_paths = data_container.data["raw_data"]
+            if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
                 raise ValueError
-            new_data = data_container.data + [Path()]
-            return DataContainer(data=new_data)
+            data_container.data["appended_data"] = file_paths + [Path()]
+            return data_container
 
     def test_init(self):
         """Should successfully initialize the pipeline."""
@@ -35,8 +42,8 @@ class TestPipeline:
 
     def test_init_with_steps(self):
         """Should successfully initialize the pipeline with one or more PipelineStep instances."""
-        step1 = self.InputStep()
-        step2 = self.AppendStep()
+        step1 = self.InputStep(outputs=["raw_data"])
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
         pipeline = Pipeline(steps=[step1, step2])
 
         assert len(pipeline.steps) == 2
@@ -45,8 +52,8 @@ class TestPipeline:
 
     def test_repr(self):
         """Should represent Pipeline using representation of steps."""
-        step1 = self.InputStep()
-        step2 = self.AppendStep()
+        step1 = self.InputStep(outputs=["raw_data"])
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
         pipeline = Pipeline(steps=[step1, step2])
 
         expected = f"Pipeline:\n  1. {step1!r}\n  2. {step2!r}"
@@ -54,8 +61,8 @@ class TestPipeline:
 
     def test_add_step(self):
         """Should successfully add new PipelineStep."""
-        step1 = self.InputStep()
-        step2 = self.AppendStep()
+        step1 = self.InputStep(outputs=["raw_data"])
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
         pipeline = Pipeline(steps=[step1])
         pipeline.add_step(step2)
 
@@ -64,14 +71,14 @@ class TestPipeline:
 
     def test_run(self):
         """Should run multiple PipelineSteps."""
-        input_step = self.InputStep()
-        increment_step = self.AppendStep()
+        input_step = self.InputStep(outputs=["raw_data"])
+        increment_step = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
         pipeline = Pipeline(steps=[input_step, increment_step])
 
         result = pipeline.run()
 
         assert isinstance(result, DataContainer)
-        assert result.data == [Path(), Path()]
+        assert result.data["appended_data"] == [Path(), Path()]
 
     def test_run_empty_pipeline(self):
         """Should return empty DataContainer on bad PipelineStep."""
@@ -79,4 +86,4 @@ class TestPipeline:
         result = pipeline.run()
 
         assert isinstance(result, DataContainer)
-        assert result.data is None
+        assert result.data == {}

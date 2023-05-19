@@ -12,14 +12,14 @@ class TestBaseDataContainer:
     def test_init(self):
         """Should init with data."""
         data = [Path()]
-        container = DataContainer(data)
-        assert container.data == data
+        container = DataContainer(data={"raw_data": data})
+        assert container.data["raw_data"] == data
 
     def test_repr(self):
         """Should match string representation."""
         data = [Path()]
-        container = DataContainer(data)
+        container = DataContainer(data={"raw_data": data})
         assert f"{container!r}" in {
-            "<DataContainer: data_type=list, data=[PosixPath('.')]>",
-            "<DataContainer: data_type=list, data=[WindowsPath('.')]>",
+            "<DataContainer: data_type=dict, data={'raw_data': [PosixPath('.')]}>",
+            "<DataContainer: data_type=list, data={'raw_data': [WindowsPath('.')]}>",
         }

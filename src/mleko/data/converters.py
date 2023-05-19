@@ -91,7 +91,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         false_values: list[str] | tuple[str, ...] | tuple[()] = ("f", "False", "false", "0"),
         downcast_float: bool = False,
         random_state: int = 1337,
-        workers: int = V_CPU_COUNT,
+        num_workers: int = V_CPU_COUNT,
         max_cache_entries: int = 1,
     ) -> None:
         """Initializes the CsvToArrowConverter with the necessary configurations and parameters.
@@ -108,7 +108,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
             false_values: A sequence of strings to consider as False values.
             downcast_float: If True, downcast float64 to float32 during conversion.
             random_state: A seed for the random number generator.
-            workers: Number of workers to use for parallel processing.
+            num_workers: Number of workers to use for parallel processing.
             max_cache_entries: Maximum number of cache entries for the LRUCacheMixin.
         """
         self._dataframe_suffix = "arrow"
@@ -123,7 +123,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         self._true_values = tuple(true_values)
         self._false_values = tuple(false_values)
         self._downcast_float = downcast_float
-        self._workers = workers
+        self._num_workers = num_workers
         self._random_state = random_state
 
     def convert(self, file_paths: list[Path] | list[str], force_recompute: bool = False) -> vaex.DataFrame:
@@ -233,7 +233,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
             A DataFrame containing the merged chunks.
         """
         with tqdm(total=len(file_paths), desc="Converting CSV files") as pbar:
-            with futures.ProcessPoolExecutor(max_workers=min(self._workers, len(file_paths))) as executor:
+            with futures.ProcessPoolExecutor(max_workers=min(self._num_workers, len(file_paths))) as executor:
                 for _ in executor.map(
                     CsvToArrowConverter._convert_csv_file_to_arrow,
                     file_paths,

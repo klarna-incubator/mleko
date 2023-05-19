@@ -16,7 +16,32 @@ class PipelineStep(ABC):
 
     Descendants of this class must implement the `execute` method, which carries out the data processing operation
     related to the step.
+    NOTE: the _num_inputs and _num_outputs attributes are used to validate the number of inputs and outputs and must be
+    set by the subclass.
     """
+
+    _num_inputs: int
+    """Number of inputs expected by the PipelineStep."""
+
+    _num_outputs: int
+    """Number of outputs expected by the PipelineStep."""
+
+    def __init__(
+        self,
+        inputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+    ) -> None:
+        """Initialize a new PipelineStep with the provided input and output keys.
+
+        Args:
+            inputs: List or tuple of input keys expected by this step.
+            outputs: List or tuple of output keys produced by this step.
+        """
+        self.inputs = tuple(inputs)
+        self.outputs = tuple(outputs)
+
+        self._validate_inputs()
+        self._validate_outputs()
 
     @abstractmethod
     def execute(self, data_container: DataContainer) -> DataContainer:
@@ -36,3 +61,21 @@ class PipelineStep(ABC):
             Processed data as a `DataContainer`.
         """
         raise NotImplementedError
+
+    def _validate_inputs(self) -> None:
+        """Check the input keys for compliance with this step's requirements.
+
+        Raises:
+            ValueError: If the PipelineStep has an invalid number of inputs.
+        """
+        if len(self.inputs) != self._num_inputs:
+            raise ValueError(f"{self.__class__.__name__} must have exactly {self._num_inputs} input(s).")
+
+    def _validate_outputs(self) -> None:
+        """Check the output keys for compliance with this step's requirements.
+
+        Raises:
+            ValueError: If the PipelineStep has an invalid number of outputs.
+        """
+        if len(self.outputs) != self._num_outputs:
+            raise ValueError(f"{self.__class__.__name__} must have exactly {self._num_outputs} output(s).")

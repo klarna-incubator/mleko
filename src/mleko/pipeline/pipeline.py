@@ -10,6 +10,11 @@ from __future__ import annotations
 
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
+from mleko.utils.custom_logger import CustomLogger
+
+
+logger = CustomLogger()
+"""A CustomLogger instance that's used throughout the module for logging."""
 
 
 class Pipeline:
@@ -65,7 +70,8 @@ class Pipeline:
         if data_container is None:
             data_container = DataContainer()
 
-        for step in self.steps:
+        for i, step in enumerate(self.steps):
+            logger.info(f"Executing step {i+1}: {step.__class__.__name__}")
             data_container = step.execute(data_container)
-
+            logger.info(f"Finished step {i+1}")
         return data_container

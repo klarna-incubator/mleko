@@ -61,7 +61,7 @@ class TestCsvToArrowConverter:
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is Best"],
-            workers=1,
+            num_workers=1,
         )
 
         n_files = 1
@@ -82,7 +82,7 @@ class TestCsvToArrowConverter:
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is Best"],
-                workers=1,
+                num_workers=1,
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
             patched_convert.assert_not_called()
@@ -91,7 +91,7 @@ class TestCsvToArrowConverter:
     def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
-            temporary_directory, downcast_float=True, workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=True, num_workers=1, max_cache_entries=2
         )
 
         n_files = 1
@@ -99,7 +99,7 @@ class TestCsvToArrowConverter:
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CsvToArrowConverter(
-            temporary_directory, downcast_float=False, workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=False, num_workers=1, max_cache_entries=2
         )
         df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 

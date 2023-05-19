@@ -88,7 +88,7 @@ class CacheMixin:
             cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
                 Fingerprinter instance for generating fingerprints.
             force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
-                cached result is available. Defaults to False.
+                cached result is available.
 
         Returns:
             The result of executing the given function. If a cached result is available and force_recompute is False,

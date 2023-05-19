@@ -16,14 +16,27 @@ from mleko.utils.decorators import auto_repr
 class ConvertStep(PipelineStep):
     """Pipeline step that manages data conversion from one format to another."""
 
+    _num_inputs = 1
+    """Number of inputs expected by the ConvertStep."""
+
+    _num_outputs = 1
+    """Number of outputs expected by the ConvertStep."""
+
     @auto_repr
-    def __init__(self, converter: BaseDataConverter) -> None:
+    def __init__(
+        self,
+        converter: BaseDataConverter,
+        inputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+    ) -> None:
         """Initialize the ConvertStep with the specified data converter.
 
         Args:
             converter: The DataConverter responsible for handling data format conversion.
+            inputs: List or tuple of input keys expected by this step.
+            outputs: List or tuple of output keys produced by this step.
         """
-        super().__init__()
+        super().__init__(inputs, outputs)
         self._converter = converter
 
     def execute(self, data_container: DataContainer) -> DataContainer:
@@ -38,8 +51,10 @@ class ConvertStep(PipelineStep):
         Returns:
             A DataContainer containing the converted data as a vaex dataframe.
         """
-        if not isinstance(data_container.data, list) or not all(isinstance(e, Path) for e in data_container.data):
+        file_paths = data_container.data[self.inputs[0]]
+        if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
             raise ValueError
 
-        df = self._converter.convert(data_container.data)
-        return DataContainer(data=df)
+        df = self._converter.convert(file_paths)
+        data_container.data[self.outputs[0]] = df
+        return data_container
