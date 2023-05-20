@@ -19,4 +19,10 @@ from .cache import CacheMixin, LRUCacheMixin
 from .fingerprinters import CSVFingerprinter, Fingerprinter, VaexFingerprinter
 
 
-__all__ = ["CacheMixin", "LRUCacheMixin", "CSVFingerprinter", "VaexFingerprinter", "Fingerprinter"]
+__all__ = [
+    "CacheMixin",
+    "LRUCacheMixin",
+    "CSVFingerprinter",
+    "VaexFingerprinter",
+    "Fingerprinter",
+]

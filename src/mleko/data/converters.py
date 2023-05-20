@@ -16,11 +16,11 @@ import vaex
 from pyarrow import csv as arrow_csv
 from tqdm import tqdm
 
-from mleko.cache.cache import LRUCacheMixin
+from mleko.cache.cache import LRUCacheMixin, VaexArrowCacheFormatMixin
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
-from mleko.utils.tqdm import set_tqdm_percent_wrapper
+from mleko.utils.vaex import get_column
 
 
 logger = CustomLogger()
@@ -40,6 +40,7 @@ class BaseDataConverter(ABC):
             output_directory: The directory where the converted files will be saved.
         """
         self._output_directory = Path(output_directory)
+        self._output_directory.mkdir(parents=True, exist_ok=True)
 
     @abstractmethod
     def convert(self, file_paths: list[Path] | list[str]) -> vaex.DataFrame:
@@ -54,7 +55,7 @@ class BaseDataConverter(ABC):
         raise NotImplementedError
 
 
-class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
+class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCacheMixin):
     """A class that converts CSV files to Arrow format using the vaex library and caches the resulting dataframes."""
 
     @auto_repr
@@ -90,7 +91,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
         true_values: list[str] | tuple[str, ...] | tuple[()] = ("t", "True", "true", "1"),
         false_values: list[str] | tuple[str, ...] | tuple[()] = ("f", "False", "false", "0"),
         downcast_float: bool = False,
-        random_state: int = 1337,
+        random_state: int | None = None,
         num_workers: int = V_CPU_COUNT,
         max_cache_entries: int = 1,
     ) -> None:
@@ -111,9 +112,9 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
             num_workers: Number of workers to use for parallel processing.
             max_cache_entries: Maximum number of cache entries for the LRUCacheMixin.
         """
-        self._dataframe_suffix = "arrow"
         BaseDataConverter.__init__(self, output_directory)
-        LRUCacheMixin.__init__(self, output_directory, self._dataframe_suffix, max_cache_entries)
+        VaexArrowCacheFormatMixin.__init__(self)
+        LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
         self._forced_datetime_columns = tuple(forced_datetime_columns)
         self._forced_numerical_columns = tuple(forced_numerical_columns)
         self._forced_categorical_columns = tuple(forced_categorical_columns)
@@ -195,8 +196,6 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
             float_type = "float32"
 
         dtypes = {}
-        for col in forced_datetime_columns:
-            dtypes[col] = "date32"
         for col in forced_numerical_columns:
             dtypes[col] = float_type
         for col in forced_categorical_columns:
@@ -216,6 +215,9 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
                 quoted_strings_can_be_null=True,
             ),
         ).drop(drop_columns)
+
+        for col in forced_datetime_columns:
+            df_chunk[col] = get_column(df_chunk, col).astype("datetime64[ns]")
 
         output_path = output_directory / f"df_chunk_{file_path.stem}.{dataframe_suffix}"
         df_chunk.export_arrow(output_path)
@@ -238,7 +240,7 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
                     CsvToArrowConverter._convert_csv_file_to_arrow,
                     file_paths,
                     repeat(self._output_directory),
-                    repeat(self._dataframe_suffix),
+                    repeat(VaexArrowCacheFormatMixin.cache_file_suffix),
                     repeat(self._forced_datetime_columns),
                     repeat(self._forced_numerical_columns),
                     repeat(self._forced_categorical_columns),
@@ -251,35 +253,16 @@ class CsvToArrowConverter(BaseDataConverter, LRUCacheMixin):
                 ):
                     pbar.update(1)
 
-        return vaex.open(self._output_directory / f"df_chunk_*.{self._dataframe_suffix}")
-
-    def _read_cache_file(self, cache_file_path: Path) -> vaex.DataFrame:
-        """Reads a cache file containing a vaex dataframe.
-
-        Args:
-            cache_file_path: The path of the cache file to be read.
-
-        Returns:
-            vaex.DataFrame: The contents of the cache file as a dataframe.
-        """
-        return vaex.open(cache_file_path)
+        return vaex.open(self._output_directory / f"df_chunk_*.{VaexArrowCacheFormatMixin.cache_file_suffix}")
 
     def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
-        """Writes the results of the dataframe conversion to Arrow format in a cache file with arrow suffix.
+        """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
 
         Args:
             cache_file_path: The path of the cache file to be written.
-            output: The vaex dataframe to be saved in the cache file.
+            output: The Vaex DataFrame to be saved in the cache file.
         """
-        with tqdm(total=100, desc=f"Merging chunked {self._dataframe_suffix} files") as pbar:
-            output.export_arrow(
-                cache_file_path,
-                progress=set_tqdm_percent_wrapper(pbar),
-                parallel=True,
-                reduce_large=True,
-            )
-
-        output.close()
-        df_chunks = cache_file_path.parent.glob(f"df_chunk_*.{self._dataframe_suffix}")
+        super()._write_cache_file(cache_file_path, output)
+        df_chunks = cache_file_path.parent.glob(f"df_chunk_*.{VaexArrowCacheFormatMixin.cache_file_suffix}")
         for df_chunk in df_chunks:
             df_chunk.unlink()

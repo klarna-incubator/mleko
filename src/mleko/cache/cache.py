@@ -23,8 +23,12 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Callable, Hashable, Sequence
 
+import vaex
+from tqdm import tqdm
+
 from mleko.cache.fingerprinters import Fingerprinter
 from mleko.utils.custom_logger import CustomLogger
+from mleko.utils.tqdm import set_tqdm_percent_wrapper
 
 
 logger = CustomLogger()
@@ -48,6 +52,43 @@ def get_frame_qualname(frame: inspect.FrameInfo) -> str:
         class_name = frame.frame.f_locals["self"].__class__.__name__
         return f"{module_name}.{class_name}.{caller_function}"
     return f"{module_name}.{caller_function}"
+
+
+class VaexArrowCacheFormatMixin:
+    """A mixin class for Vaex DataFrames to provide Arrow format caching capabilities.
+
+    This mixin class adds methods for reading and writing arrow cache files for Vaex DataFrames.
+    """
+
+    cache_file_suffix = "arrow"
+    """The file extension to use for cache files."""
+
+    def _read_cache_file(self, cache_file_path: Path) -> vaex.DataFrame:
+        """Reads a cache file containing a Vaex DataFrame.
+
+        Args:
+            cache_file_path: The path of the cache file to be read.
+
+        Returns:
+            The contents of the cache file as a DataFrame.
+        """
+        return vaex.open(cache_file_path)
+
+    def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
+        """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
+
+        Args:
+            cache_file_path: The path of the cache file to be written.
+            output: The Vaex DataFrame to be saved in the cache file.
+        """
+        with tqdm(total=100, desc="Writing DataFrame to Arrow file") as pbar:
+            output.export_arrow(
+                cache_file_path,
+                progress=set_tqdm_percent_wrapper(pbar),
+                parallel=True,
+                reduce_large=True,
+            )
+        output.close()
 
 
 class CacheMixin:
@@ -140,7 +181,9 @@ class CacheMixin:
                 values_to_hash.append(key)
 
         data = pickle.dumps((frame_qualname, values_to_hash))
-        cache_key = hashlib.md5(data).hexdigest()
+
+        class_method_name = ".".join(frame_qualname.split(".")[-2:])
+        cache_key = f"{class_method_name}.{hashlib.md5(data).hexdigest()}"
 
         return cache_key
 
@@ -169,7 +212,7 @@ class CacheMixin:
         """
 
         def extract_number(file_path: Path) -> int:
-            result = re.search(r"_(\d+).", str(file_path))
+            result = re.search(r"[a-fA-F\d]{32}_(\d+).", str(file_path))
             return int(result.group(1)) if result else 0
 
         cache_file_paths = sorted(
@@ -241,20 +284,23 @@ class LRUCacheMixin(CacheMixin):
 
         Cache entries are ordered by their modification time, and the cache is trimmed if needed.
         """
+        frame_qualname = get_frame_qualname(inspect.stack()[2])
+        class_name = frame_qualname.split(".")[-2]
         cache_files = [
             f
             for f in self._cache_directory.glob(f"*.{self._cache_file_suffix}")
-            if re.search(r"^[a-fA-F\d]{32}$", str(f.stem))
+            if re.search(rf"{class_name}\.[a-zA-Z]+\.[a-fA-F\d]{{32}}", str(f.stem))
         ]
         ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_mtime)
-
-        for i, cache_file in enumerate(ordered_cache_files):
-            if i >= self._max_entries:
-                oldest_key = next(iter(self._cache))
-                del self._cache[oldest_key]
-                (self._cache_directory / f"{oldest_key}.{self._cache_file_suffix}").unlink()
-            cache_key = cache_file.stem
-            self._cache[cache_key] = True
+        for cache_file in ordered_cache_files:
+            cache_key = cache_file.stem.split("_")[0]
+            if cache_key not in self._cache:
+                if len(self._cache) >= self._max_entries:
+                    oldest_key = next(iter(self._cache))
+                    del self._cache[oldest_key]
+                    for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                        file.unlink()
+                self._cache[cache_key] = True
 
     def _load_from_cache(self, cache_key: str) -> Any | None:
         """Loads data from the cache based on the provided cache key and updates the LRU cache.
@@ -282,7 +328,8 @@ class LRUCacheMixin(CacheMixin):
             if len(self._cache) >= self._max_entries:
                 oldest_key = next(iter(self._cache))
                 del self._cache[oldest_key]
-                (self._cache_directory / f"{oldest_key}.{self._cache_file_suffix}").unlink()
+                for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                    file.unlink()
             self._cache[cache_key] = True
         else:
             self._cache.move_to_end(cache_key)

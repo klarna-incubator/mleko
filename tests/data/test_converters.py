@@ -68,7 +68,7 @@ class TestCsvToArrowConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[date32[day], float64, string, bool]"
+        assert str(list(df.dtypes)) == "[datetime64[ns], float64, string, bool]"
         assert df.column_names == ["Time", "Count", "Name", "Is Best"]
         assert df.shape == (n_files * 3, 4)
         assert df.Name.countna() == n_files
