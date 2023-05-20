@@ -54,6 +54,10 @@ class TestCacheMixin:
             """Cached execute."""
             return self._cached_execute(lambda: a * b, [a, b], force_recompute)
 
+        def my_method_3(self, list_vals, force_recompute=False):
+            """Cached execute."""
+            return self._cached_execute(lambda: list_vals, [list_vals], force_recompute)
+
     def test_cached_execute(self, temporary_directory: Path):
         """Should save to cache as expected."""
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
@@ -78,7 +82,7 @@ class TestCacheMixin:
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
 
         result1 = my_test_instance.my_method_1(1, 2)
-        assert result1 == 3, "Result of my_method_1(1, 2) should be 3"
+        assert result1 == 3
 
         with patch.object(self.MyTestClass, "_save_to_cache") as patched_save_to_cache:
             my_test_instance.my_method_2(1, 2)
@@ -93,11 +97,34 @@ class TestCacheMixin:
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
 
         result1 = my_test_instance.my_method_1(1, 2)
-        assert result1 == 3, "Result of my_method_1(1, 2) should be 3"
+        assert result1 == 3
 
         with patch.object(self.MyTestClass, "_save_to_cache") as patched_save_to_cache:
             my_test_instance.my_method_1(1, 2, force_recompute=True)
             patched_save_to_cache.assert_called()
+
+    def test_multiple_outputs(self, temporary_directory: Path):
+        """Should successfully cache multiple outputs."""
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result1 = my_test_instance.my_method_1(1, 2)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result1 = my_test_instance.my_method_1(1, 2)
+        assert result1 == 3
+
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result2 = my_test_instance.my_method_2(1, 2)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result2 = my_test_instance.my_method_2(1, 2)
+        assert result2 == 2
+
+        values_tuple = tuple(range(102))
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result3 = my_test_instance.my_method_3(values_tuple)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result3 = my_test_instance.my_method_3(values_tuple)
+        assert result3 == values_tuple
+
+        assert len(list(temporary_directory.glob("*.cache"))) == 104
 
 
 class TestLRUCacheMixin:

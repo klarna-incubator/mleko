@@ -21,7 +21,7 @@ import pickle
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Hashable
+from typing import Any, Callable, Hashable, Sequence
 
 from mleko.cache.fingerprinters import Fingerprinter
 from mleko.utils.custom_logger import CustomLogger
@@ -167,9 +167,19 @@ class CacheMixin:
         Returns:
             The cached data if it exists, or None if there is no data for the given cache key.
         """
-        cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
-        if cache_file_path.exists():
-            return self._read_cache_file(cache_file_path)
+
+        def extract_number(file_path: Path) -> int:
+            result = re.search(r"_(\d+).", str(file_path))
+            return int(result.group(1)) if result else 0
+
+        cache_file_paths = sorted(
+            list(self._cache_directory.glob(f"{cache_key}*.{self._cache_file_suffix}")), key=extract_number
+        )
+        if cache_file_paths:
+            output_data = []
+            for cache_file_path in cache_file_paths:
+                output_data.append(self._read_cache_file(cache_file_path))
+            return tuple(output_data) if len(output_data) > 1 else output_data[0]
         return None
 
     def _write_cache_file(self, cache_file_path: Path, output: Any) -> None:
@@ -184,15 +194,24 @@ class CacheMixin:
         with open(cache_file_path, "wb") as cache_file:
             pickle.dump(output, cache_file)
 
-    def _save_to_cache(self, cache_key: str, output: Any) -> None:
+    def _save_to_cache(self, cache_key: str, output: Any | Sequence[Any]) -> None:
         """Saves the given data to the cache using the provided cache key.
+
+        If the output is a sequence, each element will be saved to a separate cache file. Otherwise, the output will be
+        saved to a single cache file. The cache file will be saved in the cache directory with the cache key as the
+        filename and the cache file suffix as the file extension.
 
         Args:
             cache_key: A string representing the cache key.
             output: The data to be saved to the cache.
         """
-        cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
-        self._write_cache_file(cache_file_path, output)
+        if isinstance(output, Sequence):
+            for i in range(len(output)):
+                cache_file_path = self._cache_directory / f"{cache_key}_{i}.{self._cache_file_suffix}"
+                self._write_cache_file(cache_file_path, output[i])
+        else:
+            cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
+            self._write_cache_file(cache_file_path, output)
 
 
 class LRUCacheMixin(CacheMixin):
@@ -248,9 +267,7 @@ class LRUCacheMixin(CacheMixin):
         """
         if cache_key in self._cache:
             self._cache.move_to_end(cache_key)
-            cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
-            return self._read_cache_file(cache_file_path)
-        return None
+        return super()._load_from_cache(cache_key)
 
     def _save_to_cache(self, cache_key: str, output: Any) -> None:
         """Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
@@ -269,5 +286,4 @@ class LRUCacheMixin(CacheMixin):
             self._cache[cache_key] = True
         else:
             self._cache.move_to_end(cache_key)
-        cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
-        self._write_cache_file(cache_file_path, output)
+        super()._save_to_cache(cache_key, output)
