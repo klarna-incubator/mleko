@@ -14,6 +14,8 @@ from itertools import islice
 from pathlib import Path
 from typing import Any
 
+import vaex
+
 
 class Fingerprinter(ABC):
     """Abstract base class for creating specialized fingerprinters."""
@@ -86,4 +88,20 @@ class CSVFingerprinter(Fingerprinter):
             with open(file_path, "rb") as f:
                 sample = b"".join(islice((f.readline() for _ in range(self._n_rows)), self._n_rows))
         fingerprint = hashlib.md5(str(sample).encode()).hexdigest()
+        return fingerprint
+
+
+class VaexFingerprinter(Fingerprinter):
+    """A fingerprinter for Vaex DataFrames."""
+
+    def fingerprint(self, dataframe: vaex.DataFrame) -> str:
+        """Generate a fingerprint for a Vaex DataFrame.
+
+        Args:
+            dataframe: The Vaex DataFrame to be fingerprinted.
+
+        Returns:
+            The fingerprint as a hexadecimal string.
+        """
+        fingerprint = hashlib.md5(str(dataframe.fingerprint()).encode()).hexdigest()
         return fingerprint

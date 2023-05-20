@@ -16,7 +16,7 @@ Together, these components allow efficient caching of method call results, reduc
 resource usage, and make it easier to identify and manage changes in data.
 """
 from .cache import CacheMixin, LRUCacheMixin
-from .fingerprinters import CSVFingerprinter, Fingerprinter
+from .fingerprinters import CSVFingerprinter, Fingerprinter, VaexFingerprinter
 
 
-__all__ = ["CacheMixin", "LRUCacheMixin", "CSVFingerprinter", "Fingerprinter"]
+__all__ = ["CacheMixin", "LRUCacheMixin", "CSVFingerprinter", "VaexFingerprinter", "Fingerprinter"]
