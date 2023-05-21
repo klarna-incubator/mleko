@@ -33,7 +33,7 @@ class TestBaseDataConverter:
 class TestCsvToArrowConverter:
     """Test suite for `data.converters.CsvToArrowConverter`."""
 
-    def convert(self, temporary_directory: Path):
+    def test_convert(self, temporary_directory: Path):
         """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""
         csv_to_arrow_converter = CsvToArrowConverter(temporary_directory)
 
