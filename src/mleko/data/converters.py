@@ -20,7 +20,6 @@ from mleko.cache.cache import LRUCacheMixin, VaexArrowCacheFormatMixin
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
-from mleko.utils.vaex import get_column
 
 
 logger = CustomLogger()
@@ -62,7 +61,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
     def __init__(
         self,
         output_directory: str | Path,
-        forced_datetime_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_numerical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_categorical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_boolean_columns: list[str] | tuple[str, ...] | tuple[()] = (),
@@ -99,7 +97,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
 
         Args:
             output_directory: The directory where the converted files will be saved.
-            forced_datetime_columns: A sequence of column names to force as datetime type.
             forced_numerical_columns: A sequence of column names to force as numerical type.
             forced_categorical_columns: A sequence of column names to force as categorical type.
             forced_boolean_columns: A sequence of column names to force as boolean type.
@@ -115,7 +112,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
         BaseDataConverter.__init__(self, output_directory)
         VaexArrowCacheFormatMixin.__init__(self)
         LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
-        self._forced_datetime_columns = tuple(forced_datetime_columns)
         self._forced_numerical_columns = tuple(forced_numerical_columns)
         self._forced_categorical_columns = tuple(forced_categorical_columns)
         self._forced_boolean_columns = tuple(forced_boolean_columns)
@@ -142,7 +138,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
         return self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
             cache_keys=[
-                self._forced_datetime_columns,
                 self._forced_numerical_columns,
                 self._forced_categorical_columns,
                 self._forced_boolean_columns,
@@ -161,7 +156,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
         file_path: Path | str,
         output_directory: Path,
         dataframe_suffix: str,
-        forced_datetime_columns: tuple[str, ...],
         forced_numerical_columns: tuple[str, ...],
         forced_categorical_columns: tuple[str, ...],
         forced_boolean_columns: tuple[str, ...],
@@ -179,7 +173,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
             file_path: The path of the CSV file to be converted.
             output_directory: The directory where the converted file should be saved.
             dataframe_suffix: The suffix for the converted dataframe files.
-            forced_datetime_columns: A sequence of column names to be forced to datetime type.
             forced_numerical_columns: A sequence of column names to be forced to numerical type.
             forced_categorical_columns: A sequence of column names to be forced to categorical type.
             forced_boolean_columns: A sequence of column names to be forced to boolean type.
@@ -213,11 +206,15 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
                 false_values=false_values,
                 strings_can_be_null=True,
                 quoted_strings_can_be_null=True,
+                timestamp_parsers=[
+                    arrow_csv.ISO8601,
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y-%m-%d %H:%M:%S.%f",
+                    "%Y-%m-%dT%H:%M:%S",
+                    "%Y-%m-%dT%H:%M:%S.%f",
+                ],
             ),
         ).drop(drop_columns)
-
-        for col in forced_datetime_columns:
-            df_chunk[col] = get_column(df_chunk, col).astype("datetime64[ns]")
 
         output_path = output_directory / f"df_chunk_{file_path.stem}.{dataframe_suffix}"
         df_chunk.export_arrow(output_path)
@@ -241,7 +238,6 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
                     file_paths,
                     repeat(self._output_directory),
                     repeat(VaexArrowCacheFormatMixin.cache_file_suffix),
-                    repeat(self._forced_datetime_columns),
                     repeat(self._forced_numerical_columns),
                     repeat(self._forced_categorical_columns),
                     repeat(self._forced_boolean_columns),

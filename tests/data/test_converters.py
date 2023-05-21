@@ -47,17 +47,16 @@ class TestCsvToArrowConverter:
         dfs = [vaex.open(f) for f in arrow_files]
 
         for df in dfs:
-            assert str(list(df.dtypes)) == "[date32[day], float64, string, bool]"
+            assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
             assert df.column_names == ["Time", "Count", "Name", "Is Best"]
             assert df.shape == (3, 4)
             assert df.Name.countna() == 1
             df.close()
 
-    def cache_hit(self, temporary_directory: Path):
+    def test_cache_hit(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and return cached values on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory,
-            forced_datetime_columns=["Time"],
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is Best"],
@@ -68,7 +67,7 @@ class TestCsvToArrowConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[ns], float64, string, bool]"
+        assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
         assert df.column_names == ["Time", "Count", "Name", "Is Best"]
         assert df.shape == (n_files * 3, 4)
         assert df.Name.countna() == n_files
@@ -78,7 +77,6 @@ class TestCsvToArrowConverter:
         with patch.object(CsvToArrowConverter, "_convert") as patched_convert:
             new_csv_to_arrow_converter = CsvToArrowConverter(
                 temporary_directory,
-                forced_datetime_columns=["Time"],
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is Best"],
