@@ -21,12 +21,14 @@ def get_column(df: vaex.DataFrame, column: str) -> vaex.Expression:
     return df[column]
 
 
-def get_columns(df: vaex.DataFrame, columns: list[str]) -> vaex.DataFrame:
+def get_columns(df: vaex.DataFrame, columns: list[str] | vaex.Expression) -> vaex.DataFrame:
     """Get specified columns from a DataFrame.
 
     Args:
         df: The input DataFrame.
-        columns: A list of the names of the desired columns.
+        columns: A list of the names of the desired columns or an Expression.
+            If an Expression is provided, it is assumed to be a boolean mask
+            that can be used to filter the DataFrame.
 
     Returns:
         A DataFrame containing only the specified columns.

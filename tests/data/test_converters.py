@@ -88,7 +88,7 @@ class TestCsvToArrowConverter:
             patched_convert.assert_not_called()
         df.close()
 
-    def cache_miss(self, temporary_directory: Path):
+    def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory, downcast_float=True, num_workers=1, max_cache_entries=2
