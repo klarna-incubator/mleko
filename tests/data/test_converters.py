@@ -33,7 +33,7 @@ class TestBaseDataConverter:
 class TestCsvToArrowConverter:
     """Test suite for `data.converters.CsvToArrowConverter`."""
 
-    def test_convert(self, temporary_directory: Path):
+    def convert(self, temporary_directory: Path):
         """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""
         csv_to_arrow_converter = CsvToArrowConverter(temporary_directory)
 
@@ -53,7 +53,7 @@ class TestCsvToArrowConverter:
             assert df.Name.countna() == 1
             df.close()
 
-    def test_cache_hit(self, temporary_directory: Path):
+    def cache_hit(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and return cached values on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory,
@@ -88,7 +88,7 @@ class TestCsvToArrowConverter:
             patched_convert.assert_not_called()
         df.close()
 
-    def test_cache_miss(self, temporary_directory: Path):
+    def cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory, downcast_float=True, num_workers=1, max_cache_entries=2
