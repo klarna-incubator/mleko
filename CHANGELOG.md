@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2023-05-21)
+### Feature
+* New notes ([#54](https://github.com/ErikBavenstrand/mleko/issues/54)) ([`21239f7`](https://github.com/ErikBavenstrand/mleko/commit/21239f7f7f26cb8fe7b419e81a3e7fe9dd3736fd))
+
+### Fix
+* **data splitting:** :bug: Added notes and examples to splitters docstrings. ([`d162c86`](https://github.com/ErikBavenstrand/mleko/commit/d162c8611c0284d0a83e4b5ad9664f964351d194))
+* **pipeline:** :bug: Updated some docstrings. ([`56b36fd`](https://github.com/ErikBavenstrand/mleko/commit/56b36fd70030b2d39351b74b3c0e4dce5bd9a06c))
+
 ## v0.2.0 (2023-05-21)
 ### Feature
 * Add data splitting step ([#53](https://github.com/ErikBavenstrand/mleko/issues/53)) ([`a668b1a`](https://github.com/ErikBavenstrand/mleko/commit/a668b1a0cd61b6fa1970f401f8209accd40e083f))
