@@ -57,6 +57,27 @@ class RandomDataSplitter(BaseDataSplitter, VaexArrowCacheFormatMixin, LRUCacheMi
 
     This class provides a method for splitting a Vaex DataFrame into two parts, with the split being performed
     randomly. The split can be stratified by specifying a column name to use for stratification.
+
+    Note:
+        The stratification is performed before the split, meaning that the split will be performed on the stratified
+        data. For example, if the data is split into 80% train and 20% test, and the stratification column contains
+        80% of the rows with value 0 and 20% of the rows with value 1, the resulting split will contain 80% of the
+        rows with value 0 and 20% of the rows with value 1.
+
+    Example:
+        >>> import vaex
+        >>> from mleko.data.splitters import RandomDataSplitter
+        >>> df = vaex.from_arrays(x=[1, 2, 3, 4], y=[0, 1, 1, 0])
+        >>> splitter = RandomDataSplitter(output_directory="cache", data_split=(0.50, 0.50), shuffle=True, stratify="y")
+        >>> df_train, df_test = splitter.split(df)
+        >>> df_train
+            #    x    y
+            0    1    0
+            1    3    1
+        >>> df_test
+            #    x    y
+            0    2    1
+            1    4    0
     """
 
     @auto_repr
