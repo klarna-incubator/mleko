@@ -16,8 +16,11 @@ class PipelineStep(ABC):
 
     Descendants of this class must implement the `execute` method, which carries out the data processing operation
     related to the step.
-    NOTE: the _num_inputs and _num_outputs attributes are used to validate the number of inputs and outputs and must be
-    set by the subclass.
+
+    Note:
+        The _num_inputs and _num_outputs attributes are used to validate the number of inputs and outputs, respectively,
+        for each step. These attributes are set by the subclasses, and should not be modified by the user.
+        When implementing a new step, you should set these attributes to the expected number of inputs and outputs.
     """
 
     _num_inputs: int

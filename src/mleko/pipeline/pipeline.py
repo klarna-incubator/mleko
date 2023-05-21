@@ -27,6 +27,11 @@ class Pipeline:
             steps: An optional list of `PipelineStep` instances that define the data processing steps in the
                    pipeline. If not provided, the pipeline will be initialized with an empty list of steps,
                    allowing steps to be added later using the `add_step` method.
+
+        Note:
+            The steps list can be provided as an argument to the constructor, or the pipeline can be initialized
+            with an empty list of steps and have them added later using the `add_step` method. This allows for
+            more flexibility in the creation of the pipeline, as steps can be added dynamically.
         """
         self.steps = steps if steps is not None else []
 

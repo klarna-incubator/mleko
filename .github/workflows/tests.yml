@@ -8,6 +8,7 @@ jobs:
   tests:
     name: ${{ matrix.session }} ${{ matrix.python }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore(release):')
     strategy:
       fail-fast: false
       matrix:
