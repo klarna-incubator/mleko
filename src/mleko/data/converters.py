@@ -127,6 +127,8 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
         """Converts a list of CSV files to Arrow format and returns a vaex dataframe joined from the converted data.
 
         The method takes care of caching, and results will be reused accordingly unless force_recompute is set to True.
+        The resulting dataframe is a vaex DataFrame joined from the converted data. The conversion is done in chunks
+        to optimize parallel processing.
 
         Args:
             file_paths: A list of file paths to be converted.
@@ -167,7 +169,8 @@ class CsvToArrowConverter(BaseDataConverter, VaexArrowCacheFormatMixin, LRUCache
     ) -> None:
         """Converts a single CSV file to Arrow format using the provided options and saves it to the output directory.
 
-        This operation is done in chunks to optimize parallel processing.
+        This operation is done in chunks to optimize parallel processing. The resulting dataframe is saved in the
+        output directory with the given suffix.
 
         Args:
             file_path: The path of the CSV file to be converted.
