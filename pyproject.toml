@@ -21,6 +21,7 @@ boto3 = "^1.26.91"
 botocore = "^1.29.91"
 tqdm = "^4.65.0"
 vaex = "^4.16.0"
+scikit-learn = "^1.2.2"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
@@ -97,7 +98,8 @@ module = [
     "botocore.config",
     "pyarrow",
     "requests",
-    "requests.auth"
+    "requests.auth",
+    "sklearn.model_selection",
 ]
 ignore_missing_imports = true
 

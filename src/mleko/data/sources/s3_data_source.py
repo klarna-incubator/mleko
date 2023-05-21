@@ -54,11 +54,11 @@ class S3DataSource(BaseDataSource):
             destination_directory: Directory to store the fetched data locally.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
-            aws_profile_name: AWS profile name to use. Defaults to None.
-            aws_region_name: AWS region name where the S3 bucket is located. Defaults to "eu-west-1".
-            num_workers: Number of workers to use for concurrent downloads. Defaults to 64.
-            manifest_file_name: Name of the manifest file. Defaults to "manifest".
-            check_s3_timestamps: Whether to check if all S3 files have the same timestamp. Defaults to True.
+            aws_profile_name: AWS profile name to use.
+            aws_region_name: AWS region name where the S3 bucket is located.
+            num_workers: Number of workers to use for concurrent downloads.
+            manifest_file_name: Name of the manifest file.
+            check_s3_timestamps: Whether to check if all S3 files have the same timestamp.
         """
         super().__init__(destination_directory)
 
@@ -78,7 +78,7 @@ class S3DataSource(BaseDataSource):
         S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
-            use_cache: Whether to skip downloading if the local data is up to date. Defaults to True.
+            use_cache: Whether to skip downloading if the local data is up to date.
 
         Raises:
             Exception: If files in the S3 bucket have different last modified dates, indicating potential corruption

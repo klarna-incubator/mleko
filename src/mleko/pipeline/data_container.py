@@ -5,7 +5,7 @@ enforcing shared structure and behavior. The goal is to facilitate data handling
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import vaex
@@ -19,7 +19,7 @@ class DataContainer:
     a shared structure or behavior across different types of data.
     """
 
-    data: list[Path] | vaex.DataFrame | None = None
+    data: dict[str, list[Path] | vaex.DataFrame] = field(default_factory=dict)
     """The data stored in the DataContainer."""
 
     def __repr__(self) -> str:

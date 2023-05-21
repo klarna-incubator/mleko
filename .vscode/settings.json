@@ -1,3 +1,9 @@
 {
-  "conventionalCommits.scopes": ["data source", "config", "cache"]
+  "conventionalCommits.scopes": [
+    "data source",
+    "config",
+    "cache",
+    "pipeline",
+    "data splitting"
+  ]
 }

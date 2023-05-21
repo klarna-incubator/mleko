@@ -6,6 +6,7 @@ complete data processing workflow within the pipeline.
 """
 from .convert import ConvertStep
 from .ingest import IngestStep
+from .split import SplitStep
 
 
-__all__ = ["IngestStep", "ConvertStep"]
+__all__ = ["IngestStep", "ConvertStep", "SplitStep"]

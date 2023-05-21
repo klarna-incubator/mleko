@@ -35,7 +35,7 @@ class BaseDataSource(ABC):
 
         Args:
             use_cache: If supported by the child class, skips data fetching when up-to-date data is already present
-                in 'destination_directory'. Defaults to True.
+                in 'destination_directory'.
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseDataSource`.

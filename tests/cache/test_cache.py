@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Hashable
 from unittest.mock import patch
 
-from mleko.cache.cache import CacheMixin, LRUCacheMixin, get_frame_qualname
+import vaex
+
+from mleko.cache.cache import CacheMixin, LRUCacheMixin, VaexArrowCacheFormatMixin, get_frame_qualname
 
 
 class TestGetFrameQualname:
@@ -54,6 +56,10 @@ class TestCacheMixin:
             """Cached execute."""
             return self._cached_execute(lambda: a * b, [a, b], force_recompute)
 
+        def my_method_3(self, list_vals, force_recompute=False):
+            """Cached execute."""
+            return self._cached_execute(lambda: list_vals, [list_vals], force_recompute)
+
     def test_cached_execute(self, temporary_directory: Path):
         """Should save to cache as expected."""
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
@@ -68,7 +74,7 @@ class TestCacheMixin:
         dummy_frame_qualname = "module.Class.method"
         cache_keys: list[Hashable] = [1, 2]
         data = pickle.dumps((dummy_frame_qualname, cache_keys))
-        expected_key = hashlib.md5(data).hexdigest()
+        expected_key = "Class.method." + hashlib.md5(data).hexdigest()
 
         key = my_test_instance._compute_cache_key(cache_keys, dummy_frame_qualname)
         assert key == expected_key
@@ -78,7 +84,7 @@ class TestCacheMixin:
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
 
         result1 = my_test_instance.my_method_1(1, 2)
-        assert result1 == 3, "Result of my_method_1(1, 2) should be 3"
+        assert result1 == 3
 
         with patch.object(self.MyTestClass, "_save_to_cache") as patched_save_to_cache:
             my_test_instance.my_method_2(1, 2)
@@ -93,17 +99,51 @@ class TestCacheMixin:
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
 
         result1 = my_test_instance.my_method_1(1, 2)
-        assert result1 == 3, "Result of my_method_1(1, 2) should be 3"
+        assert result1 == 3
 
         with patch.object(self.MyTestClass, "_save_to_cache") as patched_save_to_cache:
             my_test_instance.my_method_1(1, 2, force_recompute=True)
             patched_save_to_cache.assert_called()
+
+    def test_multiple_outputs(self, temporary_directory: Path):
+        """Should successfully cache multiple outputs."""
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result1 = my_test_instance.my_method_1(1, 2)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result1 = my_test_instance.my_method_1(1, 2)
+        assert result1 == 3
+
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result2 = my_test_instance.my_method_2(1, 2)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result2 = my_test_instance.my_method_2(1, 2)
+        assert result2 == 2
+
+        values_tuple = tuple(range(102))
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result3 = my_test_instance.my_method_3(values_tuple)
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+        result3 = my_test_instance.my_method_3(values_tuple)
+        assert result3 == values_tuple
+
+        assert len(list(temporary_directory.glob("*.cache"))) == 104
 
 
 class TestLRUCacheMixin:
     """Test suite for `cache.cache.CacheMixin`."""
 
     class MyTestClass(LRUCacheMixin):
+        """Cached test class."""
+
+        def __init__(self, cache_directory, cache_file_suffix, max_entries):
+            """Initialize cache."""
+            super().__init__(cache_directory, cache_file_suffix, max_entries)
+
+        def my_method(self, a, force_recompute=False):
+            """Cached execute."""
+            return self._cached_execute(lambda: a, [a], force_recompute)
+
+    class MyTestClass2(LRUCacheMixin):
         """Cached test class."""
 
         def __init__(self, cache_directory, cache_file_suffix, max_entries):
@@ -149,7 +189,7 @@ class TestLRUCacheMixin:
         cache_file_prefix_name = "d91956ef6381f61dbb4ae6b47a4fa33"
         n_cache_entries = 2
         for i in range(n_cache_entries + 3):
-            new_file = temporary_directory / f"{cache_file_prefix_name}{i}.{cache_suffix}"
+            new_file = temporary_directory / f"MyTestClass.test.{cache_file_prefix_name}{i}.{cache_suffix}"
             new_file.touch()
             new_modified_time = datetime.timestamp(datetime.now() + timedelta(hours=i))
             os.utime(new_file, (new_modified_time, new_modified_time))
@@ -160,3 +200,43 @@ class TestLRUCacheMixin:
         cache_file_endings = [int(cache_key.stem[-1]) for cache_key in cache_file_keys]
         assert len(lru_cached_class._cache) == n_cache_entries
         assert all([cache_key_ending > n_cache_entries for cache_key_ending in cache_file_endings])
+
+    def test_two_classes_same_cache(self, temporary_directory: Path):
+        """Should correctly cache different classes with same arguments."""
+        lru_cached_class = self.MyTestClass(temporary_directory, "cache", 2)
+        lru_cached_class2 = self.MyTestClass2(temporary_directory, "cache", 2)
+
+        lru_cached_class.my_method(1)
+        lru_cached_class2.my_method(1)
+
+        assert len(lru_cached_class._cache) == 1
+        assert len(lru_cached_class2._cache) == 1
+        assert len(list(temporary_directory.glob("*.cache"))) == 2
+
+
+class TestVaexArrowCacheFormatMixin:
+    """Test suite for `cache.cache.VaexArrowCacheFormatMixin`."""
+
+    class MyTestClass(VaexArrowCacheFormatMixin, LRUCacheMixin):
+        """Cached test class."""
+
+        def __init__(self, cache_directory, max_entries):
+            """Initialize cache."""
+            VaexArrowCacheFormatMixin.__init__(self)
+            LRUCacheMixin.__init__(self, cache_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_entries)
+
+        def my_method(self, a, force_recompute=False):
+            """Cached execute."""
+            return self._cached_execute(lambda: a, [a.fingerprint()], force_recompute)
+
+    def test_vaex_dataframe_arrow_mixin(self, temporary_directory: Path):
+        """Should save to cache as expected."""
+        my_test_instance = self.MyTestClass(temporary_directory, 2)
+
+        df = my_test_instance.my_method(vaex.from_arrays(x=[1, 2, 3]))
+        assert df.x.tolist() == [1, 2, 3]
+
+        df = my_test_instance.my_method(vaex.from_arrays(x=[1, 2, 3]))
+        assert df.x.tolist() == [1, 2, 3]
+
+        assert len(list(temporary_directory.glob("*.arrow"))) == 1

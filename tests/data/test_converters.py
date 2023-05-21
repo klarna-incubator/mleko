@@ -47,7 +47,7 @@ class TestCsvToArrowConverter:
         dfs = [vaex.open(f) for f in arrow_files]
 
         for df in dfs:
-            assert str(list(df.dtypes)) == "[date32[day], float64, string, bool]"
+            assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
             assert df.column_names == ["Time", "Count", "Name", "Is Best"]
             assert df.shape == (3, 4)
             assert df.Name.countna() == 1
@@ -57,18 +57,17 @@ class TestCsvToArrowConverter:
         """Should convert a number of CSV files to arrow and return cached values on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
             temporary_directory,
-            forced_datetime_columns=["Time"],
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is Best"],
-            workers=1,
+            num_workers=1,
         )
 
         n_files = 1
         file_paths = generate_csv_files(temporary_directory, n_files)
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[date32[day], float64, string, bool]"
+        assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
         assert df.column_names == ["Time", "Count", "Name", "Is Best"]
         assert df.shape == (n_files * 3, 4)
         assert df.Name.countna() == n_files
@@ -78,11 +77,10 @@ class TestCsvToArrowConverter:
         with patch.object(CsvToArrowConverter, "_convert") as patched_convert:
             new_csv_to_arrow_converter = CsvToArrowConverter(
                 temporary_directory,
-                forced_datetime_columns=["Time"],
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is Best"],
-                workers=1,
+                num_workers=1,
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
             patched_convert.assert_not_called()
@@ -91,7 +89,7 @@ class TestCsvToArrowConverter:
     def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CsvToArrowConverter(
-            temporary_directory, downcast_float=True, workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=True, num_workers=1, max_cache_entries=2
         )
 
         n_files = 1
@@ -99,7 +97,7 @@ class TestCsvToArrowConverter:
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CsvToArrowConverter(
-            temporary_directory, downcast_float=False, workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=False, num_workers=1, max_cache_entries=2
         )
         df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 

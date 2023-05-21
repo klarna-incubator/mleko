@@ -65,7 +65,7 @@ class KaggleCredentialsManager:
         """Retrieves Kaggle API credentials from the specified file, environment variables, or the default location.
 
         Args:
-            credentials_file_path: Path to the Kaggle API credentials file. Defaults to None.
+            credentials_file_path: Path to the Kaggle API credentials file.
 
         Returns:
             A KaggleCredentials instance with the retrieved username and API key.
@@ -223,12 +223,12 @@ class KaggleDataSource(BaseDataSource):
             owner_slug: The owner's Kaggle username or organization name.
             dataset_slug: The dataset's unique Kaggle identifier (slug).
             file_names: A list of file names to download. If not provided or empty, all files in
-                the dataset will be downloaded. Defaults to None.
+                the dataset will be downloaded.
             dataset_version: The specific dataset version number to download. If not provided,
-                the latest version will be fetched. Defaults to None.
+                the latest version will be fetched.
             kaggle_api_credentials_file: Path to a Kaggle API credentials JSON file. If not
-                provided, environment variables or the default file location will be used. Defaults to None.
-            num_workers: Number of concurrent threads to use when downloading files. Defaults to 64.
+                provided, environment variables or the default file location will be used.
+            num_workers: Number of concurrent threads to use when downloading files.
         """
         super().__init__(destination_directory)
 
@@ -246,7 +246,7 @@ class KaggleDataSource(BaseDataSource):
 
         Args:
             use_cache: If set to True, the method will check if the local files are up-to-date and
-                skip downloading if everything is already in place. Defaults to True.
+                skip downloading if everything is already in place.
 
         Returns:
             A list of local file paths pointing to the downloaded files.
@@ -367,7 +367,7 @@ class KaggleDataSource(BaseDataSource):
             params: The request parameters containing the dataset version number, if applicable.
         """
         with tqdm(total=len(kaggle_file_paths), desc="Downloading files from Kaggle") as pbar:
-            with futures.ThreadPoolExecutor(max_workers=self._num_workers) as executor:
+            with futures.ThreadPoolExecutor(max_workers=min(self._num_workers, len(kaggle_file_paths))) as executor:
                 for _ in executor.map(
                     self._kaggle_fetch_file,
                     kaggle_file_paths,
