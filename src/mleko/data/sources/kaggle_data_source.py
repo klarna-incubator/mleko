@@ -229,6 +229,11 @@ class KaggleDataSource(BaseDataSource):
             kaggle_api_credentials_file: Path to a Kaggle API credentials JSON file. If not
                 provided, environment variables or the default file location will be used.
             num_workers: Number of concurrent threads to use when downloading files.
+
+        Note:
+            The Kaggle API is not perfect and sometimes returns incorrect metadata for files, where one or more of the
+            files are missing from the dataset. This can lead to the wrong files being downloaded or the download
+            failing altogether. If you encounter this issue, please report it to Kaggle.
         """
         super().__init__(destination_directory)
 
