@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/ErikBavenstrand/mleko/releases"
+Changelog = "https://github.com/ErikBavenstrand/mleko/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "3.10.* || 3.9.* || 3.8.*"
@@ -58,7 +58,7 @@ sphinx-autoapi = "^2.1.0"
 python-semantic-release = "^7.33.3"
 
 [tool.coverage.paths]
-source = ["src", "*/site-packages"]
+source = ["mleko", "*/site-packages"]
 tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
@@ -109,7 +109,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
 branch = "main"
-version_variable = "src/mleko/__init__.py:__version__"
+version_variable = "mleko/__init__.py:__version__"
 version_toml = "pyproject.toml:tool.poetry.version"
 version_source = "tag"
 commit_version_number = true

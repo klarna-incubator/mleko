@@ -95,6 +95,17 @@ class TestAutoRepr:
         assert repr(main_without_with) != f"MainClassWithoutAutoRepr(obj={repr(test_with)})"
         assert repr(main_without_without) != f"MainClassWithoutAutoRepr(obj={test_without})"
 
+    def test_preserve_signature(self):
+        """Should preserve the signature of the wrapped function."""
+
+        @auto_repr
+        def sample_function(a, b, *, c=None, **kwargs):
+            pass
+
+        sig = inspect.signature(sample_function)
+
+        assert sig == inspect.signature(sample_function.__wrapped__)
+
 
 class TestTiming:
     """Test suite for `utils.decorators.@timing`."""

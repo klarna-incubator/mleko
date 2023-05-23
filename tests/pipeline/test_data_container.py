@@ -6,8 +6,8 @@ from pathlib import Path
 from mleko.pipeline.data_container import DataContainer
 
 
-class TestBaseDataContainer:
-    """Test suite for `pipeline.data_container.BaseDataContainer`."""
+class TestDataContainer:
+    """Test suite for `pipeline.data_container.DataContainer`."""
 
     def test_init(self):
         """Should init with data."""

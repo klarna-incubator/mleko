@@ -1,1 +1,2 @@
-"""Test suite for the library."""
+"""Test suite for MLEKO."""
+from __future__ import annotations

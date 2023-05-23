@@ -17,7 +17,7 @@ class TestPipeline:
         _num_inputs = 0
         _num_outputs = 1
 
-        def execute(self, _data_container: DataContainer) -> DataContainer:
+        def execute(self, _data_container: DataContainer, _force_recompute: bool) -> DataContainer:
             """Execute the step."""
             return DataContainer(data={"raw_data": [Path()]})
 
@@ -27,7 +27,7 @@ class TestPipeline:
         _num_inputs = 1
         _num_outputs = 1
 
-        def execute(self, data_container: DataContainer) -> DataContainer:
+        def execute(self, data_container: DataContainer, _force_recompute: bool) -> DataContainer:
             """Execute the step."""
             file_paths = data_container.data["raw_data"]
             if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
