@@ -10,14 +10,15 @@ from itertools import repeat
 from pathlib import Path
 
 import vaex
+from pyarrow import csv as arrow_csv
+from tqdm import tqdm
+
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
-from pyarrow import csv as arrow_csv
-from tqdm import tqdm
 
 from .base_converter import BaseConverter
 

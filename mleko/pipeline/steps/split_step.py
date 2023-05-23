@@ -5,11 +5,12 @@ It uses a BaseDataSplitter to perform the actual splitting.
 """
 from __future__ import annotations
 
+from vaex import DataFrame
+
 from mleko.dataset.splitters.base_splitter import BaseSplitter
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.utils.decorators import auto_repr
-from vaex import DataFrame
 
 
 class SplitStep(PipelineStep):

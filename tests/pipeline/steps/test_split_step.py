@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import vaex
+
 from mleko.dataset.splitters.base_splitter import BaseSplitter
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.steps.split_step import SplitStep

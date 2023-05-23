@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import vaex
+
 from mleko.dataset.splitters.base_splitter import BaseSplitter
 
 

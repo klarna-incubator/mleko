@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pytest
 import vaex
+
 from mleko.utils.vaex_helpers import get_column, get_columns, get_filtered_df, get_indices
 
 

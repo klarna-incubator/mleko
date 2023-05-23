@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import vaex
+
 from mleko.cache.fingerprinters import VaexFingerprinter
 from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin

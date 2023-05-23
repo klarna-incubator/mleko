@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import vaex
+
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 
 

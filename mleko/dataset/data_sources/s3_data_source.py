@@ -15,10 +15,11 @@ from typing import Any
 import boto3
 from boto3.s3.transfer import TransferConfig as BotoTransferConfig
 from botocore.config import Config as BotoConfig
+from tqdm import tqdm
+
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
-from tqdm import tqdm
 
 from .base_data_source import BaseDataSource
 
@@ -134,17 +135,21 @@ class S3DataSource(BaseDataSource):
             with open(self._destination_directory / self._manifest_file_name) as f:
                 manifest: dict[str, Any] = json.load(f)
                 if self._is_local_dataset_fresh(manifest):
-                    logger.info("Local dataset is up to date with S3 bucket contents, skipping download.")
+                    logger.info(
+                        "\033[32mCache Hit\033[0m: Local dataset is up to date with S3 bucket contents, "
+                        "skipping download."
+                    )
                     return self._get_local_filenames(["gz", "csv", "zip"])
 
         if force_recompute:
             logger.info(
-                f"\033[33mForce Refetch\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
+                f"\033[33mForce Cache Refresh\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
                 "{self._destination_directory} from S3."
             )
         else:
             logger.info(
-                f"Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to {self._destination_directory} from S3."
+                f"\033[31mCache Miss\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
+                "{self._destination_directory} from S3."
             )
 
         clear_directory(self._destination_directory)

@@ -18,11 +18,12 @@ from pathlib import Path
 from typing import NamedTuple
 
 import requests
+from requests.auth import HTTPBasicAuth
+from tqdm import tqdm
+
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
-from requests.auth import HTTPBasicAuth
-from tqdm import tqdm
 
 from .base_data_source import BaseDataSource
 
@@ -279,7 +280,7 @@ class KaggleDataSource(BaseDataSource):
             raise ValueError(error_msg)
 
         if not force_recompute and self._is_local_dataset_fresh(files_metadata):
-            logger.info("Local dataset is up to date with Kaggle, skipping download.")
+            logger.info("\033[32mCache Hit\033[0m: Local dataset is up to date with Kaggle, skipping download.")
             return self._get_local_filenames(["gz", "csv", "zip"])
 
         file_names = "*"
@@ -288,16 +289,22 @@ class KaggleDataSource(BaseDataSource):
 
         if force_recompute:
             logger.info(
-                f"\033[33mForce Refetch\033[0m: Downloading {dataset_path}/{file_names} to "
+                f"\033[33mForce Cache Refresh\033[0m: Downloading {dataset_path}/{file_names} to "
                 "{self._destination_directory} from Kaggle."
             )
         else:
-            logger.info(f"Downloading {dataset_path}/{file_names} to {self._destination_directory} from Kaggle.")
+            logger.info(
+                f"\033[31mCache Miss\033[0m: Downloading {dataset_path}/{file_names} to "
+                "{self._destination_directory} from Kaggle."
+            )
 
         clear_directory(self._destination_directory)
 
         kaggle_file_paths = [f"{dataset_path}/{file_metadata.name}" for file_metadata in files_metadata]
-        self._kaggle_fetch_files(kaggle_file_paths, params)
+
+        if kaggle_file_paths:
+            self._kaggle_fetch_files(kaggle_file_paths, params)
+            logger.info(f"Finished downloading {len(kaggle_file_paths)} files from Kaggle.")
 
         return self._get_local_filenames(["gz", "csv", "zip"])
 

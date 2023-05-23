@@ -8,14 +8,16 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
-from mleko.dataset.data_sources import KaggleDataSource
+from pytest import fixture, raises
+
 from mleko.dataset.data_sources.kaggle_data_source import (
     KaggleCredentials,
     KaggleCredentialsManager,
+    KaggleDataSource,
     KaggleFileMetadata,
 )
-from pytest import fixture, raises
 
 
 class TestKaggleCredentials:
@@ -239,6 +241,7 @@ class TestKaggleDataSource:
             with raises(ValueError):
                 data_source.fetch_data()
 
+    @pytest.mark.parametrize("force_recompute", [True, False])
     @patch("mleko.dataset.data_sources.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
     @patch("shutil.unpack_archive")
     def test_fetch_data_when_cache_is_outdated(
@@ -247,6 +250,7 @@ class TestKaggleDataSource:
         mock_unpack_archive: MagicMock,
         sample_kaggle_credentials: KaggleCredentials,
         temporary_directory: Path,
+        force_recompute: bool,
     ):
         """Should download the files if local ones are outdated."""
         mock_get_credentials.return_value = sample_kaggle_credentials
@@ -297,7 +301,7 @@ class TestKaggleDataSource:
                     iter_content=MagicMock(return_value=iter([zip_file_content])),
                 ),
             ]
-            files = data_source.fetch_data()
+            files = data_source.fetch_data(force_recompute=force_recompute)
 
         assert len(files) == 1
         assert files == [temporary_directory / "file1.csv"]  # the zip file should be ignored

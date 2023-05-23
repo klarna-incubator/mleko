@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from mleko.cache.fingerprinters.csv_fingerprinter import CSVFingerprinter
-
 from tests.conftest import generate_csv_files
 
 

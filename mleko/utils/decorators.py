@@ -45,7 +45,7 @@ def auto_repr(init_method: F) -> F:
     """
 
     @wraps(init_method)
-    def wrapped_init(self: Any, *args: Any, **kwargs: dict[str, Any]) -> None:
+    def wrapped_init(self: Any, *args: Any, **kwargs: Any) -> None:
         init_method(self, *args, **kwargs)
 
         signature = inspect.signature(init_method)
@@ -92,7 +92,7 @@ def timing(func: F) -> F:
     """
 
     @wraps(func)
-    def wrap(*args: Any, **kwargs: dict[str, Any]) -> Any:
+    def wrap(*args: Any, **kwargs: Any) -> Any:
         ts = perf_counter()
         result = func(*args, **kwargs)
         te = perf_counter()

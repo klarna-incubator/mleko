@@ -6,8 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import vaex
-from mleko.dataset.converters.csv_to_vaex_converter import CSVToVaexConverter
 
+from mleko.dataset.converters.csv_to_vaex_converter import CSVToVaexConverter
 from tests.conftest import generate_csv_files
 
 

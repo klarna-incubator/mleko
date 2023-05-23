@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 import vaex
+
 from mleko.dataset.splitters.random_splitter import RandomSplitter
 
 

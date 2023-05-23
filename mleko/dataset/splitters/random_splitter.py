@@ -8,13 +8,14 @@ from __future__ import annotations
 from pathlib import Path
 
 import vaex
+from sklearn.model_selection import train_test_split
+
 from mleko.cache.fingerprinters import VaexFingerprinter
 from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_filtered_df
-from sklearn.model_selection import train_test_split
 
 from .base_splitter import BaseSplitter
 

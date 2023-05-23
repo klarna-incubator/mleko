@@ -11,9 +11,10 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ProfileNotFound
-from mleko.dataset.data_sources import S3DataSource
 from moto.s3.models import s3_backends
 from mypy_boto3_s3.service_resource import Bucket
+
+from mleko.dataset.data_sources import S3DataSource
 
 
 class TestS3DataSource:
