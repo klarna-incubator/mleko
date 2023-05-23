@@ -1,13 +1,13 @@
-"""Test suite for the `dataset.data_sources.base_data_source` module."""
+"""Test suite for the `dataset.data_source.base_data_source` module."""
 from __future__ import annotations
 
 from pathlib import Path
 
-from mleko.dataset.data_sources.base_data_source import BaseDataSource
+from mleko.dataset.data_source.base_data_source import BaseDataSource
 
 
 class TestBaseDataSource:
-    """Test suite for `dataset.data_sources.base_data_source.BaseDataSource`."""
+    """Test suite for `dataset.data_source.base_data_source.BaseDataSource`."""
 
     class DataSource(BaseDataSource):
         """Test class inheriting from the `BaseDataSource`."""

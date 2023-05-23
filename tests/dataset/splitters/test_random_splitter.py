@@ -1,4 +1,4 @@
-"""Test suite for `dataset.splitters.random_splitter`."""
+"""Test suite for `dataset.splitter.random_splitter`."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import vaex
 
-from mleko.dataset.splitters.random_splitter import RandomSplitter
+from mleko.dataset.splitter.random_splitter import RandomSplitter
 
 
 @pytest.fixture()
@@ -33,7 +33,7 @@ def example_vaex_dataframe() -> vaex.DataFrame:
 
 
 class TestRandomSplitter:
-    """Test suite for `dataset.splitters.random_splitter.RandomSplitter`."""
+    """Test suite for `dataset.splitter.random_splitter.RandomSplitter`."""
 
     def test_split_shuffle_stratify(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes with shuffling and stratification."""

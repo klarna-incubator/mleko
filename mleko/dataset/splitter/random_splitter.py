@@ -61,7 +61,7 @@ class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
 
         Example:
             >>> import vaex
-            >>> from mleko.data.splitters import RandomSplitter
+            >>> from mleko.data.splitter import RandomSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3, 4], y=[0, 1, 1, 0])
             >>> splitter = RandomSplitter(output_directory="cache", data_split=(0.50, 0.50), shuffle=True, stratify="y")
             >>> df_train, df_test = splitter.split(df)

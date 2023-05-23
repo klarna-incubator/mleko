@@ -93,7 +93,7 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
 
         Example:
             >>> import vaex
-            >>> from mleko.dataset.converters import CSVToArrowConverter
+            >>> from mleko.dataset.converter import CSVToArrowConverter
             >>> converter = CSVToArrowConverter(
             ...     output_directory="cache",
             ...     forced_numerical_columns=["x"],

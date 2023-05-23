@@ -1,2 +1,2 @@
-"""Test suite for the `dataset.data_sources` module."""
+"""Test suite for the `dataset.data_source` module."""
 from __future__ import annotations

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from mleko.dataset.converters import BaseConverter
+from mleko.dataset.converter import BaseConverter
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.utils.decorators import auto_repr

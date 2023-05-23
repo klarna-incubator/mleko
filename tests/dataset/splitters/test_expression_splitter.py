@@ -1,4 +1,4 @@
-"""Test suite for the `dataset.splitters.expression_splitter` module."""
+"""Test suite for the `dataset.splitter.expression_splitter` module."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import vaex
 
-from mleko.dataset.splitters.expression_splitter import ExpressionSplitter
+from mleko.dataset.splitter.expression_splitter import ExpressionSplitter
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,7 @@ def example_vaex_dataframe() -> vaex.DataFrame:
 
 
 class TestExpressionDataSplitter:
-    """Test suite for `dataset.splitters.expression_splitter.ExpressionDataSplitter`."""
+    """Test suite for `dataset.splitter.expression_splitter.ExpressionDataSplitter`."""
 
     def test_split_by_index(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes based on index."""

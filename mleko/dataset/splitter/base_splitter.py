@@ -1,4 +1,4 @@
-"""Abstract base class for data splitters.
+"""Abstract base class for data splitter.
 
 This module provides a common interface for splitting a dataframe into two parts by implementing the `split` method.
 Classes that inherit from `BaseSplitter` must implement the `split` method. The `split` method should split the given
@@ -13,7 +13,7 @@ import vaex
 
 
 class BaseSplitter(ABC):
-    """Abstract base class for data splitters.
+    """Abstract base class for data splitter.
 
     Provides a common interface for splitting a dataframe into two parts by implementing the `split` method.
     """

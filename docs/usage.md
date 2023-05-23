@@ -10,7 +10,7 @@ Import the required classes:
 
 ```python
 from mleko.data.sources import KaggleDataSource
-from mleko.data.converters import CSVToArrowConverter
+from mleko.data.converter import CSVToArrowConverter
 from mleko.pipeline import Pipeline
 from mleko.pipeline.steps import IngestStep, ConvertStep
 ```

@@ -49,7 +49,7 @@ class ExpressionSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin)
 
         Example:
             >>> import vaex
-            >>> from mleko.data.splitters import ExpressionSplitter
+            >>> from mleko.data.splitter import ExpressionSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6])
             >>> splitter = ExpressionSplitter(output_directory="cache", expression="x > 1")
             >>> df_train, df_test = splitter.split(df)

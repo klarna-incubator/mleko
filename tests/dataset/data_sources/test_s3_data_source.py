@@ -1,4 +1,4 @@
-"""Test suite for the `dataset.data_sources.s3_data_source` module."""
+"""Test suite for the `dataset.data_source.s3_data_source` module."""
 from __future__ import annotations
 
 import datetime
@@ -14,11 +14,11 @@ from botocore.exceptions import ProfileNotFound
 from moto.s3.models import s3_backends
 from mypy_boto3_s3.service_resource import Bucket
 
-from mleko.dataset.data_sources import S3DataSource
+from mleko.dataset.data_source import S3DataSource
 
 
 class TestS3DataSource:
-    """Test suite for `dataset.data_sources.s3_data_source.S3DataSource`."""
+    """Test suite for `dataset.data_source.s3_data_source.S3DataSource`."""
 
     @pytest.fixture(scope="class")
     def s3_bucket(self) -> Generator[Bucket, None, None]:

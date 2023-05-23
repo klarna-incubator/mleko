@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mleko.dataset.data_sources import BaseDataSource
+from mleko.dataset.data_source import BaseDataSource
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.pipeline.steps.ingest_step import IngestStep
