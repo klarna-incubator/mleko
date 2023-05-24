@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mleko.dataset.data_source import BaseDataSource
+from mleko.dataset.ingest import BaseIngester
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.pipeline.steps.ingest_step import IngestStep
@@ -17,18 +17,18 @@ class TestIngestStep:
 
     def test_init(self):
         """Should initialize IngestStep instance."""
-        ds_mock = MagicMock(spec=BaseDataSource)
-        ingest_step = IngestStep(data_source=ds_mock, outputs=["raw_data"])
+        ds_mock = MagicMock(spec=BaseIngester)
+        ingest_step = IngestStep(ingester=ds_mock, outputs=["raw_data"])
 
         assert isinstance(ingest_step, PipelineStep)
-        assert ingest_step._data_source == ds_mock
+        assert ingest_step._ingester == ds_mock
 
     def test_execute(self):
         """Should execute the IngestStep and return the fetched data as DataContainer."""
-        ds_mock = MagicMock(spec=BaseDataSource)
+        ds_mock = MagicMock(spec=BaseIngester)
         ds_mock.fetch_data.return_value = [Path("file_1.txt"), Path("file_2.txt")]
 
-        ingest_step = IngestStep(data_source=ds_mock, outputs=["raw_data"])
+        ingest_step = IngestStep(ingester=ds_mock, outputs=["raw_data"])
         result = ingest_step.execute(DataContainer(), force_recompute=False)
 
         ds_mock.fetch_data.assert_called_once()
@@ -37,9 +37,9 @@ class TestIngestStep:
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""
-        data_source = MagicMock(spec=BaseDataSource)
+        ingester = MagicMock(spec=BaseIngester)
         with pytest.raises(ValueError):
-            IngestStep(data_source=data_source, inputs=[], outputs=["converted_data", "raw_data"])
+            IngestStep(ingester=ingester, inputs=[], outputs=["converted_data", "raw_data"])
 
         with pytest.raises(ValueError):
-            IngestStep(data_source=data_source, inputs=["raw_data"], outputs=[])
+            IngestStep(ingester=ingester, inputs=["raw_data"], outputs=[])

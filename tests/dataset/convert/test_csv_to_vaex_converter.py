@@ -1,4 +1,4 @@
-"""Test suite for `dataset.converter.csv_to_vaex_converter`."""
+"""Test suite for `dataset.convert.csv_to_vaex_converter`."""
 from __future__ import annotations
 
 import glob
@@ -7,12 +7,12 @@ from unittest.mock import patch
 
 import vaex
 
-from mleko.dataset.converter.csv_to_vaex_converter import CSVToVaexConverter
+from mleko.dataset.convert.csv_to_vaex_converter import CSVToVaexConverter
 from tests.conftest import generate_csv_files
 
 
 class TestCSVToVaexConverter:
-    """Test suite for `dataset.converter.csv_to_vaex_converter.CSVToVaexConverter`."""
+    """Test suite for `dataset.convert.csv_to_vaex_converter.CSVToVaexConverter`."""
 
     def test_convert(self, temporary_directory: Path):
         """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""

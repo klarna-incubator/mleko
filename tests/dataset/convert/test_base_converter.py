@@ -1,15 +1,15 @@
-"""Test suite for `dataset.converter.base_converter`."""
+"""Test suite for `dataset.convert.base_convert`."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import vaex
 
-from mleko.dataset.converter.base_converter import BaseConverter
+from mleko.dataset.convert.base_converter import BaseConverter
 
 
 class TestBaseConverter:
-    """Test suite for `dataset.converter.base_converter.BaseConverter`."""
+    """Test suite for `dataset.convert.base_converter.BaseConverter`."""
 
     class DerivedDataConverter(BaseConverter):
         """Test class."""

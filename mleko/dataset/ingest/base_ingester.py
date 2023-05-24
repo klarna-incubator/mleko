@@ -1,6 +1,6 @@
 """Abstract base class module for data source implementations to fetch and store data from various sources.
 
-The BaseDataSource class provides the foundation for creating data source classes that handle data retrieval from
+The BaseIngester class provides the foundation for creating data source classes that handle data retrieval from
 different sources, such as AWS S3 or Kaggle, and manage the storage of the fetched data in a specified destination
 directory.
 """
@@ -11,8 +11,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 
-class BaseDataSource(ABC):
-    """BaseDataSource is an abstract foundation for data source classes that interact with various external sources.
+class BaseIngester(ABC):
+    """BaseIngester is an abstract foundation for data source classes that interact with various external sources.
 
     This class provides the basic structure and methods necessary for derived data source classes, facilitating data
     fetching from various sources, like AWS S3 or Kaggle, and storing them in a local destination directory. It offers
@@ -37,7 +37,7 @@ class BaseDataSource(ABC):
             force_recompute: Whether to force the data source to recompute its output, even if it already exists.
 
         Raises:
-            NotImplementedError: Must be implemented in the child class that inherits from `BaseDataSource`.
+            NotImplementedError: Must be implemented in the child class that inherits from `BaseIngester`.
 
         Returns:
             A list of Path objects pointing to the downloaded data files.

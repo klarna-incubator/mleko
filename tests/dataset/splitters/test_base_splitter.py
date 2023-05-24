@@ -1,15 +1,15 @@
-"""Test suite for `dataset.splitter.base_splitter`."""
+"""Test suite for `dataset.split.base_splitter`."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import vaex
 
-from mleko.dataset.splitter.base_splitter import BaseSplitter
+from mleko.dataset.split.base_splitter import BaseSplitter
 
 
 class TestBaseSplitter:
-    """Test suite for `dataset.splitter.base_splitter.BaseSplitter`."""
+    """Test suite for `dataset.split.base_splitter.BaseSplitter`."""
 
     class DerivedSplitter(BaseSplitter):
         """Test class."""

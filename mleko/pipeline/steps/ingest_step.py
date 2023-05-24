@@ -1,12 +1,12 @@
 """Module handling data ingestion from a data source in the pipeline process.
 
 This module contains the `IngestStep` class which is a specialized pipeline step designed for handling data
-fetching from a specified `BaseDataSource`. It's responsible for retrieving data from the data source, and
+fetching from a specified `BaseIngester`. It's responsible for retrieving data from the data source, and
 returning a `DataContainer` object containing the list of fetched files.
 """
 from __future__ import annotations
 
-from mleko.dataset.data_source import BaseDataSource
+from mleko.dataset.ingest import BaseIngester
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.utils import auto_repr
@@ -24,19 +24,19 @@ class IngestStep(PipelineStep):
     @auto_repr
     def __init__(
         self,
-        data_source: BaseDataSource,
+        ingester: BaseIngester,
         inputs: list[str] | tuple[str, ...] | tuple[()] = (),
         outputs: list[str] | tuple[str, ...] | tuple[()] = (),
     ) -> None:
         """Initialize the IngestStep with the specified data source.
 
         Args:
-            data_source: The data source from which to fetch the data, a BaseDataSource instance.
+            ingester: The data source from which to fetch the data, a BaseIngester instance.
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
         """
         super().__init__(inputs, outputs)
-        self._data_source = data_source
+        self._ingester = ingester
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
         """Fetch data from the configured data source and return a DataContainer with fetched files.
@@ -48,6 +48,6 @@ class IngestStep(PipelineStep):
         Returns:
             DataContainer: A DataContainer containing a list of fetched files.
         """
-        files = self._data_source.fetch_data(force_recompute)
+        files = self._ingester.fetch_data(force_recompute)
         data_container.data[self.outputs[0]] = files
         return data_container

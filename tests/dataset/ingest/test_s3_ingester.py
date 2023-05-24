@@ -1,4 +1,4 @@
-"""Test suite for the `dataset.data_source.s3_data_source` module."""
+"""Test suite for the `dataset.ingest.s3_ingester` module."""
 from __future__ import annotations
 
 import datetime
@@ -14,11 +14,11 @@ from botocore.exceptions import ProfileNotFound
 from moto.s3.models import s3_backends
 from mypy_boto3_s3.service_resource import Bucket
 
-from mleko.dataset.data_source import S3DataSource
+from mleko.dataset.ingest import S3Ingester
 
 
-class TestS3DataSource:
-    """Test suite for `dataset.data_source.s3_data_source.S3DataSource`."""
+class TestS3Ingester:
+    """Test suite for `dataset.ingest.s3_ingester.S3Ingester`."""
 
     @pytest.fixture(scope="class")
     def s3_bucket(self) -> Generator[Bucket, None, None]:
@@ -33,7 +33,7 @@ class TestS3DataSource:
         s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
 
-        test_data = S3DataSource(
+        test_data = S3Ingester(
             destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
@@ -56,7 +56,7 @@ class TestS3DataSource:
         ].last_modified = datetime.datetime(2000, 1, 1)
 
         with pytest.raises(Exception, match="Files in S3"):
-            test_data = S3DataSource(
+            test_data = S3Ingester(
                 destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
@@ -80,7 +80,7 @@ class TestS3DataSource:
             )
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
-        test_data = S3DataSource(
+        test_data = S3Ingester(
             destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
@@ -92,8 +92,8 @@ class TestS3DataSource:
             force_recompute=True,
         )
 
-        with patch.object(S3DataSource, "_s3_fetch_all") as mocked_s3_fetch_all:
-            test_data = S3DataSource(
+        with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
+            test_data = S3Ingester(
                 destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
@@ -118,7 +118,7 @@ class TestS3DataSource:
             )
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
-        test_data = S3DataSource(
+        test_data = S3Ingester(
             destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
@@ -140,8 +140,8 @@ class TestS3DataSource:
             )
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO_NEW")
-        with patch.object(S3DataSource, "_s3_fetch_all") as mocked_s3_fetch_all:
-            test_data = S3DataSource(
+        with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
+            test_data = S3Ingester(
                 destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
@@ -174,7 +174,7 @@ class TestS3DataSource:
             credentials.token = "test_token"  # noqa: S105
             mocked_get_credentials.return_value = credentials
 
-            S3DataSource(
+            S3Ingester(
                 destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",

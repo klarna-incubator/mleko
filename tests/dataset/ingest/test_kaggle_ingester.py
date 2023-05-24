@@ -1,4 +1,4 @@
-"""Test suite for the `dataset.data_source.kaggle_data_source` module."""
+"""Test suite for the `dataset.ingest.kaggle_ingester` module."""
 from __future__ import annotations
 
 import io
@@ -12,16 +12,16 @@ import pytest
 import requests
 from pytest import fixture, raises
 
-from mleko.dataset.data_source.kaggle_data_source import (
+from mleko.dataset.ingest.kaggle_ingester import (
     KaggleCredentials,
     KaggleCredentialsManager,
-    KaggleDataSource,
     KaggleFileMetadata,
+    KaggleIngester,
 )
 
 
 class TestKaggleCredentials:
-    """Test suite for `dataset.data_source.kaggle_data_source.KaggleCredentials`."""
+    """Test suite for `dataset.ingest.kaggle_ingester.KaggleCredentials`."""
 
     def test_init(self):
         """Should successfully initialize."""
@@ -34,7 +34,7 @@ class TestKaggleCredentials:
 
 
 class TestCredentialsManager:
-    """Test suite for `dataset.data_source.kaggle_data_source.TestCredentialsManager`."""
+    """Test suite for `dataset.ingest.kaggle_ingester.TestCredentialsManager`."""
 
     def test_get_credentials_from_config_file(self, temporary_directory: Path):
         """Should fetch credentials from a provided config file."""
@@ -59,9 +59,9 @@ class TestCredentialsManager:
 
         with patch.dict(os.environ, {"KAGGLE_USERNAME": "", "KAGGLE_KEY": ""}):
             with patch(
-                "mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager._read_environment_config"
+                "mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager._read_environment_config"
             ) as mock_read_env_config, patch(
-                "mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager._read_config_file"
+                "mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager._read_config_file"
             ) as mock_read_config_file:
                 mock_read_env_config.return_value = None
                 mock_read_config_file.return_value = credentials
@@ -104,7 +104,7 @@ class TestCredentialsManager:
 
 
 class TestKaggleFileMetadata:
-    """Test suite for `dataset.data_source.kaggle_data_source.KaggleFileMetadata`."""
+    """Test suite for `dataset.ingest.kaggle_ingester.KaggleFileMetadata`."""
 
     def test_init(self):
         """Should successfully initialize."""
@@ -118,8 +118,8 @@ class TestKaggleFileMetadata:
         assert kaggle_file_metadata.total_bytes == total_bytes
 
 
-class TestKaggleDataSource:
-    """Test suite for `dataset.data_source.kaggle_data_source.KaggleDataSource`."""
+class TestKaggleIngester:
+    """Test suite for `dataset.ingest.kaggle_ingester.KaggleIngester`."""
 
     @fixture
     def sample_kaggle_credentials(self):
@@ -131,21 +131,21 @@ class TestKaggleDataSource:
         """Returns a sample `KaggleFileMetadata` instance."""
         return KaggleFileMetadata("file.csv", 1609459200.0, 12345)
 
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
     def test_init(self, mock_get_credentials: MagicMock, sample_kaggle_credentials: KaggleCredentials):
         """Should successfullt initialize."""
         mock_get_credentials.return_value = sample_kaggle_credentials
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=".",
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
         )
 
-        assert isinstance(data_source, KaggleDataSource)
-        assert data_source._kaggle_config == sample_kaggle_credentials
+        assert isinstance(ingester, KaggleIngester)
+        assert ingester._kaggle_config == sample_kaggle_credentials
 
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleDataSource._kaggle_fetch_files")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleIngester._kaggle_fetch_files")
     def test_fetch_data_when_cache_is_fresh(
         self,
         mock_kaggle_fetch_files: MagicMock,
@@ -171,7 +171,7 @@ class TestKaggleDataSource:
 
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
@@ -183,13 +183,13 @@ class TestKaggleDataSource:
                 status_code=200,
                 content=json.dumps({"datasetFiles": files}),
             )
-            files = data_source.fetch_data()
+            files = ingester.fetch_data()
 
         assert len(files) == 2
         assert files == [temporary_directory / "file1.csv", temporary_directory / "file2.csv"]
         mock_kaggle_fetch_files.assert_not_called()
 
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
     def test_raise_http_error_fetch_dataset_list(
         self,
         mock_get_credentials: MagicMock,
@@ -199,7 +199,7 @@ class TestKaggleDataSource:
         """Should raise an HTTPError if the dataset list fails."""
         mock_get_credentials.return_value = sample_kaggle_credentials
 
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
@@ -213,9 +213,9 @@ class TestKaggleDataSource:
                 raise_for_status=MagicMock(side_effect=requests.exceptions.HTTPError),
             )
             with raises(requests.exceptions.HTTPError):
-                data_source.fetch_data()
+                ingester.fetch_data()
 
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
     def test_raise_value_error_if_dataset_list_is_empty(
         self,
         mock_get_credentials: MagicMock,
@@ -225,7 +225,7 @@ class TestKaggleDataSource:
         """Should raise a ValueError if the dataset list returns an empty array."""
         mock_get_credentials.return_value = sample_kaggle_credentials
 
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
@@ -239,10 +239,10 @@ class TestKaggleDataSource:
                 content=json.dumps({"datasetFiles": []}),
             )
             with raises(ValueError):
-                data_source.fetch_data()
+                ingester.fetch_data()
 
     @pytest.mark.parametrize("force_recompute", [True, False])
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
     @patch("shutil.unpack_archive")
     def test_fetch_data_when_cache_is_outdated(
         self,
@@ -270,7 +270,7 @@ class TestKaggleDataSource:
 
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
@@ -301,13 +301,13 @@ class TestKaggleDataSource:
                     iter_content=MagicMock(return_value=iter([zip_file_content])),
                 ),
             ]
-            files = data_source.fetch_data(force_recompute=force_recompute)
+            files = ingester.fetch_data(force_recompute=force_recompute)
 
         assert len(files) == 1
         assert files == [temporary_directory / "file1.csv"]  # the zip file should be ignored
         assert mock_unpack_archive.call_count == 1
 
-    @patch("mleko.dataset.data_source.kaggle_data_source.KaggleCredentialsManager.get_kaggle_credentials")
+    @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
     def test_fetch_data_raises_http_error_on_bad_request(
         self,
         mock_get_credentials: MagicMock,
@@ -332,7 +332,7 @@ class TestKaggleDataSource:
 
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
-        data_source = KaggleDataSource(
+        ingester = KaggleIngester(
             destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
@@ -363,4 +363,4 @@ class TestKaggleDataSource:
             ]
 
             with raises(requests.exceptions.HTTPError):
-                data_source.fetch_data()
+                ingester.fetch_data()

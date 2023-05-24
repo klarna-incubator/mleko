@@ -1,6 +1,6 @@
-"""Module for fetching data from AWS S3 and storing it locally using the S3DataSource class.
+"""Module for fetching data from AWS S3 and storing it locally using the S3Ingester class.
 
-The S3DataSource class provides an interface for downloading specified data from an AWS S3 bucket.
+The S3Ingester class provides an interface for downloading specified data from an AWS S3 bucket.
 It allows users to specify the attributes related to the S3 system and configure concurrent downloads.
 This module uses boto3 library for interacting with the AWS API.
 """
@@ -21,15 +21,15 @@ from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
 
-from .base_data_source import BaseDataSource
+from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
 """A CustomLogger instance that's used throughout the module for logging."""
 
 
-class S3DataSource(BaseDataSource):
-    """S3DataSource provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
+class S3Ingester(BaseIngester):
+    """S3Ingester provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
 
     This class extends interacts with AWS S3, allowing users to download specified data from an S3 bucket.
     It supports manifest-based caching, enabling more efficient data fetching by verifying if the
@@ -67,8 +67,8 @@ class S3DataSource(BaseDataSource):
             check_s3_timestamps: Whether to check if all S3 files have the same timestamp.
 
         Examples:
-            >>> from mleko.dataset.sources import S3DataSource
-            >>> s3_data_source = S3DataSource(
+            >>> from mleko.dataset.sources import S3Ingester
+            >>> s3_ingester = S3Ingester(
             ...     destination_directory="data",
             ...     s3_bucket_name="mleko-datasets",
             ...     s3_key_prefix="kaggle/ashishpatel26/indian-food-101",
@@ -78,7 +78,7 @@ class S3DataSource(BaseDataSource):
             ...     manifest_file_name="manifest",
             ...     check_s3_timestamps=True,
             ... )
-            >>> s3_data_source.fetch_data()
+            >>> s3_ingester.fetch_data()
             [PosixPath('data/indian_food.csv')]
         """
         super().__init__(destination_directory)

@@ -1,6 +1,6 @@
 """A module for downloading and managing Kaggle datasets using the Kaggle API.
 
-This module focuses on the KaggleDataSource class, which provides a convenient way to download and update Kaggle
+This module focuses on the KaggleIngester class, which provides a convenient way to download and update Kaggle
 datasets by handling credentials, fetching file metadata, downloading files, and keeping the local cache up to date.
 
 In order to use this module, the user must have valid Kaggle API credentials.
@@ -25,7 +25,7 @@ from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
 
-from .base_data_source import BaseDataSource
+from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
@@ -173,10 +173,10 @@ class KaggleFileMetadata:
     """Total size of the file in bytes."""
 
 
-class KaggleDataSource(BaseDataSource):
+class KaggleIngester(BaseIngester):
     """Handles dataset retrieval from Kaggle, downloading and updating files as necessary.
 
-    The KaggleDataSource class downloads files from the specified Kaggle dataset and saves them to the destination
+    The KaggleIngester class downloads files from the specified Kaggle dataset and saves them to the destination
     directory. It also checks if the local files are up to date and skips downloading if everything is already in
     place.
     """
@@ -198,9 +198,9 @@ class KaggleDataSource(BaseDataSource):
         kaggle_api_credentials_file: str | Path | None = None,
         num_workers: int = 64,
     ) -> None:
-        """Initializes a KaggleDataSource instance to fetch data from a specific Kaggle dataset.
+        """Initializes a KaggleIngester instance to fetch data from a specific Kaggle dataset.
 
-        In order to use KaggleDataSource, valid Kaggle API credentials are required. These credentials can be obtained
+        In order to use KaggleIngester, valid Kaggle API credentials are required. These credentials can be obtained
         by creating an API token on the Kaggle account settings page. The token should be saved in a JSON file named
         `kaggle.json` containing the "username" and "key" fields.
 
@@ -231,15 +231,15 @@ class KaggleDataSource(BaseDataSource):
             num_workers: Number of concurrent threads to use when downloading files.
 
         Examples:
-            >>> from mleko.dataset.sources import KaggleDataSource
-            >>> kaggle_data_source = KaggleDataSource(
+            >>> from mleko.dataset.sources import KaggleIngester
+            >>> kaggle_ingester = KaggleIngester(
             ...     destination_directory="~/data",
             ...     owner_slug="allen-institute-for-ai",
             ...     dataset_slug="covid-19-masks-dataset",
             ...     file_names=["images.zip", "annotations.json"],
             ...     dataset_version=1,
             ... )
-            >>> kaggle_data_source.fetch_data()
+            >>> kaggle_ingester.fetch_data()
             [PosixPath('~/data/images.zip'), PosixPath('~/data/annotations.json')]
         """
         super().__init__(destination_directory)

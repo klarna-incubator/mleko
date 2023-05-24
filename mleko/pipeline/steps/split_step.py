@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from vaex import DataFrame
 
-from mleko.dataset.splitter.base_splitter import BaseSplitter
+from mleko.dataset.split.base_splitter import BaseSplitter
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
 from mleko.utils.decorators import auto_repr
