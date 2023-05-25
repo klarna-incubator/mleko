@@ -190,7 +190,7 @@ class KaggleIngester(BaseIngester):
     @auto_repr
     def __init__(
         self,
-        destination_directory: str | Path,
+        output_directory: str | Path,
         owner_slug: str,
         dataset_slug: str,
         file_names: list[str] | None = None,
@@ -219,7 +219,7 @@ class KaggleIngester(BaseIngester):
             contains nested folders.
 
         Args:
-            destination_directory: The directory where the downloaded files will be stored.
+            output_directory: The directory where the downloaded files will be stored.
             owner_slug: The owner's Kaggle username or organization name.
             dataset_slug: The dataset's unique Kaggle identifier (slug).
             file_names: A list of file names to download. If not provided or empty, all files in
@@ -233,7 +233,7 @@ class KaggleIngester(BaseIngester):
         Examples:
             >>> from mleko.dataset.sources import KaggleIngester
             >>> kaggle_ingester = KaggleIngester(
-            ...     destination_directory="~/data",
+            ...     output_directory="~/data",
             ...     owner_slug="allen-institute-for-ai",
             ...     dataset_slug="covid-19-masks-dataset",
             ...     file_names=["images.zip", "annotations.json"],
@@ -242,7 +242,7 @@ class KaggleIngester(BaseIngester):
             >>> kaggle_ingester.fetch_data()
             [PosixPath('~/data/images.zip'), PosixPath('~/data/annotations.json')]
         """
-        super().__init__(destination_directory)
+        super().__init__(output_directory)
 
         self._owner_slug, self._dataset_slug, self._dataset_version = owner_slug, dataset_slug, dataset_version
         self._file_names: set[str] = set(file_names) if file_names is not None else set()
@@ -290,15 +290,15 @@ class KaggleIngester(BaseIngester):
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading {dataset_path}/{file_names} to "
-                "{self._destination_directory} from Kaggle."
+                "{self._output_directory} from Kaggle."
             )
         else:
             logger.info(
                 f"\033[31mCache Miss\033[0m: Downloading {dataset_path}/{file_names} to "
-                "{self._destination_directory} from Kaggle."
+                "{self._output_directory} from Kaggle."
             )
 
-        clear_directory(self._destination_directory)
+        clear_directory(self._output_directory)
 
         kaggle_file_paths = [f"{dataset_path}/{file_metadata.name}" for file_metadata in files_metadata]
 
@@ -357,7 +357,7 @@ class KaggleIngester(BaseIngester):
         Raises:
             HTTPError: If there is an error in the HTTP response while downloading file from Kaggle.
         """
-        local_file_path = self._destination_directory / Path(kaggle_file_path).name
+        local_file_path = self._output_directory / Path(kaggle_file_path).name
         response = requests.get(
             f"{self._KAGGLE_DATASET_URL}/download/{kaggle_file_path}",
             params=params,
@@ -414,7 +414,7 @@ class KaggleIngester(BaseIngester):
             True if the local dataset files are up to date, False otherwise.
         """
         for file in files_metadata:
-            local_file_path = self._destination_directory / file.name
+            local_file_path = self._output_directory / file.name
             if (
                 not local_file_path.exists()
                 or file.total_bytes != os.path.getsize(local_file_path)

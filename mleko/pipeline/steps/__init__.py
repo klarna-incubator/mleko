@@ -7,8 +7,9 @@ complete data processing workflow within the pipeline.
 from __future__ import annotations
 
 from .convert_step import ConvertStep
+from .feature_select_step import FeatureSelectStep
 from .ingest_step import IngestStep
 from .split_step import SplitStep
 
 
-__all__ = ["IngestStep", "ConvertStep", "SplitStep"]
+__all__ = ["IngestStep", "ConvertStep", "SplitStep", "FeatureSelectStep"]

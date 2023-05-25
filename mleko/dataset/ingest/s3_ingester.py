@@ -39,7 +39,7 @@ class S3Ingester(BaseIngester):
     @auto_repr
     def __init__(
         self,
-        destination_directory: str | Path,
+        output_directory: str | Path,
         s3_bucket_name: str,
         s3_key_prefix: str,
         aws_profile_name: str | None = None,
@@ -57,7 +57,7 @@ class S3Ingester(BaseIngester):
             The profile and region is read from the AWS credentials file located at '~/.aws/credentials'.
 
         Args:
-            destination_directory: Directory to store the fetched data locally.
+            output_directory: Directory to store the fetched data locally.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
             aws_profile_name: AWS profile name to use.
@@ -69,7 +69,7 @@ class S3Ingester(BaseIngester):
         Examples:
             >>> from mleko.dataset.sources import S3Ingester
             >>> s3_ingester = S3Ingester(
-            ...     destination_directory="data",
+            ...     output_directory="data",
             ...     s3_bucket_name="mleko-datasets",
             ...     s3_key_prefix="kaggle/ashishpatel26/indian-food-101",
             ...     aws_profile_name="mleko",
@@ -81,7 +81,7 @@ class S3Ingester(BaseIngester):
             >>> s3_ingester.fetch_data()
             [PosixPath('data/indian_food.csv')]
         """
-        super().__init__(destination_directory)
+        super().__init__(output_directory)
 
         self._s3_bucket_name = s3_bucket_name
         self._s3_key_prefix = s3_key_prefix
@@ -93,9 +93,9 @@ class S3Ingester(BaseIngester):
         self._check_s3_timestamps = check_s3_timestamps
 
     def fetch_data(self, force_recompute: bool = False) -> list[Path]:
-        """Downloads the data from the S3 bucket and stores it in the 'destination_directory'.
+        """Downloads the data from the S3 bucket and stores it in the 'output_directory'.
 
-        If 'force_recompute' is False, verifies whether the data in the local 'destination_directory' is current
+        If 'force_recompute' is False, verifies whether the data in the local 'output_directory' is current
         with the S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
@@ -130,9 +130,9 @@ class S3Ingester(BaseIngester):
             self._s3_client.download_file(
                 Bucket=self._s3_bucket_name,
                 Key=manifest_file_key,
-                Filename=str(self._destination_directory / self._manifest_file_name),
+                Filename=str(self._output_directory / self._manifest_file_name),
             )
-            with open(self._destination_directory / self._manifest_file_name) as f:
+            with open(self._output_directory / self._manifest_file_name) as f:
                 manifest: dict[str, Any] = json.load(f)
                 if self._is_local_dataset_fresh(manifest):
                     logger.info(
@@ -144,15 +144,15 @@ class S3Ingester(BaseIngester):
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                "{self._destination_directory} from S3."
+                "{self._output_directory} from S3."
             )
         else:
             logger.info(
                 f"\033[31mCache Miss\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                "{self._destination_directory} from S3."
+                "{self._output_directory} from S3."
             )
 
-        clear_directory(self._destination_directory)
+        clear_directory(self._output_directory)
         keys_to_download = [
             entry["Key"]
             for entry in resp["Contents"]
@@ -204,7 +204,7 @@ class S3Ingester(BaseIngester):
             use_threads=False,
             multipart_threshold=int(0.5 * gb),  # Multipart transfer if file > 500MB
         )
-        file_path = self._destination_directory / Path(key).name
+        file_path = self._output_directory / Path(key).name
         with open(file_path, "wb") as data:
             self._s3_client.download_fileobj(
                 Bucket=self._s3_bucket_name,
@@ -239,7 +239,7 @@ class S3Ingester(BaseIngester):
         for entry in manifest["entries"]:
             file_name: str = os.path.basename(entry["url"])
             file_size = int(entry["meta"]["content_length"])
-            local_file_path = self._destination_directory / file_name
+            local_file_path = self._output_directory / file_name
             if not local_file_path.exists() or file_size != os.path.getsize(local_file_path):
                 return False
         return True

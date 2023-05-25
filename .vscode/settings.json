@@ -4,6 +4,7 @@
     "config",
     "cache",
     "pipeline",
-    "data splitting"
+    "data splitting",
+    "feature selection"
   ]
 }
