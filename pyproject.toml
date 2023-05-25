@@ -91,15 +91,13 @@ show_error_context = true
 
 [[tool.mypy.overrides]]
 module = [
-    "vaex",
-    "tqdm",
-    "boto3",
-    "boto3.s3.transfer",
-    "botocore.config",
-    "pyarrow",
-    "requests",
-    "requests.auth",
-    "sklearn.model_selection",
+    "vaex.*",
+    "tqdm.*",
+    "boto3.*",
+    "botocore.*",
+    "pyarrow.*",
+    "requests.*",
+    "sklearn.*",
 ]
 ignore_missing_imports = true
 

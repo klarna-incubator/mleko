@@ -75,14 +75,16 @@ class LRUCacheMixin(CacheMixin):
         """
         frame_qualname = get_frame_qualname(inspect.stack()[2])
         class_name = frame_qualname.split(".")[-2]
+        file_name_pattern = rf"{class_name}\.[a-zA-Z_][a-zA-Z0-9_]*\.[a-fA-F\d]{{32}}"
         cache_files = [
             f
             for f in self._cache_directory.glob(f"*.{self._cache_file_suffix}")
-            if re.search(rf"{class_name}\.[a-zA-Z]+\.[a-fA-F\d]{{32}}", str(f.stem))
+            if re.search(file_name_pattern, str(f.stem))
         ]
         ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_mtime)
         for cache_file in ordered_cache_files:
-            cache_key = cache_file.stem.split("_")[0]
+            cache_key_match = re.search(file_name_pattern, cache_file.stem)
+            cache_key = cache_key_match.group(0)  # type: ignore
             if cache_key not in self._cache:
                 if len(self._cache) >= self._max_entries:
                     oldest_key = next(iter(self._cache))

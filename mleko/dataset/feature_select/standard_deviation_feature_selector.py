@@ -1,10 +1,11 @@
-"""Module for the missing rate feature selector."""
+"""Module for the standard deviation feature selector."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import vaex
 from tqdm import tqdm
+from vaex.ml import MaxAbsScaler
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
@@ -19,24 +20,24 @@ logger = CustomLogger()
 """The logger for the module."""
 
 
-class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin, LRUCacheMixin):
-    """Selects features based on the missing rate."""
+class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin, LRUCacheMixin):
+    """Selects features based on the standard deviation."""
 
     def __init__(
         self,
         output_directory: str | Path,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
-        missing_rate_threshold: float = 1.0,
+        standard_deviation_threshold: float = 0.00,
         max_cache_entries: int = 1,
     ) -> None:
         """Initializes the feature selector.
 
-        The feature selector will select all features with a missing rate below the specified threshold. The default
-        set of features is all features in the DataFrame.
+        The feature selector will select all features with a standard deviation above the specified threshold.
+        The default set of features is all numeric features in the DataFrame.
 
         Note:
-            Works with all types of features.
+            Only works with numeric features.
 
         Warning:
             Make sure to ignore any important features that need to be kept, such as the
@@ -46,38 +47,39 @@ class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin,
             output_directory: Directory where the selected features will be stored locally.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
-            missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
+            standard_deviation_threshold: The minimum standard deviation allowed for a feature to be selected.
             max_cache_entries: The maximum number of entries to keep in the cache.
 
         Examples:
             >>> import vaex
-            >>> from mleko.dataset.feature_select import MissingRateFeatureSelector
+            >>> from mleko.dataset.feature_select import StandardDeviationFeatureSelector
             >>> from mleko.utils.vaex_helpers import get_column
             >>> df = vaex.from_arrays(
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            ...     b=[1, 2, 3, 4, 5, None, None, None, None, None],
-            ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
+            ...     b=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ...     c=[1, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            ...     d=["str1", "str2", "str3", "str4", "str5", "str6", "str7", "str8", "str9", "str10"],
             ... )
-            >>> MissingRateFeatureSelector(
+            >>> selector = StandardDeviationFeatureSelector(
             ...     output_directory=".",
             ...     ignore_features=["c"],
-            ...     missing_rate_threshold=0.3,
-            ... ).select_features(df).get_column_names()
-            ['a', 'b']
+            ...     standard_deviation_threshold=0.1,
+            ... )
+            >>> df_selected = selector.select_features(df)
+            >>> df_selected.get_column_names()
+            ['a', 'c', 'd']
         """
         BaseFeatureSelector.__init__(self, output_directory, features, ignore_features)
         VaexArrowCacheFormatMixin.__init__(self)
         LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
-        self._missing_rate_threshold = missing_rate_threshold
+        self._standard_deviation_threshold = standard_deviation_threshold
 
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
-        """Selects features based on the missing rate.
-
-        Will cache the result of the feature selection.
+        """Selects features based on the standard deviation.
 
         Args:
             dataframe: The DataFrame to select features from.
-            force_recompute: Whether to force recompute the feature selection.
+            force_recompute: Whether to force recompute the selected features.
 
         Returns:
             The DataFrame with the selected features.
@@ -87,14 +89,14 @@ class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin,
             cache_keys=[
                 self._features,
                 self._ignore_features,
-                self._missing_rate_threshold,
+                self._standard_deviation_threshold,
                 (dataframe, VaexFingerprinter()),
             ],
             force_recompute=force_recompute,
         )
 
     def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Selects features based on the missing rate.
+        """Selects features based on the standard deviation.
 
         Args:
             dataframe: The DataFrame to select features from.
@@ -105,16 +107,22 @@ class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin,
         feature_names = self._feature_set(dataframe)
         logger.info(f"Selecting features from the following set: {feature_names}.")
 
-        missing_rate: dict[str, float] = {}
-        for feature_name in tqdm(feature_names, desc="Calculating missing rates for features"):
-            column = get_column(dataframe, feature_name)
-            missing_rate[feature_name] = column.countna() / dataframe.shape[0]
+        scaler = MaxAbsScaler(features=list(feature_names), prefix="")
+        df_scaled = scaler.fit_transform(dataframe)
+        standard_deviation: dict[str, float] = {}
+        for feature_name in tqdm(feature_names, desc="Calculating standard deviation for features"):
+            column = get_column(df_scaled, feature_name)
+            standard_deviation[feature_name] = column.std()
 
         dropped_features = {
-            feature_name for feature_name in feature_names if missing_rate[feature_name] >= self._missing_rate_threshold
+            feature_name
+            for feature_name in feature_names
+            if standard_deviation[feature_name] <= self._standard_deviation_threshold
         }
-        logger.info(f"Dropping features with missing rate >= {self._missing_rate_threshold}: {dropped_features}.")
-
+        logger.info(
+            f"Dropping features with normalized standard deviation <= {self._standard_deviation_threshold}: "
+            f"{dropped_features}."
+        )
         selected_features = [
             feature_name for feature_name in dataframe.get_column_names() if feature_name not in dropped_features
         ]
@@ -129,5 +137,5 @@ class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin,
         Returns:
             The default set of features.
         """
-        feature_names = dataframe.get_column_names()
+        feature_names = dataframe.get_column_names(dtype="numeric")
         return frozenset(str(feature_name) for feature_name in feature_names)

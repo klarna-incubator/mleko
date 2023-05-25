@@ -6,9 +6,11 @@ within the pipeline.
 """
 from .base_feature_selector import BaseFeatureSelector
 from .missing_rate_feature_selector import MissingRateFeatureSelector
+from .standard_deviation_feature_selector import StandardDeviationFeatureSelector
 
 
 __all__ = [
     "BaseFeatureSelector",
     "MissingRateFeatureSelector",
+    "StandardDeviationFeatureSelector",
 ]
