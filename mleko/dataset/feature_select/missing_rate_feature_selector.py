@@ -94,7 +94,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin,
             force_recompute=force_recompute,
         )
 
-    def _select_features(self, dataframe: vaex.DataFrame):
+    def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Selects features based on the missing rate.
 
         Args:
