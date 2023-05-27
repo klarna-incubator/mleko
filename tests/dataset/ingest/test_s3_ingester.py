@@ -34,7 +34,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
 
         test_data = S3Ingester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -57,7 +57,7 @@ class TestS3Ingester:
 
         with pytest.raises(Exception, match="Files in S3"):
             test_data = S3Ingester(
-                output_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -81,7 +81,7 @@ class TestS3Ingester:
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
         test_data = S3Ingester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -94,7 +94,7 @@ class TestS3Ingester:
 
         with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3Ingester(
-                output_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -119,7 +119,7 @@ class TestS3Ingester:
         )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
         test_data = S3Ingester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -142,7 +142,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO_NEW")
         with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3Ingester(
-                output_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -175,7 +175,7 @@ class TestS3Ingester:
             mocked_get_credentials.return_value = credentials
 
             S3Ingester(
-                output_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_profile_name="custom-profile-name",

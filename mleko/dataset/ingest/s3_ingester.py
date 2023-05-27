@@ -1,9 +1,4 @@
-"""Module for fetching data from AWS S3 and storing it locally using the S3Ingester class.
-
-The S3Ingester class provides an interface for downloading specified data from an AWS S3 bucket.
-It allows users to specify the attributes related to the S3 system and configure concurrent downloads.
-This module uses boto3 library for interacting with the AWS API.
-"""
+"""Module for fetching data from AWS S3 and storing it locally using the `S3Ingester` class."""
 from __future__ import annotations
 
 import json
@@ -25,13 +20,13 @@ from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
-"""A CustomLogger instance that's used throughout the module for logging."""
+"""A module-level custom logger."""
 
 
 class S3Ingester(BaseIngester):
-    """S3Ingester provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
+    """`S3Ingester` provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
 
-    This class extends interacts with AWS S3, allowing users to download specified data from an S3 bucket.
+    This class interacts with AWS S3 to download specified data from an S3 bucket.
     It supports manifest-based caching, enabling more efficient data fetching by verifying if the
     local dataset is up-to-date before downloading.
     """
@@ -39,7 +34,7 @@ class S3Ingester(BaseIngester):
     @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        destination_directory: str | Path,
         s3_bucket_name: str,
         s3_key_prefix: str,
         aws_profile_name: str | None = None,
@@ -57,7 +52,7 @@ class S3Ingester(BaseIngester):
             The profile and region is read from the AWS credentials file located at '~/.aws/credentials'.
 
         Args:
-            output_directory: Directory to store the fetched data locally.
+            destination_directory: Directory to store the fetched data locally.
             s3_bucket_name: Name of the S3 bucket containing the data.
             s3_key_prefix: Prefix of the S3 keys for the files to download.
             aws_profile_name: AWS profile name to use.
@@ -69,7 +64,7 @@ class S3Ingester(BaseIngester):
         Examples:
             >>> from mleko.dataset.sources import S3Ingester
             >>> s3_ingester = S3Ingester(
-            ...     output_directory="data",
+            ...     destination_directory="data",
             ...     s3_bucket_name="mleko-datasets",
             ...     s3_key_prefix="kaggle/ashishpatel26/indian-food-101",
             ...     aws_profile_name="mleko",
@@ -81,21 +76,18 @@ class S3Ingester(BaseIngester):
             >>> s3_ingester.fetch_data()
             [PosixPath('data/indian_food.csv')]
         """
-        super().__init__(output_directory)
-
+        super().__init__(destination_directory)
         self._s3_bucket_name = s3_bucket_name
         self._s3_key_prefix = s3_key_prefix
         self._s3_client = self._get_s3_client(aws_profile_name, aws_region_name)
-
         self._num_workers = num_workers
-
         self._manifest_file_name = manifest_file_name
         self._check_s3_timestamps = check_s3_timestamps
 
     def fetch_data(self, force_recompute: bool = False) -> list[Path]:
-        """Downloads the data from the S3 bucket and stores it in the 'output_directory'.
+        """Downloads the data from the S3 bucket and stores it in the 'destination_directory'.
 
-        If 'force_recompute' is False, verifies whether the data in the local 'output_directory' is current
+        If 'force_recompute' is False, verifies whether the data in the local 'destination_directory' is current
         with the S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
@@ -130,9 +122,9 @@ class S3Ingester(BaseIngester):
             self._s3_client.download_file(
                 Bucket=self._s3_bucket_name,
                 Key=manifest_file_key,
-                Filename=str(self._output_directory / self._manifest_file_name),
+                Filename=str(self._destination_directory / self._manifest_file_name),
             )
-            with open(self._output_directory / self._manifest_file_name) as f:
+            with open(self._destination_directory / self._manifest_file_name) as f:
                 manifest: dict[str, Any] = json.load(f)
                 if self._is_local_dataset_fresh(manifest):
                     logger.info(
@@ -144,15 +136,15 @@ class S3Ingester(BaseIngester):
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                "{self._output_directory} from S3."
+                f"{self._destination_directory} from S3."
             )
         else:
             logger.info(
                 f"\033[31mCache Miss\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                "{self._output_directory} from S3."
+                f"{self._destination_directory} from S3."
             )
 
-        clear_directory(self._output_directory)
+        clear_directory(self._destination_directory)
         keys_to_download = [
             entry["Key"]
             for entry in resp["Contents"]
@@ -204,7 +196,7 @@ class S3Ingester(BaseIngester):
             use_threads=False,
             multipart_threshold=int(0.5 * gb),  # Multipart transfer if file > 500MB
         )
-        file_path = self._output_directory / Path(key).name
+        file_path = self._destination_directory / Path(key).name
         with open(file_path, "wb") as data:
             self._s3_client.download_fileobj(
                 Bucket=self._s3_bucket_name,
@@ -239,7 +231,7 @@ class S3Ingester(BaseIngester):
         for entry in manifest["entries"]:
             file_name: str = os.path.basename(entry["url"])
             file_size = int(entry["meta"]["content_length"])
-            local_file_path = self._output_directory / file_name
+            local_file_path = self._destination_directory / file_name
             if not local_file_path.exists() or file_size != os.path.getsize(local_file_path):
                 return False
         return True

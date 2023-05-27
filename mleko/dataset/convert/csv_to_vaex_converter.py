@@ -1,7 +1,4 @@
-"""The module provides csv to vaex converter functionality.
-
-It includes a class for converting CSV files to a random-access `vaex` compatible format.
-"""
+"""The module contains the `CSVToVaexConverter`, which converts CSV to a random-access `vaex` compatible format."""
 from __future__ import annotations
 
 import multiprocessing
@@ -14,8 +11,6 @@ from pyarrow import csv as arrow_csv
 from tqdm import tqdm
 
 from mleko.cache.fingerprinters import CSVFingerprinter
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
-from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
@@ -24,13 +19,13 @@ from .base_converter import BaseConverter
 
 
 logger = CustomLogger()
-"""A CustomLogger instance that's used throughout the module for logging."""
+"""A module-level logger instance."""
 
 V_CPU_COUNT = multiprocessing.cpu_count()
 """A module-level constant representing the total number of CPUs available on the current system."""
 
 
-class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin):
+class CSVToVaexConverter(BaseConverter):
     """A class that converts CSV to a random-access `vaex` compatible format."""
 
     @auto_repr
@@ -67,9 +62,9 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
         downcast_float: bool = False,
         random_state: int | None = None,
         num_workers: int = V_CPU_COUNT,
-        max_cache_entries: int = 1,
+        cache_size: int = 1,
     ) -> None:
-        """Initializes the CSVToArrowConverter with the necessary configurations and parameters.
+        """Initializes the `CSVToArrowConverter` with the necessary configurations and parameters.
 
         Args:
             output_directory: The directory where the converted files will be saved.
@@ -83,7 +78,7 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
             downcast_float: If True, downcast float64 to float32 during conversion.
             random_state: A seed for the random number generator.
             num_workers: Number of workers to use for parallel processing.
-            max_cache_entries: Maximum number of cache entries for the LRUCacheMixin.
+            cache_size: Maximum number of cache entries for the LRUCacheMixin.
 
         Warning:
             The `forced_numerical_columns`, `forced_categorical_columns`, `forced_boolean_columns`, and `drop_columns`
@@ -106,13 +101,11 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
             ...     downcast_float=True,
             ...     random_state=42,
             ...     num_workers=4,
-            ...     max_cache_entries=1,
+            ...     cache_size=1,
             ... )
             >>> df = converter.convert(["data.csv"])
         """
-        BaseConverter.__init__(self, output_directory)
-        VaexArrowCacheFormatMixin.__init__(self)
-        LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
+        super().__init__(output_directory, cache_size)
         self._forced_numerical_columns = tuple(forced_numerical_columns)
         self._forced_categorical_columns = tuple(forced_categorical_columns)
         self._forced_boolean_columns = tuple(forced_boolean_columns)
@@ -125,14 +118,14 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
         self._random_state = random_state
 
     def convert(self, file_paths: list[Path] | list[str], force_recompute: bool = False) -> vaex.DataFrame:
-        """Converts a list of CSV files to Arrow format and returns a vaex dataframe joined from the converted data.
+        """Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
 
-        The method takes care of caching, and results will be reused accordingly unless force_recompute is set to True.
-        The resulting dataframe is a vaex DataFrame joined from the converted data. The conversion is done in chunks
-        to optimize parallel processing.
+        The method takes care of caching, and results will be reused accordingly unless `force_recompute`
+        is set to True. The resulting dataframe is a `vaex` DataFrame joined from the converted data.
+        The conversion is done in chunks to optimize parallel processing.
 
         Note:
-            Will read the first 100,000/len(file_paths) rows of each file to determine if the file is the same as the
+            Will read the first `100,000/len(file_paths)` rows of each file to determine if the file is the same as the
             one in the cache. If the file is the same, the cache will be used. Otherwise, the file will be converted
             and the cache will be updated.
 
@@ -141,7 +134,7 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
             force_recompute: If set to True, forces recomputation and ignores the cache.
 
         Returns:
-            vaex.DataFrame: The resulting dataframe with the combined converted data.
+            The resulting dataframe with the combined converted data.
         """
         return self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
@@ -245,8 +238,8 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
                 for _ in executor.map(
                     CSVToVaexConverter._convert_csv_file_to_arrow,
                     file_paths,
-                    repeat(self._output_directory),
-                    repeat(VaexArrowCacheFormatMixin.cache_file_suffix),
+                    repeat(self._cache_directory),
+                    repeat(self._cache_file_suffix),
                     repeat(self._forced_numerical_columns),
                     repeat(self._forced_categorical_columns),
                     repeat(self._forced_boolean_columns),
@@ -258,7 +251,7 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
                 ):
                     pbar.update(1)
 
-        return vaex.open(self._output_directory / f"df_chunk_*.{VaexArrowCacheFormatMixin.cache_file_suffix}")
+        return vaex.open(self._cache_directory / f"df_chunk_*.{self._cache_file_suffix}")
 
     def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
         """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
@@ -268,4 +261,4 @@ class CSVToVaexConverter(BaseConverter, VaexArrowCacheFormatMixin, LRUCacheMixin
             output: The Vaex DataFrame to be saved in the cache file.
         """
         super()._write_cache_file(cache_file_path, output)
-        clear_directory(cache_file_path.parent, pattern=f"df_chunk_*.{VaexArrowCacheFormatMixin.cache_file_suffix}")
+        clear_directory(cache_file_path.parent, pattern=f"df_chunk_*.{self._cache_file_suffix}")

@@ -1,8 +1,13 @@
-"""Provides functionality for fetching data from various sources such as AWS S3 and Kaggle, and storing it locally.
+"""The subpackage provides functionality for fetching data from various sources.
 
 This subpackage contains classes designed to easily fetch data from different sources, like AWS S3 or Kaggle,
 and store them locally in specified destination directories. The main classes are 'BaseIngester', an abstract base
 class for implementing specific data source classes, along with concrete implementations.
+
+The following ingester classes are provided by the subpackage:
+    - `BaseIngester`: The abstract base class for all ingesters.
+    - `S3Ingester`: An ingester for fetching data from AWS S3.
+    - `KaggleIngester`: An ingester for fetching data from Kaggle.
 """
 from __future__ import annotations
 

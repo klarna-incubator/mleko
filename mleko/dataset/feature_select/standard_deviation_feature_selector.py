@@ -2,34 +2,34 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Hashable
 
 import vaex
 from tqdm import tqdm
 from vaex.ml import MaxAbsScaler
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
-from mleko.cache.lru_cache_mixin import LRUCacheMixin
+from mleko.dataset.feature_select.base_feature_selector import BaseFeatureSelector
 from mleko.utils.custom_logger import CustomLogger
+from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_columns
-
-from .base_feature_selector import BaseFeatureSelector
 
 
 logger = CustomLogger()
-"""The logger for the module."""
+"""A module-level logger for the module."""
 
 
-class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormatMixin, LRUCacheMixin):
+class StandardDeviationFeatureSelector(BaseFeatureSelector):
     """Selects features based on the standard deviation."""
 
+    @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        cache_directory: str | Path,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         standard_deviation_threshold: float = 0.00,
-        max_cache_entries: int = 1,
+        cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
 
@@ -44,11 +44,11 @@ class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormat
             target feature or some identifier.
 
         Args:
-            output_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the selected features will be stored locally.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             standard_deviation_threshold: The minimum standard deviation allowed for a feature to be selected.
-            max_cache_entries: The maximum number of entries to keep in the cache.
+            cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
             >>> import vaex
@@ -61,7 +61,7 @@ class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormat
             ...     d=["str1", "str2", "str3", "str4", "str5", "str6", "str7", "str8", "str9", "str10"],
             ... )
             >>> selector = StandardDeviationFeatureSelector(
-            ...     output_directory=".",
+            ...     cache_directory=".",
             ...     ignore_features=["c"],
             ...     standard_deviation_threshold=0.1,
             ... )
@@ -69,9 +69,7 @@ class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormat
             >>> df_selected.get_column_names()
             ['a', 'c', 'd']
         """
-        BaseFeatureSelector.__init__(self, output_directory, features, ignore_features)
-        VaexArrowCacheFormatMixin.__init__(self)
-        LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
+        super().__init__(cache_directory, features, ignore_features, cache_size)
         self._standard_deviation_threshold = standard_deviation_threshold
 
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
@@ -87,9 +85,7 @@ class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormat
         return self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe),
             cache_keys=[
-                self._features,
-                self._ignore_features,
-                self._standard_deviation_threshold,
+                self._fingerprint(),
                 (dataframe, VaexFingerprinter()),
             ],
             force_recompute=force_recompute,
@@ -139,3 +135,13 @@ class StandardDeviationFeatureSelector(BaseFeatureSelector, VaexArrowCacheFormat
         """
         feature_names = dataframe.get_column_names(dtype="numeric")
         return frozenset(str(feature_name) for feature_name in feature_names)
+
+    def _fingerprint(self) -> Hashable:
+        """Returns a hashable fingerprint of the feature selector.
+
+        Append the standard deviation threshold to the fingerprint.
+
+        Returns:
+            The fingerprint of the feature selector.
+        """
+        return super()._fingerprint(), self._standard_deviation_threshold

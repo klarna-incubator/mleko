@@ -20,7 +20,7 @@ class TestBaseConverter:
 
     def test_abstract_methods(self, temporary_directory: Path):
         """Should return vaex dataframe from convert method."""
-        test_derived_data_converter = self.DerivedDataConverter(temporary_directory)
+        test_derived_data_converter = self.DerivedDataConverter(temporary_directory, 1)
 
         df = test_derived_data_converter.convert([])
         assert df.shape == (3, 2)

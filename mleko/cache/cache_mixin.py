@@ -1,4 +1,4 @@
-"""This module contains the basic CacheMixin class for caching the results of method calls.
+"""This module contains the basic `CacheMixin` class for caching the results of method calls.
 
 This class can be used as a mixin to add caching functionality to a class. It provides the basic
 functionality for caching the results of method calls based on user-defined cache keys and fingerprints.
@@ -7,8 +7,8 @@ The class can be extended to provide additional functionality by inheriting from
 the `_read_cache_file()` and `_write_cache_file()` methods to customize the cache loading and saving
 processes, respectively.
 
-Combining this class with the format mixins in the `mleko.cache.format` module can be used to add
-support for caching different data formats, such as Vaex DataFrames in Arrow format.
+Combining this class with the format mixins can be used to add support for caching different data
+formats, such as Vaex DataFrames in Arrow format.
 """
 from __future__ import annotations
 
@@ -24,14 +24,14 @@ from mleko.utils.custom_logger import CustomLogger
 
 
 logger = CustomLogger()
-"""A CustomLogger instance that's used throughout the module for logging."""
+"""A module-level logger instance."""
 
 
 def get_frame_qualname(frame: inspect.FrameInfo) -> str:
     """Gets the fully qualified name of the function or method associated with the provided frame.
 
     Args:
-        frame: A FrameInfo object containing the information of the function or method call.
+        frame: A `FrameInfo` object containing the information of the function or method call.
 
     Returns:
         A string representing the fully qualified name, in the format "module.class.method" for class methods or
@@ -64,7 +64,7 @@ class CacheMixin:
     """
 
     def __init__(self, cache_directory: str | Path, cache_file_suffix: str) -> None:
-        """Initializes the CacheMixin with the provided cache directory.
+        """Initializes the `CacheMixin` with the provided cache directory.
 
         Note:
             The cache directory will be created if it does not exist.
@@ -93,9 +93,7 @@ class CacheMixin:
         self._cache_directory = Path(cache_directory)
         self._cache_directory.mkdir(parents=True, exist_ok=True)
         self._cache_file_suffix = cache_file_suffix
-        self._cache_type_name = [
-            base.__name__ for base in self.__class__.__bases__ if CacheMixin.__name__ in base.__name__
-        ][0].replace("Mixin", "")
+        self._cache_type_name = self._find_cache_type_name(self.__class__)
 
     def _cached_execute(
         self,
@@ -113,7 +111,7 @@ class CacheMixin:
                 cached result is available.
 
         Returns:
-            The result of executing the given function. If a cached result is available and force_recompute is False,
+            The result of executing the given function. If a cached result is available and `force_recompute` is False,
             the cached result will be returned instead of recomputing the result.
         """
         frame_qualname = get_frame_qualname(inspect.stack()[1])
@@ -238,3 +236,21 @@ class CacheMixin:
         else:
             cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
             self._write_cache_file(cache_file_path, output)
+
+    def _find_cache_type_name(self, cls: type) -> str | None:
+        """Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.
+
+        Args:
+            cls: The class to search.
+
+        Returns:
+            The name of the class that inherits from `CacheMixin`, or None if no such class exists.
+        """
+        if CacheMixin.__name__ in cls.__name__:
+            return cls.__name__.replace("Mixin", "")
+
+        for base in cls.__bases__:
+            found_class_name = self._find_cache_type_name(base)
+            if found_class_name:
+                return found_class_name
+        return None

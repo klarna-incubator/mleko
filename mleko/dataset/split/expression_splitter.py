@@ -6,8 +6,6 @@ from pathlib import Path
 import vaex
 
 from mleko.cache.fingerprinters import VaexFingerprinter
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
-from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -15,43 +13,42 @@ from .base_splitter import BaseSplitter
 
 
 logger = CustomLogger()
-"""A CustomLogger instance that's used throughout the module for logging."""
+"""A module-level logger instance."""
 
 
-class ExpressionSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
-    """A class that handles splitting of Vaex DataFrames based on a given `vaex` expression."""
+class ExpressionSplitter(BaseSplitter):
+    """A class that handles splitting of `vaex` DataFrames based on a given `vaex` expression."""
 
     @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        cache_directory: str | Path,
         expression: str,
-        max_cache_entries: int = 1,
+        cache_size: int = 1,
     ):
-        """Initializes the ExpressionSplitter with the given parameters.
+        """Initializes the `ExpressionSplitter` with the given parameters.
 
         The expression should be a valid Vaex expression that evaluates to a boolean
-        value. The split can be stratified by specifying a column name to use for stratification. The rows for which
-        the expression evaluates to True will be returned as the first dataframe, and the remaining rows will be
-        returned as the second dataframe.
+        value. The rows for which the expression evaluates to True will be returned as the first dataframe,
+        and the remaining rows will be returned as the second dataframe.
 
         Note:
             To filter by a date column, use the `scalar_datetime` function. For example, to filter by a date column
-            named `date` and return the rows before 2020-06-01, use the
+            named `date` and return the rows before `2020-06-01`, use the
             expression `"date < scalar_datetime('2020-06-01')"`.
 
         Args:
-            output_directory: The target directory where the split dataframes are to be saved.
+            cache_directory: The target directory where the split dataframes are to be saved.
             expression: A valid Vaex expression that evaluates to a boolean value. The rows for which the expression
                 evaluates to True will be returned as the first dataframe, and the remaining rows will be returned
                 as the second dataframe.
-            max_cache_entries: The maximum number of entries to keep in the cache.
+            cache_size: The maximum number of entries to keep in the cache.
 
         Example:
             >>> import vaex
             >>> from mleko.data.split import ExpressionSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6])
-            >>> splitter = ExpressionSplitter(output_directory="cache", expression="x > 1")
+            >>> splitter = ExpressionSplitter(cache_directory="cache", expression="x > 1")
             >>> df_train, df_test = splitter.split(df)
             >>> df_train
                 #    x    y
@@ -61,9 +58,7 @@ class ExpressionSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin)
                 #    x    y
                 0    1    4
         """
-        BaseSplitter.__init__(self, output_directory)
-        VaexArrowCacheFormatMixin.__init__(self)
-        LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
+        super().__init__(cache_directory, cache_size)
         self._expression = expression
 
     def split(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> tuple[vaex.DataFrame, vaex.DataFrame]:
@@ -86,7 +81,7 @@ class ExpressionSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin)
         )
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
-        """Perform the actual splitting of the dataframe.
+        """Split the given dataframe into two parts.
 
         Args:
             dataframe: The dataframe to be split.

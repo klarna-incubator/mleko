@@ -1,5 +1,6 @@
 """Test suite for `dataset.feature_select.standard_deviation_feature_selector`."""
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import vaex
@@ -47,9 +48,14 @@ class TestStandardDeviationFeatureSelector:
 
     def test_std_default(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should perform standard deviation feature selection on numeric columns by default."""
-        standard_deviation_feature_selector = StandardDeviationFeatureSelector(
-            temporary_directory, standard_deviation_threshold=0.004
+        df = StandardDeviationFeatureSelector(temporary_directory, standard_deviation_threshold=0.004).select_features(
+            example_vaex_dataframe
         )
-        df = standard_deviation_feature_selector._select_features(example_vaex_dataframe)
         assert df.shape == (5, 2)
         assert df.column_names == ["string_col", "target"]
+
+        with patch.object(StandardDeviationFeatureSelector, "_select_features") as mocked_select_features:
+            StandardDeviationFeatureSelector(temporary_directory, standard_deviation_threshold=0.004).select_features(
+                example_vaex_dataframe
+            )
+            mocked_select_features.assert_not_called()

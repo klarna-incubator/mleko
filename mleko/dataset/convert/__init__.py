@@ -1,8 +1,8 @@
-"""The module provides functionality for converting data between different file formats.
+"""The subpackage provides functionality for converting data between different file formats.
 
-It includes a base class for data converter to support various file format conversions and caching mechanisms.
-While it primarily focuses on handling CSV files, the infrastructure allows for extending its
-capabilities to other formats as needed.
+The subpackage contains the following converter classes:
+    - `BaseConverter`: The abstract base class for all converters.
+    - `CSVToVaexConverter`: A converter for converting CSV files to Vaex DataFrames.
 """
 from __future__ import annotations
 

@@ -1,8 +1,5 @@
 """A module for downloading and managing Kaggle datasets using the Kaggle API.
 
-This module focuses on the KaggleIngester class, which provides a convenient way to download and update Kaggle
-datasets by handling credentials, fetching file metadata, downloading files, and keeping the local cache up to date.
-
 In order to use this module, the user must have valid Kaggle API credentials.
 """
 from __future__ import annotations
@@ -29,7 +26,7 @@ from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
-"""A CustomLogger instance that's used throughout the module for logging."""
+"""A module-level custom logger."""
 
 
 class KaggleCredentials(NamedTuple):
@@ -176,7 +173,7 @@ class KaggleFileMetadata:
 class KaggleIngester(BaseIngester):
     """Handles dataset retrieval from Kaggle, downloading and updating files as necessary.
 
-    The KaggleIngester class downloads files from the specified Kaggle dataset and saves them to the destination
+    The `KaggleIngester` class downloads files from the specified Kaggle dataset and saves them to the destination
     directory. It also checks if the local files are up to date and skips downloading if everything is already in
     place.
     """
@@ -198,9 +195,9 @@ class KaggleIngester(BaseIngester):
         kaggle_api_credentials_file: str | Path | None = None,
         num_workers: int = 64,
     ) -> None:
-        """Initializes a KaggleIngester instance to fetch data from a specific Kaggle dataset.
+        """Initializes a `KaggleIngester` instance to fetch data from a specific Kaggle dataset.
 
-        In order to use KaggleIngester, valid Kaggle API credentials are required. These credentials can be obtained
+        In order to use `KaggleIngester`, valid Kaggle API credentials are required. These credentials can be obtained
         by creating an API token on the Kaggle account settings page. The token should be saved in a JSON file named
         `kaggle.json` containing the "username" and "key" fields.
 
@@ -243,7 +240,6 @@ class KaggleIngester(BaseIngester):
             [PosixPath('~/data/images.zip'), PosixPath('~/data/annotations.json')]
         """
         super().__init__(output_directory)
-
         self._owner_slug, self._dataset_slug, self._dataset_version = owner_slug, dataset_slug, dataset_version
         self._file_names: set[str] = set(file_names) if file_names is not None else set()
         self._kaggle_config = KaggleCredentialsManager.get_kaggle_credentials(kaggle_api_credentials_file)
@@ -290,15 +286,15 @@ class KaggleIngester(BaseIngester):
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading {dataset_path}/{file_names} to "
-                "{self._output_directory} from Kaggle."
+                f"{self._destination_directory} from Kaggle."
             )
         else:
             logger.info(
                 f"\033[31mCache Miss\033[0m: Downloading {dataset_path}/{file_names} to "
-                "{self._output_directory} from Kaggle."
+                f"{self._destination_directory} from Kaggle."
             )
 
-        clear_directory(self._output_directory)
+        clear_directory(self._destination_directory)
 
         kaggle_file_paths = [f"{dataset_path}/{file_metadata.name}" for file_metadata in files_metadata]
 
@@ -357,7 +353,7 @@ class KaggleIngester(BaseIngester):
         Raises:
             HTTPError: If there is an error in the HTTP response while downloading file from Kaggle.
         """
-        local_file_path = self._output_directory / Path(kaggle_file_path).name
+        local_file_path = self._destination_directory / Path(kaggle_file_path).name
         response = requests.get(
             f"{self._KAGGLE_DATASET_URL}/download/{kaggle_file_path}",
             params=params,
@@ -414,7 +410,7 @@ class KaggleIngester(BaseIngester):
             True if the local dataset files are up to date, False otherwise.
         """
         for file in files_metadata:
-            local_file_path = self._output_directory / file.name
+            local_file_path = self._destination_directory / file.name
             if (
                 not local_file_path.exists()
                 or file.total_bytes != os.path.getsize(local_file_path)

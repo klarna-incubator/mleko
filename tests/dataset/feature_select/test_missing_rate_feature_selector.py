@@ -1,5 +1,6 @@
 """Test suite for `dataset.feature_select.missing_rate_feature_selector`."""
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import vaex
@@ -52,10 +53,16 @@ class TestMissingRateFeatureSelector:
         assert df.shape == (10, 3)
         assert df.column_names == ["a", "b", "target"]
 
-    def test_filter_missing(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
+    def test_filter_missing_cached(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should filter away columns with missing rate above threshold."""
-        test_missing_rate_feature_selector = MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2)
-
-        df = test_missing_rate_feature_selector._select_features(example_vaex_dataframe)
+        df = MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).select_features(
+            example_vaex_dataframe
+        )
         assert df.shape == (10, 1)
         assert df.column_names == ["a"]
+
+        with patch.object(MissingRateFeatureSelector, "_select_features") as mock_select_features:
+            MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).select_features(
+                example_vaex_dataframe
+            )
+            mock_select_features.assert_not_called()

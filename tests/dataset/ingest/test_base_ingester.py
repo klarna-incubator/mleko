@@ -20,4 +20,4 @@ class TestBaseIngester:
         """Should create the destination directory and sets _destination_dir attribute."""
         test_data = self.DataSource(temporary_directory)
         assert temporary_directory.exists()
-        assert test_data._output_directory == temporary_directory
+        assert test_data._destination_directory == temporary_directory

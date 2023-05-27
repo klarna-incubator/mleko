@@ -70,7 +70,7 @@ class TestCSVToVaexConverter:
     def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CSVToVaexConverter(
-            temporary_directory, downcast_float=True, num_workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=True, num_workers=1, cache_size=2
         )
 
         n_files = 1
@@ -78,7 +78,7 @@ class TestCSVToVaexConverter:
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CSVToVaexConverter(
-            temporary_directory, downcast_float=False, num_workers=1, max_cache_entries=2
+            temporary_directory, downcast_float=False, num_workers=1, cache_size=2
         )
         df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 

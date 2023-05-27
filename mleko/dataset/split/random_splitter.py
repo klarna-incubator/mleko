@@ -1,6 +1,6 @@
-"""The module provides a `RandomSplitter` class for splitting Vaex DataFrames randomly.
+"""The module provides a `RandomSplitter` class for splitting `vaex` DataFrames randomly.
 
-The splitter can be used to split a Vaex DataFrame into two parts, with the split being performed randomly. The split
+The splitter can be used to split a `vaex` DataFrame into two parts, with the split being performed randomly. The split
 can be stratified by specifying a column name to use for stratification.
 """
 from __future__ import annotations
@@ -11,8 +11,6 @@ import vaex
 from sklearn.model_selection import train_test_split
 
 from mleko.cache.fingerprinters import VaexFingerprinter
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
-from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_filtered_df
@@ -24,24 +22,24 @@ logger = CustomLogger()
 """A CustomLogger instance that's used throughout the module for logging."""
 
 
-class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
-    """A class that handles random splitting of Vaex DataFrames.
+class RandomSplitter(BaseSplitter):
+    """A class that handles random splitting of `vaex` DataFrames.
 
-    This class provides a method for splitting a Vaex DataFrame into two parts, with the split being performed
+    This class provides a method for splitting a `vaex` DataFrame into two parts, with the split being performed
     randomly. The split can be stratified by specifying a column name to use for stratification.
     """
 
     @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        cache_directory: str | Path,
         data_split: tuple[float, float] = (0.80, 0.20),
         shuffle: bool = True,
         stratify: str | None = None,
         random_state: int | None = None,
-        max_cache_entries: int = 1,
+        cache_size: int = 1,
     ):
-        """Initializes the RandomSplitter with the given parameters.
+        """Initializes the `RandomSplitter` with the given parameters.
 
         Note:
             The stratification is performed before the split, meaning that the split will be performed on the stratified
@@ -50,20 +48,20 @@ class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
             rows with value 0 and 20% of the rows with value 1.
 
         Args:
-            output_directory: The target directory where the split dataframes are to be saved.
+            cache_directory: The target directory where the split dataframes are to be saved.
             data_split: A tuple containing the desired split percentages or weights for the train and test dataframes.
                 If the sum of the values is not equal to 1, the values will be normalized. Meaning, if the values are
                 (0.90, 0.20), the resulting split will be (0.818, 0.182).
             shuffle: Whether to shuffle the data before splitting.
             stratify: The name of the column to use for stratification. If None, stratification will not be performed.
             random_state: The seed to use for random number generation.
-            max_cache_entries: The maximum number of entries to keep in the cache.
+            cache_size: The maximum number of entries to keep in the cache.
 
         Example:
             >>> import vaex
             >>> from mleko.data.split import RandomSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3, 4], y=[0, 1, 1, 0])
-            >>> splitter = RandomSplitter(output_directory="cache", data_split=(0.50, 0.50), shuffle=True, stratify="y")
+            >>> splitter = RandomSplitter(cache_directory="cache", data_split=(0.50, 0.50), shuffle=True, stratify="y")
             >>> df_train, df_test = splitter.split(df)
             >>> df_train
                 #    x    y
@@ -74,9 +72,7 @@ class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
                 0    2    1
                 1    4    0
         """
-        BaseSplitter.__init__(self, output_directory)
-        VaexArrowCacheFormatMixin.__init__(self)
-        LRUCacheMixin.__init__(self, output_directory, VaexArrowCacheFormatMixin.cache_file_suffix, max_cache_entries)
+        super().__init__(cache_directory, cache_size)
         self._idx2_size = [split / sum(data_split) for split in data_split][1]
         self._shuffle = shuffle
         self._stratify = stratify
@@ -91,7 +87,7 @@ class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
 
         Args:
             dataframe: The dataframe to be split.
-            force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+            force_recompute: Whether to force recompute the split, even if the cache is available.
 
         Returns:
             A tuple containing the split dataframes.
@@ -109,7 +105,7 @@ class RandomSplitter(BaseSplitter, VaexArrowCacheFormatMixin, LRUCacheMixin):
         )
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
-        """Perform the actual splitting of the dataframe.
+        """Split the given dataframe into two parts.
 
         Args:
             dataframe: The dataframe to be split.
