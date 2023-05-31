@@ -8,7 +8,7 @@ import vaex
 
 from mleko.dataset.feature_select.composite_feature_selector import CompositeFeatureSelector
 from mleko.dataset.feature_select.missing_rate_feature_selector import MissingRateFeatureSelector
-from mleko.dataset.feature_select.standard_deviation_feature_selector import StandardDeviationFeatureSelector
+from mleko.dataset.feature_select.variance_feature_selector import VarianceFeatureSelector
 
 
 @pytest.fixture()
@@ -42,7 +42,7 @@ class TestCompositeFeatureSelector:
             temporary_directory,
             [
                 MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
-                StandardDeviationFeatureSelector(temporary_directory, standard_deviation_threshold=0.0),
+                VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
             ],
         )
 

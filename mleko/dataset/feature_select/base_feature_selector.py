@@ -126,8 +126,8 @@ class BaseFeatureSelector(VaexArrowCacheFormatMixin, LRUCacheMixin, ABC):
         """
         return self.__class__.__name__, self._features, self._ignore_features
 
-    def _feature_set(self, dataframe: vaex.DataFrame) -> frozenset[str]:
-        """Returns the set of features to be used by the feature selector.
+    def _feature_set(self, dataframe: vaex.DataFrame) -> list[str]:
+        """Returns the list of features to be used by the feature selector.
 
         It is the default set of features minus the features to be ignored if the `features` argument is None, or the
         list of names in the `features` argument if it is not None.
@@ -136,6 +136,8 @@ class BaseFeatureSelector(VaexArrowCacheFormatMixin, LRUCacheMixin, ABC):
             dataframe: DataFrame from which to select features.
 
         Returns:
-            Frozen set of feature names to be used by the feature selector.
+            Sorted list of feature names to be used by the feature selector.
         """
-        return self._default_features(dataframe) - self._ignore_features if self._features is None else self._features
+        return sorted(
+            self._default_features(dataframe) - self._ignore_features if self._features is None else self._features
+        )

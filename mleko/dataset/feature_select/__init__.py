@@ -8,17 +8,20 @@ The following feature selectors are provided by the subpackage:
     - `BaseFeatureSelector`: The abstract base class for all feature selectors.
     - `CompositeFeatureSelector`: A feature selector for combining multiple feature selectors.
     - `MissingRateFeatureSelector`: A feature selector for removing features with a high percentage of missing values.
-    - `StandardDeviationFeatureSelector`: A feature selector for removing features with a low standard deviation.
+    - `VarianceFeatureSelector`: A feature selector for removing features with a low standard deviation.
+    - `PearsonCorrelationFeatureSelector`: A feature selector for removing features with a high Pearson correlation.
 """
 from .base_feature_selector import BaseFeatureSelector
 from .composite_feature_selector import CompositeFeatureSelector
 from .missing_rate_feature_selector import MissingRateFeatureSelector
-from .standard_deviation_feature_selector import StandardDeviationFeatureSelector
+from .pearson_correlation_feature_selector import PearsonCorrelationFeatureSelector
+from .variance_feature_selector import VarianceFeatureSelector
 
 
 __all__ = [
     "BaseFeatureSelector",
     "CompositeFeatureSelector",
     "MissingRateFeatureSelector",
-    "StandardDeviationFeatureSelector",
+    "VarianceFeatureSelector",
+    "PearsonCorrelationFeatureSelector",
 ]

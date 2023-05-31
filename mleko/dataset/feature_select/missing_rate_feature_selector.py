@@ -26,9 +26,9 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
     def __init__(
         self,
         cache_directory: str | Path,
+        missing_rate_threshold: float,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
-        missing_rate_threshold: float = 1.0,
         cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
@@ -45,9 +45,9 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
 
         Args:
             cache_directory: Directory where the selected features will be stored locally.
+            missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
-            missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -96,22 +96,18 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         Returns:
             The DataFrame with the selected features.
         """
-        feature_names = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set: {feature_names}.")
+        features = self._feature_set(dataframe)
+        logger.info(f"Selecting features from the following set: {features}.")
 
         missing_rate: dict[str, float] = {}
-        for feature_name in tqdm(feature_names, desc="Calculating missing rates for features"):
-            column = get_column(dataframe, feature_name)
-            missing_rate[feature_name] = column.countna() / dataframe.shape[0]
+        for feature in tqdm(features, desc="Calculating missing rates for features"):
+            column = get_column(dataframe, feature)
+            missing_rate[feature] = column.countna() / dataframe.shape[0]
 
-        dropped_features = {
-            feature_name for feature_name in feature_names if missing_rate[feature_name] >= self._missing_rate_threshold
-        }
+        dropped_features = {feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold}
         logger.info(f"Dropping features with missing rate >= {self._missing_rate_threshold}: {dropped_features}.")
 
-        selected_features = [
-            feature_name for feature_name in dataframe.get_column_names() if feature_name not in dropped_features
-        ]
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
         return get_columns(dataframe, selected_features)
 
     def _default_features(self, dataframe: vaex.DataFrame) -> frozenset[str]:
@@ -123,8 +119,8 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         Returns:
             The default set of features.
         """
-        feature_names = dataframe.get_column_names()
-        return frozenset(str(feature_name) for feature_name in feature_names)
+        features = dataframe.get_column_names()
+        return frozenset(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the feature selector.

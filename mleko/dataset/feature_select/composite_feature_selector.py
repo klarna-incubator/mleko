@@ -72,7 +72,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             9   10    None
         """
         super().__init__(cache_directory, None, None, cache_size)
-        self._feature_selectors = set(feature_selectors)
+        self._feature_selectors = tuple(feature_selectors)
 
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
         """Selects the features from the DataFrame.
@@ -112,8 +112,8 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         Returns:
             Set of default features.
         """
-        feature_names = dataframe.get_column_names()
-        return frozenset(str(feature_name) for feature_name in feature_names)
+        features = dataframe.get_column_names()
+        return frozenset(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the feature selector.
