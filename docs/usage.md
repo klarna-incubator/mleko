@@ -9,25 +9,25 @@ This guide demonstrates how to use the mleko library to fetch and manage dataset
 Import the required classes:
 
 ```python
-from mleko.data.sources import KaggleDataSource
-from mleko.data.converters import CsvToArrowConverter
+from mleko.data.sources import KaggleIngester
+from mleko.data.convert import CSVToArrowConverter
 from mleko.pipeline import Pipeline
 from mleko.pipeline.steps import IngestStep, ConvertStep
 ```
 
-Set the dataset name and initialize KaggleDataSource and CsvToArrowConverter objects:
+Set the dataset name and initialize KaggleIngester and CSVToArrowConverter objects:
 
 ```python
 DATASET_NAME = "mlg-ulb/creditcardfraud"
-kaggle_data_source = KaggleDataSource(f"data/{DATASET_NAME}/raw", owner_slug=DATASET_NAME.split("/")[0], dataset_slug=DATASET_NAME.split("/")[1])
-csv_to_arrow_converter = CsvToArrowConverter(output_directory=f"data/{DATASET_NAME}/converted", downcast_float=True)
+kaggle_ingester = KaggleIngester(f"data/{DATASET_NAME}/raw", owner_slug=DATASET_NAME.split("/")[0], dataset_slug=DATASET_NAME.split("/")[1])
+csv_to_arrow_converter = CSVToArrowConverter(output_directory=f"data/{DATASET_NAME}/converted", downcast_float=True)
 ```
 
 Create a Pipeline instance with IngestStep and ConvertStep:
 
 ```python
 pipeline = Pipeline(steps=[
-    IngestStep(kaggle_data_source),
+    IngestStep(kaggle_ingester),
     ConvertStep(csv_to_arrow_converter)
 ])
 ```

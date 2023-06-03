@@ -6,9 +6,10 @@
 /.pytype/
 /dist/
 /docs/_build/
-/src/*.egg-info/
+/mleko/*.egg-info/
 __pycache__/
 .venv/*
 .pytest_cache/
 examples/data
+examples/S3\ Experiment.ipynb
 .DS_Store

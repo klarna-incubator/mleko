@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/ErikBavenstrand/mleko/releases"
+Changelog = "https://github.com/ErikBavenstrand/mleko/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "3.10.* || 3.9.* || 3.8.*"
@@ -22,6 +22,7 @@ botocore = "^1.29.91"
 tqdm = "^4.65.0"
 vaex = "^4.16.0"
 scikit-learn = "^1.2.2"
+pandas = "^2.0.2"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
@@ -58,7 +59,7 @@ sphinx-autoapi = "^2.1.0"
 python-semantic-release = "^7.33.3"
 
 [tool.coverage.paths]
-source = ["src", "*/site-packages"]
+source = ["mleko", "*/site-packages"]
 tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
@@ -68,7 +69,7 @@ source = ["mleko"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 100
-exclude_lines = ["pragma: no cover", "raise NotImplementedError", '"""']
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", '"""', "self._cached_execute"]
 
 [tool.isort]
 profile = "black"
@@ -91,15 +92,13 @@ show_error_context = true
 
 [[tool.mypy.overrides]]
 module = [
-    "vaex",
-    "tqdm",
-    "boto3",
-    "boto3.s3.transfer",
-    "botocore.config",
-    "pyarrow",
-    "requests",
-    "requests.auth",
-    "sklearn.model_selection",
+    "vaex.*",
+    "tqdm.*",
+    "boto3.*",
+    "botocore.*",
+    "pyarrow.*",
+    "requests.*",
+    "sklearn.*",
 ]
 ignore_missing_imports = true
 
@@ -109,7 +108,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
 branch = "main"
-version_variable = "src/mleko/__init__.py:__version__"
+version_variable = "mleko/__init__.py:__version__"
 version_toml = "pyproject.toml:tool.poetry.version"
 version_source = "tag"
 commit_version_number = true
