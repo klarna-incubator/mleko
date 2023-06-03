@@ -7,9 +7,14 @@ from typing import Hashable
 import vaex
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
 from .base_feature_selector import BaseFeatureSelector
+
+
+logger = CustomLogger()
+"""A module-level logger for the module."""
 
 
 class CompositeFeatureSelector(BaseFeatureSelector):
@@ -99,8 +104,13 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         Returns:
             DataFrame with the selected features.
         """
-        for feature_selector in self._feature_selectors:
+        for i, feature_selector in enumerate(self._feature_selectors):
+            logger.info(
+                f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
+                f"{feature_selector.__class__.__name__}."
+            )
             dataframe = feature_selector._select_features(dataframe).extract()
+            logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return dataframe
 
     def _default_features(self, dataframe: vaex.DataFrame) -> frozenset[str]:  # pragma: no cover

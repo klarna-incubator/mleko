@@ -7,7 +7,7 @@ from typing import Hashable
 
 import vaex
 
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
+from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 
@@ -16,7 +16,7 @@ logger = CustomLogger()
 """The logger for the module."""
 
 
-class BaseFeatureSelector(VaexArrowCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
     """Abstract class for feature selection.
 
     The feature selection process is implemented in the `select_features` method, which takes a DataFrame as input and

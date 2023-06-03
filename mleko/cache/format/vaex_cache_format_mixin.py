@@ -9,7 +9,7 @@ from tqdm import tqdm
 from mleko.utils.tqdm_helpers import set_tqdm_percent_wrapper
 
 
-class VaexArrowCacheFormatMixin:
+class VaexCacheFormatMixin:
     """A mixin class for `vaex` DataFrames to provide Arrow format caching capabilities.
 
     This mixin class adds methods for reading and writing arrow cache files for `vaex` DataFrames.
@@ -19,7 +19,7 @@ class VaexArrowCacheFormatMixin:
         The mixin should be before the cache format class in the inheritance list.
 
     Examples:
-        >>> class MyCacheFormat(VaexArrowCacheFormatMixin, CacheFormat):
+        >>> class MyCacheFormat(VaexCacheFormatMixin, CacheFormat):
         >>>     pass
     """
 
@@ -44,11 +44,11 @@ class VaexArrowCacheFormatMixin:
             cache_file_path: The path of the cache file to be written.
             output: The Vaex DataFrame to be saved in the cache file.
         """
-        with tqdm(total=100, desc="Writing DataFrame to Arrow file") as pbar:
-            output.export_arrow(
+        with tqdm(total=100, desc=f"Writing DataFrame to .{self._cache_file_suffix} file") as pbar:
+            output.export(
                 cache_file_path,
                 progress=set_tqdm_percent_wrapper(pbar),
                 parallel=True,
-                reduce_large=True,
+                chunk_size=100_000,
             )
         output.close()

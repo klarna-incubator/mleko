@@ -33,7 +33,7 @@ class Pipeline:
                    pipeline. If not provided, the pipeline will be initialized with an empty list of steps,
                    allowing steps to be added later using the `add_step` method.
         """
-        self.steps = steps if steps is not None else []
+        self._steps = steps if steps is not None else []
 
     def __repr__(self) -> str:
         """Returns a string representation of the Pipeline, including the ordered list of steps.
@@ -43,7 +43,7 @@ class Pipeline:
             in the pipeline, numbered for easier identification.
         """
         cls_name = type(self).__name__
-        steps_str = "\n".join([f"  {index + 1}. {step!r}" for index, step in enumerate(self.steps)])
+        steps_str = "\n".join([f"  {index + 1}. {step!r}" for index, step in enumerate(self._steps)])
         return f"{cls_name}:\n{steps_str}"
 
     def add_step(self, step: PipelineStep) -> None:
@@ -55,7 +55,7 @@ class Pipeline:
         Args:
             step: The PipelineStep instance to be added at the end of the pipeline's steps list.
         """
-        self.steps.append(step)
+        self._steps.append(step)
 
     def run(self, data_container: DataContainer | None = None, force_recompute: bool = False) -> DataContainer:
         """Executes the pipeline steps in the order they were added, passing output from one to the next.
@@ -77,8 +77,8 @@ class Pipeline:
             logger.info("No data container provided. Creating an empty one.")
             data_container = DataContainer()
 
-        for i, step in enumerate(self.steps):
-            logger.info(f"Executing step {i+1}: {step.__class__.__name__}.")
+        for i, step in enumerate(self._steps):
+            logger.info(f"Executing step {i+1}/{len(self._steps)}: {step.__class__.__name__}.")
             data_container = step.execute(data_container, force_recompute)
-            logger.info(f"Finished step {i+1} execution.")
+            logger.info(f"Finished step {i+1}/{len(self._steps)} execution.")
         return data_container

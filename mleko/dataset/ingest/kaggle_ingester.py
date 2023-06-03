@@ -187,7 +187,7 @@ class KaggleIngester(BaseIngester):
     @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        destination_directory: str | Path,
         owner_slug: str,
         dataset_slug: str,
         file_names: list[str] | None = None,
@@ -216,7 +216,7 @@ class KaggleIngester(BaseIngester):
             contains nested folders.
 
         Args:
-            output_directory: The directory where the downloaded files will be stored.
+            destination_directory: The directory where the downloaded files will be stored.
             owner_slug: The owner's Kaggle username or organization name.
             dataset_slug: The dataset's unique Kaggle identifier (slug).
             file_names: A list of file names to download. If not provided or empty, all files in
@@ -230,7 +230,7 @@ class KaggleIngester(BaseIngester):
         Examples:
             >>> from mleko.dataset.sources import KaggleIngester
             >>> kaggle_ingester = KaggleIngester(
-            ...     output_directory="~/data",
+            ...     destination_directory="~/data",
             ...     owner_slug="allen-institute-for-ai",
             ...     dataset_slug="covid-19-masks-dataset",
             ...     file_names=["images.zip", "annotations.json"],
@@ -239,7 +239,7 @@ class KaggleIngester(BaseIngester):
             >>> kaggle_ingester.fetch_data()
             [PosixPath('~/data/images.zip'), PosixPath('~/data/annotations.json')]
         """
-        super().__init__(output_directory)
+        super().__init__(destination_directory)
         self._owner_slug, self._dataset_slug, self._dataset_version = owner_slug, dataset_slug, dataset_version
         self._file_names: set[str] = set(file_names) if file_names is not None else set()
         self._kaggle_config = KaggleCredentialsManager.get_kaggle_credentials(kaggle_api_credentials_file)

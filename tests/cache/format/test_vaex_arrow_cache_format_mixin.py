@@ -5,14 +5,14 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
+from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 
 
-class TestVaexArrowCacheFormatMixin:
-    """Test suite for `cache.format.vaex_arrow_cache_format_mixin.VaexArrowCacheFormatMixin`."""
+class TestVaexCacheFormatMixin:
+    """Test suite for `cache.format.vaex_arrow_cache_format_mixin.VaexCacheFormatMixin`."""
 
-    class MyTestClass(VaexArrowCacheFormatMixin, LRUCacheMixin):
+    class MyTestClass(VaexCacheFormatMixin, LRUCacheMixin):
         """Cached test class."""
 
         def __init__(self, cache_directory, max_entries):

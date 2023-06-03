@@ -38,7 +38,7 @@ class TestPipeline:
     def test_init(self):
         """Should successfully initialize the pipeline."""
         pipeline = Pipeline()
-        assert not pipeline.steps
+        assert not pipeline._steps
 
     def test_init_with_steps(self):
         """Should successfully initialize the pipeline with one or more PipelineStep instances."""
@@ -46,9 +46,9 @@ class TestPipeline:
         step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
         pipeline = Pipeline(steps=[step1, step2])
 
-        assert len(pipeline.steps) == 2
-        assert pipeline.steps[0] == step1
-        assert pipeline.steps[1] == step2
+        assert len(pipeline._steps) == 2
+        assert pipeline._steps[0] == step1
+        assert pipeline._steps[1] == step2
 
     def test_repr(self):
         """Should represent Pipeline using representation of steps."""
@@ -66,8 +66,8 @@ class TestPipeline:
         pipeline = Pipeline(steps=[step1])
         pipeline.add_step(step2)
 
-        assert len(pipeline.steps) == 2
-        assert pipeline.steps[1] == step2
+        assert len(pipeline._steps) == 2
+        assert pipeline._steps[1] == step2
 
     def test_run(self):
         """Should run multiple PipelineSteps."""

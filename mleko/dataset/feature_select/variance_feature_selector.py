@@ -101,7 +101,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             The DataFrame with the selected features.
         """
         features = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set: {features}.")
+        logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
 
         scaler = MaxAbsScaler(features=list(features), prefix="")
         df_scaled = scaler.fit_transform(dataframe)
@@ -112,7 +112,8 @@ class VarianceFeatureSelector(BaseFeatureSelector):
 
         dropped_features = {feature for feature in features if variance[feature] <= self._variance_threshold}
         logger.info(
-            f"Dropping features with normalized variance <= {self._variance_threshold}: " f"{dropped_features}."
+            f"Dropping ({len(dropped_features)}) features with normalized variance <= {self._variance_threshold}: "
+            f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
         return get_columns(dataframe, selected_features)

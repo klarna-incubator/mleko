@@ -11,4 +11,5 @@ __pycache__/
 .venv/*
 .pytest_cache/
 examples/data
+examples/S3\ Experiment.ipynb
 .DS_Store

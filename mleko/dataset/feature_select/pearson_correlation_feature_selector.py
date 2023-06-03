@@ -98,7 +98,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             The DataFrame with the selected features.
         """
         features = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set: {features}.")
+        logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
 
         corr_matrix = abs(np.array(dataframe.correlation(features)))
         avg_corr = corr_matrix.mean(axis=1)
@@ -144,7 +144,10 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
 
         # Combine guaranteed_dropped and additional_dropped sets
         dropped_features = guaranteed_dropped.union(additional_dropped)
-        logger.info(f"Dropping features with correlation >= {self._correlation_threshold}: {dropped_features}.")
+        logger.info(
+            f"Dropping ({len(dropped_features)}) features with correlation >= {self._correlation_threshold}: "
+            f"{dropped_features}."
+        )
 
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
         return get_columns(dataframe, selected_features)

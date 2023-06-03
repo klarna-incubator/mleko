@@ -136,7 +136,7 @@ class TestKaggleIngester:
         """Should successfullt initialize."""
         mock_get_credentials.return_value = sample_kaggle_credentials
         ingester = KaggleIngester(
-            output_directory=".",
+            destination_directory=".",
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
         )
@@ -172,7 +172,7 @@ class TestKaggleIngester:
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
         ingester = KaggleIngester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -200,7 +200,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -226,7 +226,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -271,7 +271,7 @@ class TestKaggleIngester:
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
         ingester = KaggleIngester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -333,7 +333,7 @@ class TestKaggleIngester:
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
         ingester = KaggleIngester(
-            output_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",

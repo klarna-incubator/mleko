@@ -6,11 +6,11 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.format.vaex_arrow_cache_format_mixin import VaexArrowCacheFormatMixin
+from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 
 
-class BaseSplitter(VaexArrowCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseSplitter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
     """Abstract base class for data splitter.
 
     Will cache the split dataframes in the output directory.

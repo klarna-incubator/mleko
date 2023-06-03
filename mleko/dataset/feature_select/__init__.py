@@ -10,9 +10,11 @@ The following feature selectors are provided by the subpackage:
     - `MissingRateFeatureSelector`: A feature selector for removing features with a high percentage of missing values.
     - `VarianceFeatureSelector`: A feature selector for removing features with a low standard deviation.
     - `PearsonCorrelationFeatureSelector`: A feature selector for removing features with a high Pearson correlation.
+    - `InvarianceFeatureSelector`: A feature selector for removing invariant features.
 """
 from .base_feature_selector import BaseFeatureSelector
 from .composite_feature_selector import CompositeFeatureSelector
+from .invariance_feature_selector import InvarianceFeatureSelector
 from .missing_rate_feature_selector import MissingRateFeatureSelector
 from .pearson_correlation_feature_selector import PearsonCorrelationFeatureSelector
 from .variance_feature_selector import VarianceFeatureSelector
@@ -24,4 +26,5 @@ __all__ = [
     "MissingRateFeatureSelector",
     "VarianceFeatureSelector",
     "PearsonCorrelationFeatureSelector",
+    "InvarianceFeatureSelector",
 ]
