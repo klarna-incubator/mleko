@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2023-06-03)
+### Feature
+
+* **feature selection:** ✨ Add  that filters out invariant features. ([`798c261`](https://github.com/ErikBavenstrand/mleko/commit/798c26103b41fd32f71d16b7b8d40f647f2c849b))
+* **feature selection:** ✨ Add `PearsonCorrelationFeatureSelector` which drops highly correlated features. ([`66e5cd2`](https://github.com/ErikBavenstrand/mleko/commit/66e5cd28a4621172ed1c3d27cfc430b89d7da321))
+* **feature selection:** ✨ Add `CompositeFeatureSelector`, for chaining multiple feature selection steps on the same DataFrame. ([`3d75079`](https://github.com/ErikBavenstrand/mleko/commit/3d75079d1bc9ab1102a9edb6dbb545b03f43b4dd))
+* **feature selection:** ✨ Add standard deviation feature selector. ([`c56177b`](https://github.com/ErikBavenstrand/mleko/commit/c56177bb7e25cbf763418707d09976290f659088))
+* **feature selection:** ✨ Add missing rate feature selector. ([`d5ba8b5`](https://github.com/ErikBavenstrand/mleko/commit/d5ba8b57ae4102b2c5c424556d86640f2934dc46))
+
+### Fix
+
+* 🐛 Fix typeguard breaking changes causing build to fail. ([`66c6a8e`](https://github.com/ErikBavenstrand/mleko/commit/66c6a8e24e04815f35dc18de5b3ccd20589fe79d))
+
 ## v0.3.1 (2023-05-21)
 ### Fix
 * :bug: Added notes to pipeline step docstrings. ([`d94f899`](https://github.com/ErikBavenstrand/mleko/commit/d94f89921befafe6a81540c996626e7a849fd260))
