@@ -96,7 +96,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str]:
+    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features to be used by the feature selector.
 
         Args:

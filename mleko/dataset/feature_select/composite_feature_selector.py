@@ -113,7 +113,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return dataframe
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str]:  # pragma: no cover
+    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:  # pragma: no cover
         """Returns the default features of the DataFrame.
 
         Args:

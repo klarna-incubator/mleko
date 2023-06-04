@@ -113,7 +113,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
         return get_columns(dataframe, selected_features)
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str]:
+    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.
 
         Args:
