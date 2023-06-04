@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.1 (2023-06-04)
+### Fix
+
+* **feature selection:** 🐛 Fix `FeatureSelector` cache to use tuple instead of frozenset to have stable fingerprint. ([`cd82417`](https://github.com/ErikBavenstrand/mleko/commit/cd824177e252ae00af4d2ed8cc50b607c4a4928f))
+
 ## v0.4.0 (2023-06-03)
 ### Feature
 
