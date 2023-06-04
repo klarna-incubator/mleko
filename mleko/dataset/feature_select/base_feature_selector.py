@@ -61,8 +61,8 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        self._features: tuple[str] | None = tuple(features) if features is not None else None
-        self._ignore_features: tuple[str] = tuple(ignore_features) if ignore_features is not None else tuple()
+        self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
+        self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
 
     @abstractmethod
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
