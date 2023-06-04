@@ -61,10 +61,8 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        self._features: frozenset[str] | None = frozenset(features) if features is not None else None
-        self._ignore_features: frozenset[str] = (
-            frozenset(ignore_features) if ignore_features is not None else frozenset()
-        )
+        self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
+        self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
 
     @abstractmethod
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
@@ -98,7 +96,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _default_features(self, dataframe: vaex.DataFrame) -> frozenset[str]:
+    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features to be used by the feature selector.
 
         Args:
@@ -108,7 +106,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
 
         Returns:
-            Frozen set of feature names to be used by the feature selector.
+            Tuple of feature names to be used by the feature selector.
         """
         raise NotImplementedError
 
@@ -139,5 +137,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             Sorted list of feature names to be used by the feature selector.
         """
         return sorted(
-            self._default_features(dataframe) - self._ignore_features if self._features is None else self._features
+            set(self._default_features(dataframe)) - set(self._ignore_features)
+            if self._features is None
+            else self._features
         )

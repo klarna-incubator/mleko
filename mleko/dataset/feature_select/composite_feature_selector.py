@@ -113,17 +113,17 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return dataframe
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> frozenset[str]:  # pragma: no cover
+    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:  # pragma: no cover
         """Returns the default features of the DataFrame.
 
         Args:
             dataframe: DataFrame from which the default features will be extracted.
 
         Returns:
-            Set of default features.
+            Tuple of default features.
         """
         features = dataframe.get_column_names()
-        return frozenset(str(feature) for feature in features)
+        return tuple(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the feature selector.
