@@ -5,6 +5,7 @@
     "cache",
     "pipeline",
     "data splitting",
-    "feature selection"
+    "feature selection",
+    "semantic versioning"
   ]
 }

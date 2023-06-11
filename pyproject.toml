@@ -116,3 +116,4 @@ upload_to_pypi = false
 upload_to_release = false
 hvcs = "github"
 commit_message = "chore(release): release {version}"
+changelog_sections = "feature,fix,breaking,performance,documentation,refactor,style,test,build,ci,chore"
