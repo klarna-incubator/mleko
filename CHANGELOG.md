@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.2 (2023-06-11)
+
+### Performance
+
+* ⚡️ Optimize VarianceFeatureSelector when threshold is 0. ([`906dde3`](https://github.com/ErikBavenstrand/mleko/commit/906dde391d83bc3b07ac5a56bb690dba294e757f))
+
+### Refactor
+
+* ➖ Remove pandas dependency. ([`40e264c`](https://github.com/ErikBavenstrand/mleko/commit/40e264c0604793e860887bbbd03b5c374fa55162))
+
+### Ci
+
+* **semantic versioning:** 👷 Add more sections to changelog based on conventional commit categories. ([`e5b1594`](https://github.com/ErikBavenstrand/mleko/commit/e5b15944ae98793273ed407b13867abf68783f36))
+
 ## v0.4.1 (2023-06-04)
 ### Fix
 
