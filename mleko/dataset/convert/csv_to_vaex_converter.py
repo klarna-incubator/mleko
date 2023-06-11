@@ -219,7 +219,7 @@ class CSVToVaexConverter(BaseConverter):
         ).drop(drop_columns)
 
         output_path = output_directory / f"df_chunk_{file_path.stem}.{dataframe_suffix}"
-        df_chunk.export(output_path)
+        df_chunk.export(output_path, chunk_size=100_000, parallel=False)
         df_chunk.close()
 
     def _convert(self, file_paths: list[Path] | list[str]) -> vaex.DataFrame:

@@ -103,11 +103,15 @@ class VarianceFeatureSelector(BaseFeatureSelector):
         features = self._feature_set(dataframe)
         logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
 
-        scaler = MaxAbsScaler(features=list(features), prefix="")
-        df_scaled = scaler.fit_transform(dataframe)
+        if self._variance_threshold > 0:
+            scaler = MaxAbsScaler(features=list(features), prefix="")
+            df = scaler.fit_transform(dataframe)
+        else:
+            df = dataframe
+
         variance: dict[str, float] = {}
         for feature in tqdm(features, desc="Calculating variance for features"):
-            column = get_column(df_scaled, feature)
+            column = get_column(df, feature)
             variance[feature] = column.var()
 
         dropped_features = {feature for feature in features if variance[feature] <= self._variance_threshold}
