@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 def set_tqdm_percent_wrapper(pbar: tqdm) -> Callable[[float], None]:
@@ -20,7 +20,7 @@ def set_tqdm_percent_wrapper(pbar: tqdm) -> Callable[[float], None]:
         A function that sets the percentage based on the float value passed as a parameter.
 
     Example:
-        >>> from tqdm import tqdm
+        >>> from tqdm.auto import tqdm
         >>> from mleko.utils import set_tqdm_percent_wrapper
         >>> pbar = tqdm(total=100)
         >>> set_percent = set_tqdm_percent_wrapper(pbar)

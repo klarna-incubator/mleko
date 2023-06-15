@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import vaex
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.utils.tqdm_helpers import set_tqdm_percent_wrapper
 

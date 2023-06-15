@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Hashable
 
 import vaex
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.dataset.feature_select.base_feature_selector import BaseFeatureSelector

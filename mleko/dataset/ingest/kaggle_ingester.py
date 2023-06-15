@@ -16,7 +16,7 @@ from typing import NamedTuple
 
 import requests
 from requests.auth import HTTPBasicAuth
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
