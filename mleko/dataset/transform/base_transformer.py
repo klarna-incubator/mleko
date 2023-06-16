@@ -26,7 +26,7 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
     def __init__(
         self,
         cache_directory: str | Path,
-        features: list[str] | tuple[str, ...] | None,
+        features: list[str] | tuple[str, ...],
         cache_size: int,
     ) -> None:
         """Initializes the transformer and ensures the destination directory exists.
@@ -37,7 +37,7 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             cache_size: The maximum number of cache entries to keep in the cache.
         """
         LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
-        self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
+        self._features: tuple[str, ...] = tuple(features)
 
     @abstractmethod
     def transform(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:

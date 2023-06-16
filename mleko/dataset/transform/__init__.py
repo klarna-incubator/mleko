@@ -7,9 +7,11 @@ transformation workflow within the pipeline.
 The following feature transformers are provided by the subpackage:
     - `BaseTransformer`: The abstract base class for all feature transformers.
     - `FrequencyEncoderTransformer`: A feature transformer for encoding categorical features using frequency encoding.
+    - `LabelEncoderTransformer`: A feature transformer for encoding categorical features using label encoding.
 """
 from .base_transformer import BaseTransformer
 from .frequency_encoder_transformer import FrequencyEncoderTransformer
+from .label_encoder_transformer import LabelEncoderTransformer
 
 
-__all__ = ["BaseTransformer", "FrequencyEncoderTransformer"]
+__all__ = ["BaseTransformer", "FrequencyEncoderTransformer", "LabelEncoderTransformer"]
