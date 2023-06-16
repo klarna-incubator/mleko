@@ -28,7 +28,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
     def __init__(
         self,
         cache_directory: str | Path,
-        feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...] | tuple[()] = (),
+        feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...],
         cache_size: int = 1,
     ) -> None:
         """Initializes the composite feature selector.
@@ -44,7 +44,6 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         Examples:
             >>> import vaex
             >>> from mleko.dataset.feature_select import CompositeFeatureSelector, MissingRateFeatureSelector
-            >>> from mleko.utils.vaex_helpers import get_column
             >>> df = vaex.from_arrays(
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[1, 2, 3, 4, None, None, None, None, None, None],

@@ -8,10 +8,13 @@ The following feature transformers are provided by the subpackage:
     - `BaseTransformer`: The abstract base class for all feature transformers.
     - `FrequencyEncoderTransformer`: A feature transformer for encoding categorical features using frequency encoding.
     - `LabelEncoderTransformer`: A feature transformer for encoding categorical features using label encoding.
+    - `CompositeTransformer`: A feature transformer that combines multiple feature transformers into a single feature
+        transformer.
 """
 from .base_transformer import BaseTransformer
+from .composite_transformer import CompositeTransformer
 from .frequency_encoder_transformer import FrequencyEncoderTransformer
 from .label_encoder_transformer import LabelEncoderTransformer
 
 
-__all__ = ["BaseTransformer", "FrequencyEncoderTransformer", "LabelEncoderTransformer"]
+__all__ = ["BaseTransformer", "FrequencyEncoderTransformer", "LabelEncoderTransformer", "CompositeTransformer"]
