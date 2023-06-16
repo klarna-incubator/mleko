@@ -10,6 +10,7 @@ from .convert_step import ConvertStep
 from .feature_select_step import FeatureSelectStep
 from .ingest_step import IngestStep
 from .split_step import SplitStep
+from .transform_step import TransformStep
 
 
-__all__ = ["IngestStep", "ConvertStep", "SplitStep", "FeatureSelectStep"]
+__all__ = ["IngestStep", "ConvertStep", "SplitStep", "FeatureSelectStep", "TransformStep"]

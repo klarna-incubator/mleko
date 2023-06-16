@@ -44,7 +44,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.

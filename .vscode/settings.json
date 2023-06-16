@@ -6,6 +6,7 @@
     "pipeline",
     "data splitting",
     "feature selection",
-    "semantic versioning"
+    "semantic versioning",
+    "transformer"
   ]
 }

@@ -37,7 +37,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         selector will be applied to the DataFrame in the order they are specified.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             feature_selectors: List of feature selectors to be combined.
             cache_size: The maximum number of entries to keep in the cache.
 

@@ -43,7 +43,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             `ValueError` is raised.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             features: List of feature names to be used by the feature selector. If None, the default is all features
                 applicable to the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector. If None, the default is to
@@ -66,7 +66,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
 
     @abstractmethod
     def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
-        """Selects features from the given DataFrame and returns a list of paths to the selected features.
+        """Selects features from the given DataFrame.
 
         Args:
             dataframe: DataFrame from which to select features.
@@ -76,7 +76,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
 
         Returns:
-            A dataframe with the selected features.
+            A DataFrame with the selected features.
         """
         raise NotImplementedError
 
@@ -117,7 +117,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Note:
             Subclasses should call the parent method and include the result in the hashable object along with any other
             information that uniquely identifies the feature selector. All attributes that are used in the
-            that affect the output of the feature selector should be included in the hashable object.
+            feature selector that affect the output of the feature selector should be included in the hashable object.
 
         Returns:
             Hashable object that uniquely identifies the feature selector.
