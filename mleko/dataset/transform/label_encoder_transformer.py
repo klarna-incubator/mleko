@@ -58,7 +58,7 @@ class LabelEncoderTransformer(BaseTransformer):
             ...     allow_unseen=True,
             ... ).transform(df)
             >>> df["a"].tolist()
-            [9, 6, 2, 8, 7, 1, 3, 5, 0, 4]
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
             [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
         """

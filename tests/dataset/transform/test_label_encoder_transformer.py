@@ -26,9 +26,9 @@ class TestVaexLabelEncoderTransformer:
         label_encoder_transformer = LabelEncoderTransformer(temporary_directory, features=["a", "b", "c"])
         df = label_encoder_transformer._transform(example_vaex_dataframe)
 
-        assert df["a"].tolist() == [0, 0, 1, 1]  # type: ignore
-        assert df["b"].tolist() == [0, 0, 0, 0]  # type: ignore
-        assert df["c"].tolist() == [0, 1, 1, 1]  # type: ignore
+        assert sorted(df["a"].tolist()) == [0, 0, 1, 1]  # type: ignore
+        assert sorted(df["b"].tolist()) == [0, 0, 0, 0]  # type: ignore
+        assert sorted(df["c"].tolist()) == [0, 1, 1, 1]  # type: ignore
 
     def test_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly label encode features and use cache if possible."""

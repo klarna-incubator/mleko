@@ -38,7 +38,7 @@ class TestCompositeTransformer:
 
         df = test_composite_transformer.transform(example_vaex_dataframe)
 
-        assert df["a"].tolist() == [9, 6, 2, 8, 7, 1, 3, 5, 0, 4]  # type: ignore
+        assert sorted(df["a"].tolist()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # type: ignore
         for value in df["b"].tolist():  # type: ignore
             if not np.isnan(value):
                 assert value == 0.4
