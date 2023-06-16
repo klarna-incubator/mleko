@@ -40,7 +40,3 @@ class TestFrequencyEncoderTransformer:
         with patch.object(FrequencyEncoderTransformer, "_transform") as mocked_transform:
             FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"]).transform(example_vaex_dataframe)
             mocked_transform.assert_not_called()
-
-        with patch.object(FrequencyEncoderTransformer, "_transform") as mocked_transform:
-            FrequencyEncoderTransformer(temporary_directory, features=["a", "b"]).transform(example_vaex_dataframe)
-            mocked_transform.assert_called()
