@@ -2,6 +2,30 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-06-17)
+
+### Feature
+
+* **transformer:** ✨ Add MinMaxScalerTransformer for normalizing numerical features. ([`9b26c00`](https://github.com/ErikBavenstrand/mleko/commit/9b26c00ecefa12929a2316309ba5b3e55022b5a5))
+* **transformer:** ✨ Add MaxAbsScalerTransformer that scales numerical features. ([`1fd2a93`](https://github.com/ErikBavenstrand/mleko/commit/1fd2a9369bfb74eba3d0015024857070f31bbe34))
+* **transformer:** ✨ Add CompositeTransformer for chaining together multiple transformers sequentially. ([`006d741`](https://github.com/ErikBavenstrand/mleko/commit/006d74157167e4ddb2c575ca897662de8a1c0d4d))
+* **transformer:** ✨ Add LabelEncoderTransformer for ordinal encoding. ([`41a4c45`](https://github.com/ErikBavenstrand/mleko/commit/41a4c45dcb7a232f2a8f3af3a39e9bcf4bcb3929))
+* **transformer:** ✨ Add FrequencyEncoderTransformer along with support for pipeline. ([`465e6db`](https://github.com/ErikBavenstrand/mleko/commit/465e6db3b2830e3cc3f996af9eacb36b8ccf8468))
+
+### Refactor
+
+* 💫 Switch to tqdm.auto to prevent breaking in Jupyter notebooks. ([`dc139cf`](https://github.com/ErikBavenstrand/mleko/commit/dc139cf3844d1a6beb7b5682b44275fd2f9ef2cf))
+
+### Test
+
+* ✅ Now _get_local_filenames returns a sorted list of filenames to ensure stability. ([`774e8eb`](https://github.com/ErikBavenstrand/mleko/commit/774e8eb2a38e5904a170473c56523926b3acffb4))
+
+### Chore
+
+* **deps:** Fix issue with boolean logic in last commit. ([`3832911`](https://github.com/ErikBavenstrand/mleko/commit/38329116ab1da1a19b14e201c283b3b50435e7c0))
+* **deps:** Update release workflow to ignore chore(deps) commits. ([`a7d5f62`](https://github.com/ErikBavenstrand/mleko/commit/a7d5f62dba2ef4686c77e5bc41f2e9546d6049ca))
+* **deps:** Bump sphinx-autoapi from 2.1.0 to 2.1.1 in /docs ([`2cb82d1`](https://github.com/ErikBavenstrand/mleko/commit/2cb82d1d791ce4f8cb379071250e36506931f8cd))
+
 ## v0.4.2 (2023-06-11)
 
 ### Performance
