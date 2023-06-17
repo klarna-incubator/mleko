@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Hashable
 
 import vaex
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from vaex.ml import MaxAbsScaler
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
@@ -44,7 +44,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             variance_threshold: The minimum variance allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.

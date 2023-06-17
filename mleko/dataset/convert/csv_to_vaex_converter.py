@@ -8,7 +8,7 @@ from pathlib import Path
 
 import vaex
 from pyarrow import csv as arrow_csv
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.utils.custom_logger import CustomLogger

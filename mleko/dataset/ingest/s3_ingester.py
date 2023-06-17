@@ -10,7 +10,7 @@ from typing import Any
 import boto3
 from boto3.s3.transfer import TransferConfig as BotoTransferConfig
 from botocore.config import Config as BotoConfig
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr

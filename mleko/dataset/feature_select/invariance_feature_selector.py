@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Hashable
 
 import vaex
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.dataset.feature_select.base_feature_selector import BaseFeatureSelector
@@ -42,7 +42,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             cache_size: The maximum number of entries to keep in the cache.

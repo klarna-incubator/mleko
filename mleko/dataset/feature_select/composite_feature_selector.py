@@ -28,7 +28,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
     def __init__(
         self,
         cache_directory: str | Path,
-        feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...] | tuple[()] = (),
+        feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...],
         cache_size: int = 1,
     ) -> None:
         """Initializes the composite feature selector.
@@ -37,14 +37,13 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         selector will be applied to the DataFrame in the order they are specified.
 
         Args:
-            cache_directory: Directory where the selected features will be stored locally.
+            cache_directory: Directory where the resulting DataFrame will be stored locally.
             feature_selectors: List of feature selectors to be combined.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
             >>> import vaex
             >>> from mleko.dataset.feature_select import CompositeFeatureSelector, MissingRateFeatureSelector
-            >>> from mleko.utils.vaex_helpers import get_column
             >>> df = vaex.from_arrays(
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[1, 2, 3, 4, None, None, None, None, None, None],

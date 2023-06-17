@@ -47,9 +47,11 @@ class BaseIngester(ABC):
         Returns:
             A list of Path objects for all CSV, ZIP and GZ files in the destination directory.
         """
-        return [
-            Path(filepath)
-            for filepath in [
-                p for suffix in file_suffixes for p in glob.glob(f"{self._destination_directory}/*.{suffix}")
+        return sorted(
+            [
+                Path(filepath)
+                for filepath in [
+                    p for suffix in file_suffixes for p in glob.glob(f"{self._destination_directory}/*.{suffix}")
+                ]
             ]
-        ]
+        )
