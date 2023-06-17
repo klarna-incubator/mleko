@@ -20,7 +20,7 @@ def example_vaex_dataframe() -> vaex.DataFrame:
 class TestMaxAbsScalerTransformer:
     """Test suite for `dataset.transform.max_abs_scaler_transformer.MaxAbsScalerTransformer`."""
 
-    def test_label_encoding(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
+    def test_max_abs_scaling(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly scale the specified features."""
         max_abs_scaler_transformer = MaxAbsScalerTransformer(temporary_directory, features=["a", "b"])
         df = max_abs_scaler_transformer._transform(example_vaex_dataframe)
