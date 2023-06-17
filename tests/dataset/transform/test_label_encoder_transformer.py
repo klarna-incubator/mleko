@@ -18,7 +18,7 @@ def example_vaex_dataframe() -> vaex.DataFrame:
     )
 
 
-class TestVaexLabelEncoderTransformer:
+class TestLabelEncoderTransformer:
     """Test suite for `dataset.transform.label_encoder_transformer.LabelEncoderTransformer`."""
 
     def test_label_encoding(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):

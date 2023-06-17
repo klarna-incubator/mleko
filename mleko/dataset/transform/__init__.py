@@ -6,15 +6,23 @@ transformation workflow within the pipeline.
 
 The following feature transformers are provided by the subpackage:
     - `BaseTransformer`: The abstract base class for all feature transformers.
-    - `FrequencyEncoderTransformer`: A feature transformer for encoding categorical features using frequency encoding.
-    - `LabelEncoderTransformer`: A feature transformer for encoding categorical features using label encoding.
     - `CompositeTransformer`: A feature transformer that combines multiple feature transformers into a single feature
         transformer.
+    - `FrequencyEncoderTransformer`: A feature transformer for encoding categorical features using frequency encoding.
+    - `LabelEncoderTransformer`: A feature transformer for encoding categorical features using label encoding.
+    - `MaxAbsScalerTransformer`: A feature transformer for scaling features using maximum absolute scaling.
 """
 from .base_transformer import BaseTransformer
 from .composite_transformer import CompositeTransformer
 from .frequency_encoder_transformer import FrequencyEncoderTransformer
 from .label_encoder_transformer import LabelEncoderTransformer
+from .max_abs_scaler_transformer import MaxAbsScalerTransformer
 
 
-__all__ = ["BaseTransformer", "FrequencyEncoderTransformer", "LabelEncoderTransformer", "CompositeTransformer"]
+__all__ = [
+    "BaseTransformer",
+    "CompositeTransformer",
+    "FrequencyEncoderTransformer",
+    "LabelEncoderTransformer",
+    "MaxAbsScalerTransformer",
+]
