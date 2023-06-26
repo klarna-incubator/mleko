@@ -31,17 +31,20 @@ class PipelineStep(ABC):
 
     def __init__(
         self,
-        inputs: list[str] | tuple[str, ...] | tuple[()] = (),
-        outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        inputs: list[str] | tuple[str, ...] | tuple[()],
+        outputs: list[str] | tuple[str, ...] | tuple[()],
+        cache_group: str | None,
     ) -> None:
         """Initialize a new PipelineStep with the provided input and output keys.
 
         Args:
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
+            cache_group: The cache group to use.
         """
-        self.inputs = tuple(inputs)
-        self.outputs = tuple(outputs)
+        self._inputs = tuple(inputs)
+        self._outputs = tuple(outputs)
+        self._cache_group = cache_group
 
         self._validate_inputs()
         self._validate_outputs()
@@ -72,7 +75,7 @@ class PipelineStep(ABC):
         Raises:
             ValueError: If the PipelineStep has an invalid number of inputs.
         """
-        if len(self.inputs) != self._num_inputs:
+        if len(self._inputs) != self._num_inputs:
             raise ValueError(f"{self.__class__.__name__} must have exactly {self._num_inputs} input(s).")
 
     def _validate_outputs(self) -> None:
@@ -81,5 +84,5 @@ class PipelineStep(ABC):
         Raises:
             ValueError: If the PipelineStep has an invalid number of outputs.
         """
-        if len(self.outputs) != self._num_outputs:
+        if len(self._outputs) != self._num_outputs:
             raise ValueError(f"{self.__class__.__name__} must have exactly {self._num_outputs} output(s).")

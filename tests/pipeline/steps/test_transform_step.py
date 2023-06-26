@@ -29,13 +29,15 @@ class TestTransformStep:
         df = vaex.from_dict({"col2": [4, 5, 6]})
         transformer.transform = MagicMock(return_value=df)
 
-        feature_select_step = TransformStep(transformer=transformer, inputs=["df_clean"], outputs=["df_clean_selected"])
+        feature_select_step = TransformStep(
+            transformer=transformer, inputs=["df_clean"], outputs=["df_clean_selected"], cache_group=None
+        )
         result = feature_select_step.execute(data_container, force_recompute=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
-        transformer.transform.assert_called_once_with(data_container.data["df_clean"], False)
+        transformer.transform.assert_called_once_with(data_container.data["df_clean"], None, False)
 
     def test_wrong_data_type(self):
         """Should throw ValueError if not recieving a vaex dataframe."""

@@ -74,11 +74,14 @@ class CompositeTransformer(BaseTransformer):
         super().__init__(cache_directory, [], cache_size)
         self._transformers = tuple(transformers)
 
-    def transform(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Transforms the DataFrame using the transformers in the order they are specified.
 
         Args:
             dataframe: The DataFrame to transform.
+            cache_group: The cache group to use.
             force_recompute: Whether to force the recomputation of the transformation.
 
         Returns:
@@ -87,6 +90,7 @@ class CompositeTransformer(BaseTransformer):
         return self._cached_execute(
             lambda_func=lambda: self._transform(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

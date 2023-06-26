@@ -42,8 +42,8 @@ class TestPipeline:
 
     def test_init_with_steps(self):
         """Should successfully initialize the pipeline with one or more PipelineStep instances."""
-        step1 = self.InputStep(outputs=["raw_data"])
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
+        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
         pipeline = Pipeline(steps=[step1, step2])
 
         assert len(pipeline._steps) == 2
@@ -52,8 +52,8 @@ class TestPipeline:
 
     def test_repr(self):
         """Should represent Pipeline using representation of steps."""
-        step1 = self.InputStep(outputs=["raw_data"])
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
+        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
         pipeline = Pipeline(steps=[step1, step2])
 
         expected = f"Pipeline:\n  1. {step1!r}\n  2. {step2!r}"
@@ -61,8 +61,8 @@ class TestPipeline:
 
     def test_add_step(self):
         """Should successfully add new PipelineStep."""
-        step1 = self.InputStep(outputs=["raw_data"])
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
+        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
+        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
         pipeline = Pipeline(steps=[step1])
         pipeline.add_step(step2)
 
@@ -71,8 +71,8 @@ class TestPipeline:
 
     def test_run(self):
         """Should run multiple PipelineSteps."""
-        input_step = self.InputStep(outputs=["raw_data"])
-        increment_step = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"])
+        input_step = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
+        increment_step = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
         pipeline = Pipeline(steps=[input_step, increment_step])
 
         result = pipeline.run()

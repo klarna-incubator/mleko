@@ -19,9 +19,9 @@ class TestLRUCacheMixin:
             """Initialize cache."""
             super().__init__(cache_directory, cache_file_suffix, max_entries)
 
-        def my_method(self, a, force_recompute=False):
+        def my_method(self, a, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a], force_recompute)
+            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)
 
     class MyTestClass2(LRUCacheMixin):
         """Cached test class."""
@@ -30,9 +30,9 @@ class TestLRUCacheMixin:
             """Initialize cache."""
             super().__init__(cache_directory, cache_file_suffix, max_entries)
 
-        def my_method(self, a, force_recompute=False):
+        def my_method(self, a, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a], force_recompute)
+            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)
 
     def test_eviction(self, temporary_directory: Path):
         """Should evict the least recently used cache entries correctly."""
@@ -78,7 +78,8 @@ class TestLRUCacheMixin:
 
         cache_file_keys = list(temporary_directory.glob(f"{cache_file_prefix_name}*.{cache_suffix}"))
         cache_file_endings = [int(cache_key.stem[-1]) for cache_key in cache_file_keys]
-        assert len(lru_cached_class._cache) == n_cache_entries
+        assert len(lru_cached_class._cache) == 1
+        assert len(lru_cached_class._cache["test"].keys()) == n_cache_entries
         assert all([cache_key_ending > n_cache_entries for cache_key_ending in cache_file_endings])
 
     def test_two_classes_same_cache(self, temporary_directory: Path):

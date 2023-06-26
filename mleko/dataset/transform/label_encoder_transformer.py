@@ -65,13 +65,16 @@ class LabelEncoderTransformer(BaseTransformer):
         super().__init__(cache_directory, features, cache_size)
         self._allow_unseen = allow_unseen
 
-    def transform(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Transforms the features of the given DataFrame using label encoding.
 
         Will cache the resulting DataFrame in the cache directory.
 
         Args:
             dataframe: The DataFrame to transform.
+            cache_group: The cache group to use.
             force_recompute: Whether to force recomputation of the transformation.
 
         Returns:
@@ -80,6 +83,7 @@ class LabelEncoderTransformer(BaseTransformer):
         return self._cached_execute(
             lambda_func=lambda: self._transform(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

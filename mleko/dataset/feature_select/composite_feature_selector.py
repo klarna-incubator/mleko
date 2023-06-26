@@ -78,11 +78,14 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         super().__init__(cache_directory, None, None, cache_size)
         self._feature_selectors = tuple(feature_selectors)
 
-    def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def select_features(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Selects the features from the DataFrame.
 
         Args:
             dataframe: DataFrame from which the features will be selected.
+            cache_group: The cache group to use for caching.
             force_recompute: If True, the features will be recomputed even if they are cached.
 
         Returns:
@@ -91,6 +94,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         return self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

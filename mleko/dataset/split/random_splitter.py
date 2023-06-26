@@ -78,7 +78,9 @@ class RandomSplitter(BaseSplitter):
         self._stratify = stratify
         self._random_state = random_state
 
-    def split(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> tuple[vaex.DataFrame, vaex.DataFrame]:
+    def split(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.
 
         Splits the dataframe into train and test sets according to the proportions, shuffle,
@@ -87,6 +89,7 @@ class RandomSplitter(BaseSplitter):
 
         Args:
             dataframe: The dataframe to be split.
+            cache_group: The cache group to use.
             force_recompute: Whether to force recompute the split, even if the cache is available.
 
         Returns:
@@ -101,6 +104,7 @@ class RandomSplitter(BaseSplitter):
                 self._random_state,
                 (dataframe, VaexFingerprinter()),
             ],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

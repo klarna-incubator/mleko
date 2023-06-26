@@ -117,7 +117,9 @@ class CSVToVaexConverter(BaseConverter):
         self._num_workers = num_workers
         self._random_state = random_state
 
-    def convert(self, file_paths: list[Path] | list[str], force_recompute: bool = False) -> vaex.DataFrame:
+    def convert(
+        self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
 
         The method takes care of caching, and results will be reused accordingly unless `force_recompute`
@@ -131,6 +133,7 @@ class CSVToVaexConverter(BaseConverter):
 
         Args:
             file_paths: A list of file paths to be converted.
+            cache_group: The cache group to use.
             force_recompute: If set to True, forces recomputation and ignores the cache.
 
         Returns:
@@ -149,6 +152,7 @@ class CSVToVaexConverter(BaseConverter):
                 self._downcast_float,
                 (file_paths, CSVFingerprinter(n_rows=100_000 // len(file_paths))),
             ],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

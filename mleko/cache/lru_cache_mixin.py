@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +69,7 @@ class LRUCacheMixin(CacheMixin):
         """
         super().__init__(cache_directory, cache_file_suffix)
         self._cache_size = cache_size
-        self._cache: OrderedDict[str, bool] = OrderedDict()
+        self._cache: dict[str, OrderedDict[str, bool]] = defaultdict(OrderedDict)
         self._load_cache_from_disk()
 
     def _load_cache_from_disk(self) -> None:
@@ -79,23 +79,30 @@ class LRUCacheMixin(CacheMixin):
         """
         frame_qualname = get_frame_qualname(inspect.stack()[2])
         class_name = frame_qualname.split(".")[-2]
-        file_name_pattern = rf"{class_name}\.[a-zA-Z_][a-zA-Z0-9_]*\.[a-fA-F\d]{{32}}"
+        file_name_pattern = rf"{class_name}\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{{32}}"
+
         cache_files = [
             f
             for f in self._cache_directory.glob(f"*.{self._cache_file_suffix}")
             if re.search(file_name_pattern, str(f.stem))
         ]
         ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_mtime)
+
         for cache_file in ordered_cache_files:
             cache_key_match = re.search(file_name_pattern, cache_file.stem)
-            cache_key = cache_key_match.group(0)  # type: ignore
-            if cache_key not in self._cache:
-                if len(self._cache) >= self._cache_size:
-                    oldest_key = next(iter(self._cache))
-                    del self._cache[oldest_key]
-                    for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
-                        file.unlink()
-                self._cache[cache_key] = True
+            if cache_key_match:
+                method_name, cache_group = cache_key_match.groups()
+                group_identifier = method_name + cache_group if cache_group else method_name
+                cache_key = cache_key_match.group(0)
+
+                if cache_key not in self._cache[group_identifier]:
+                    if len(self._cache[group_identifier]) >= self._cache_size:
+                        oldest_key = next(iter(self._cache[group_identifier]))
+                        del self._cache[group_identifier][oldest_key]
+                        for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                            file.unlink()
+
+                    self._cache[group_identifier][cache_key] = True
 
     def _load_from_cache(self, cache_key: str) -> Any | None:
         """Loads data from the cache based on the provided cache key and updates the LRU cache.
@@ -106,9 +113,11 @@ class LRUCacheMixin(CacheMixin):
         Returns:
             The cached data if it exists, or None if there is no data for the given cache key.
         """
-        if cache_key in self._cache:
-            self._cache.move_to_end(cache_key)
-        return super()._load_from_cache(cache_key)
+        for group_identifier in self._cache.keys():
+            if cache_key in self._cache[group_identifier]:
+                self._cache[group_identifier].move_to_end(cache_key)
+            return super()._load_from_cache(cache_key)
+        return None
 
     def _save_to_cache(self, cache_key: str, output: Any) -> None:
         """Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
@@ -119,13 +128,22 @@ class LRUCacheMixin(CacheMixin):
             cache_key: A string representing the cache key.
             output: The data to be saved to the cache.
         """
-        if cache_key not in self._cache:
-            if len(self._cache) >= self._cache_size:
-                oldest_key = next(iter(self._cache))
-                del self._cache[oldest_key]
-                for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
-                    file.unlink()
-            self._cache[cache_key] = True
-        else:
-            self._cache.move_to_end(cache_key)
-        super()._save_to_cache(cache_key, output)
+        cache_key_match = re.match(
+            r"[a-zA-Z_][a-zA-Z0-9_]*\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{32}", cache_key
+        )
+        if cache_key_match:
+            method_name, cache_group = cache_key_match.groups()
+            group_identifier = method_name + cache_group if cache_group else method_name
+
+            if cache_key not in self._cache[group_identifier]:
+                if len(self._cache[group_identifier]) >= self._cache_size:
+                    oldest_key = next(iter(self._cache[group_identifier]))
+                    del self._cache[group_identifier][oldest_key]
+                    for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                        file.unlink()
+
+                self._cache[group_identifier][cache_key] = True
+            else:
+                self._cache[group_identifier].move_to_end(cache_key)
+
+            super()._save_to_cache(cache_key, output)

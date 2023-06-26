@@ -28,6 +28,7 @@ class ConvertStep(PipelineStep):
         converter: BaseConverter,
         inputs: list[str] | tuple[str, ...] | tuple[()] = (),
         outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        cache_group: str | None = None,
     ) -> None:
         """Initialize the ConvertStep with the specified data converter.
 
@@ -35,8 +36,9 @@ class ConvertStep(PipelineStep):
             converter: The DataConverter responsible for handling data format conversion.
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
+            cache_group: The cache group to use.
         """
-        super().__init__(inputs, outputs)
+        super().__init__(inputs, outputs, cache_group)
         self._converter = converter
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
@@ -52,10 +54,10 @@ class ConvertStep(PipelineStep):
         Returns:
             A DataContainer containing the converted data as a vaex dataframe.
         """
-        file_paths = data_container.data[self.inputs[0]]
+        file_paths = data_container.data[self._inputs[0]]
         if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
             raise ValueError
 
-        df = self._converter.convert(file_paths, force_recompute)
-        data_container.data[self.outputs[0]] = df
+        df = self._converter.convert(file_paths, self._cache_group, force_recompute)
+        data_container.data[self._outputs[0]] = df
         return data_container
