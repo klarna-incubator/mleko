@@ -50,8 +50,8 @@ jobs:
         run: |
           set -o pipefail
           # Set git details
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name "Erik Båvenstrand"
+          git config --global user.email "erik@bavenstrand.com"
           # Run semantic-release
           poetry run semantic-release publish -v DEBUG -D commit_author="github-actions <github-actions@github.com>"
           output_value=$(poetry version | awk "{print $2}")

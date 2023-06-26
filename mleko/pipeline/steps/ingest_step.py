@@ -35,7 +35,7 @@ class IngestStep(PipelineStep):
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
         """
-        super().__init__(inputs, outputs)
+        super().__init__(inputs, outputs, None)
         self._ingester = ingester
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
@@ -49,5 +49,5 @@ class IngestStep(PipelineStep):
             DataContainer: A DataContainer containing a list of fetched files.
         """
         files = self._ingester.fetch_data(force_recompute)
-        data_container.data[self.outputs[0]] = files
+        data_container.data[self._outputs[0]] = files
         return data_container

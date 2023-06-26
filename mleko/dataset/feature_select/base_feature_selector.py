@@ -65,11 +65,14 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
 
     @abstractmethod
-    def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def select_features(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Selects features from the given DataFrame.
 
         Args:
             dataframe: DataFrame from which to select features.
+            cache_group: The cache group to use.
             force_recompute: Whether to force the feature selector to recompute its output, even if it already exists.
 
         Raises:

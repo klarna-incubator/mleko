@@ -66,11 +66,14 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
         """
         super().__init__(cache_directory, features, ignore_features, cache_size)
 
-    def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def select_features(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Selects features based on invariance.
 
         Args:
             dataframe: The DataFrame to select features from.
+            cache_group: The cache group to use for caching.
             force_recompute: Whether to force recompute the selected features.
 
         Returns:
@@ -82,6 +85,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
                 self._fingerprint(),
                 (dataframe, VaexFingerprinter()),
             ],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

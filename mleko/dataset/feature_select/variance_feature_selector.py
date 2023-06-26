@@ -72,11 +72,14 @@ class VarianceFeatureSelector(BaseFeatureSelector):
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._variance_threshold = variance_threshold
 
-    def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def select_features(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Selects features based on the variance.
 
         Args:
             dataframe: The DataFrame to select features from.
+            cache_group: The cache group to use.
             force_recompute: Whether to force recompute the selected features.
 
         Returns:
@@ -88,6 +91,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
                 self._fingerprint(),
                 (dataframe, VaexFingerprinter()),
             ],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

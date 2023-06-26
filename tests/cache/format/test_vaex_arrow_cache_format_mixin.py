@@ -21,7 +21,7 @@ class TestVaexCacheFormatMixin:
 
         def my_method(self, a, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a.fingerprint()], force_recompute)
+            return self._cached_execute(lambda: a, [a.fingerprint()], None, force_recompute)
 
     def test_vaex_dataframe_arrow_mixin(self, temporary_directory: Path):
         """Should save to cache as expected."""

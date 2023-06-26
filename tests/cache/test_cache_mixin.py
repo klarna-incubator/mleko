@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Hashable
 from unittest.mock import patch
 
+import pytest
+
 from mleko.cache.cache_mixin import CacheMixin, get_frame_qualname
 
 
@@ -44,17 +46,17 @@ class TestCacheMixin:
             """Initialize cache."""
             super().__init__(cache_directory, cache_file_suffix)
 
-        def my_method_1(self, a, b, force_recompute=False):
+        def my_method_1(self, a, b, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a + b, [a, b], force_recompute)
+            return self._cached_execute(lambda: a + b, [a, b], cache_group, force_recompute)
 
-        def my_method_2(self, a, b, force_recompute=False):
+        def my_method_2(self, a, b, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a * b, [a, b], force_recompute)
+            return self._cached_execute(lambda: a * b, [a, b], cache_group, force_recompute)
 
-        def my_method_3(self, list_vals, force_recompute=False):
+        def my_method_3(self, list_vals, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: list_vals, [list_vals], force_recompute)
+            return self._cached_execute(lambda: list_vals, [list_vals], cache_group, force_recompute)
 
     def test_cached_execute(self, temporary_directory: Path):
         """Should save to cache as expected."""
@@ -67,13 +69,25 @@ class TestCacheMixin:
         """Should compute MD5 based cache keys correctly."""
         my_test_instance = self.MyTestClass(temporary_directory, "cache")
 
-        dummy_frame_qualname = "module.Class.method"
+        dummy_class_method_name = "Class.method"
+        cache_group = "cache_group"
         cache_keys: list[Hashable] = [1, 2]
-        data = pickle.dumps((dummy_frame_qualname, cache_keys))
-        expected_key = "Class.method." + hashlib.md5(data).hexdigest()
+        data = pickle.dumps(cache_keys)
+        expected_key = f"{dummy_class_method_name}.{cache_group}.{hashlib.md5(data).hexdigest()}"
 
-        key = my_test_instance._compute_cache_key(cache_keys, dummy_frame_qualname)
+        key = my_test_instance._compute_cache_key(cache_keys, dummy_class_method_name, cache_group)
         assert key == expected_key
+
+    def test_cache_key_overflow(self, temporary_directory: Path):
+        """Should raise ValueError if cache key is too long."""
+        my_test_instance = self.MyTestClass(temporary_directory, "cache")
+
+        dummy_class_method_name = "Class.method"
+        cache_group = "".join(["a" for _ in range(255)])
+        cache_keys: list[Hashable] = [1, 2]
+
+        with pytest.raises(ValueError):
+            my_test_instance._compute_cache_key(cache_keys, dummy_class_method_name, cache_group)
 
     def test_different_functions_same_arguments(self, temporary_directory: Path):
         """Should correctly cache different functions with same arguments."""
