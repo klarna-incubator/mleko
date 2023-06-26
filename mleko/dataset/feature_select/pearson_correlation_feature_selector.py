@@ -72,11 +72,14 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._correlation_threshold = correlation_threshold
 
-    def select_features(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def select_features(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Selects features based on the Pearson correlation.
 
         Args:
             dataframe: The DataFrame to select features from.
+            cache_group: The cache group to use.
             force_recompute: Whether to force recompute the selected features.
 
         Returns:
@@ -85,6 +88,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         return self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
             force_recompute=force_recompute,
         )
 

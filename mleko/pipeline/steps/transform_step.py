@@ -24,6 +24,7 @@ class TransformStep(PipelineStep):
         transformer: BaseTransformer,
         inputs: list[str] | tuple[str, ...] | tuple[()] = (),
         outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        cache_group: str | None = None,
     ) -> None:
         """Initialize the TransformStep with the specified transformer.
 
@@ -31,8 +32,9 @@ class TransformStep(PipelineStep):
             transformer: The Transformer responsible for handling feature transformation.
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
+            cache_group: The cache group to use.
         """
-        super().__init__(inputs, outputs)
+        super().__init__(inputs, outputs, cache_group)
         self._transformer = transformer
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
@@ -48,10 +50,10 @@ class TransformStep(PipelineStep):
         Returns:
             A DataContainer containing the selected features as a vaex DataFrame.
         """
-        dataframe = data_container.data[self.inputs[0]]
+        dataframe = data_container.data[self._inputs[0]]
         if not isinstance(dataframe, DataFrame):
             raise ValueError
 
-        df = self._transformer.transform(dataframe, force_recompute)
-        data_container.data[self.outputs[0]] = df
+        df = self._transformer.transform(dataframe, self._cache_group, force_recompute)
+        data_container.data[self._outputs[0]] = df
         return data_container

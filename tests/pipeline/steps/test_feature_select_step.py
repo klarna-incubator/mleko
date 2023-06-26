@@ -32,14 +32,14 @@ class TestFeatureSelectStep:
         feature_selector.select_features = MagicMock(return_value=df)
 
         feature_select_step = FeatureSelectStep(
-            feature_selector=feature_selector, inputs=["df_clean"], outputs=["df_clean_selected"]
+            feature_selector=feature_selector, inputs=["df_clean"], outputs=["df_clean_selected"], cache_group=None
         )
         result = feature_select_step.execute(data_container, force_recompute=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
-        feature_selector.select_features.assert_called_once_with(data_container.data["df_clean"], False)
+        feature_selector.select_features.assert_called_once_with(data_container.data["df_clean"], None, False)
 
     def test_wrong_data_type(self):
         """Should throw ValueError if not recieving a vaex dataframe."""

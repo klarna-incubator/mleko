@@ -40,11 +40,14 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         self._features: tuple[str, ...] = tuple(features)
 
     @abstractmethod
-    def transform(self, dataframe: vaex.DataFrame, force_recompute: bool = False) -> vaex.DataFrame:
+    def transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Transfigures the specified features in the DataFrame.
 
         Args:
             dataframe: DataFrame to be transformed.
+            cache_group: The cache group to use.
             force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
 
         Raises:

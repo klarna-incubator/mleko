@@ -28,6 +28,7 @@ class SplitStep(PipelineStep):
         splitter: BaseSplitter,
         inputs: list[str] | tuple[str, ...] | tuple[()] = (),
         outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        cache_group: str | None = None,
     ) -> None:
         """Initialize the SplitStep with the specified data splitter.
 
@@ -35,8 +36,9 @@ class SplitStep(PipelineStep):
             splitter: The DataSplitter responsible for handling data splitting.
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
+            cache_group: The cache group to use.
         """
-        super().__init__(inputs, outputs)
+        super().__init__(inputs, outputs, cache_group)
         self._splitter = splitter
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
@@ -52,11 +54,11 @@ class SplitStep(PipelineStep):
         Returns:
             A DataContainer containing the split data as two vaex DataFrames.
         """
-        dataframe = data_container.data[self.inputs[0]]
+        dataframe = data_container.data[self._inputs[0]]
         if not isinstance(dataframe, DataFrame):
             raise ValueError
 
-        df1, df2 = self._splitter.split(dataframe, force_recompute)
-        data_container.data[self.outputs[0]] = df1
-        data_container.data[self.outputs[1]] = df2
+        df1, df2 = self._splitter.split(dataframe, self._cache_group, force_recompute)
+        data_container.data[self._outputs[0]] = df1
+        data_container.data[self._outputs[1]] = df2
         return data_container

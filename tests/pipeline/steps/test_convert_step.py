@@ -31,13 +31,15 @@ class TestConvertStep:
         df = vaex.from_dict({"col1": [1, 2, 3], "col2": [4, 5, 6]})
         converter.convert = MagicMock(return_value=df)
 
-        convert_step = ConvertStep(converter=converter, inputs=["raw_data"], outputs=["converted_data"])
+        convert_step = ConvertStep(
+            converter=converter, inputs=["raw_data"], outputs=["converted_data"], cache_group=None
+        )
         result = convert_step.execute(data_container, force_recompute=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["converted_data"] == df
 
-        converter.convert.assert_called_once_with(file_paths, False)
+        converter.convert.assert_called_once_with(file_paths, None, False)
 
     def test_wrong_data_type(self):
         """Should throw ValueError if not recieving list[Path]."""

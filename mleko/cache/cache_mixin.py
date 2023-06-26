@@ -99,14 +99,24 @@ class CacheMixin:
         self,
         lambda_func: Callable[[], Any],
         cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
+        cache_group: str | None = None,
         force_recompute: bool = False,
     ) -> Any:
         """Executes the given function, caching the results based on the provided cache keys and fingerprints.
+
+        Warning:
+            The cache group is used to group related cache keys together to prevent collisions between cache keys
+            originating from the same method. For example, if a method is called during the training and testing
+            phases of a machine learning pipeline, the cache keys for the training and testing phases should be
+            using different cache groups to prevent collisions between the cache keys for the two phases. Otherwise,
+            the later cache keys might overwrite the earlier cache entries.
 
         Args:
             lambda_func: A lambda function to execute.
             cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
                 BaseFingerprinter instance for generating fingerprints.
+            cache_group: A string representing the cache group, used to group related cache keys together when methods
+                are called independently.
             force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
                 cached result is available.
 
@@ -116,7 +126,7 @@ class CacheMixin:
         """
         frame_qualname = get_frame_qualname(inspect.stack()[1])
         class_method_name = ".".join(frame_qualname.split(".")[-2:])
-        cache_key = self._compute_cache_key(cache_keys, frame_qualname)
+        cache_key = self._compute_cache_key(cache_keys, class_method_name, cache_group)
 
         if not force_recompute:
             output = self._load_from_cache(cache_key)
@@ -139,14 +149,22 @@ class CacheMixin:
         return self._load_from_cache(cache_key)
 
     def _compute_cache_key(
-        self, cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]], frame_qualname: str
+        self,
+        cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
+        class_method_name: str,
+        cache_group: str | None = None,
     ) -> str:
         """Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
 
         Args:
             cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
                 BaseFingerprinter instance for generating fingerprints.
-            frame_qualname: The fully qualified name of the cached function stack frame.
+            class_method_name: A string of format "class.method" for class methods or "module.function" for
+                functions, representing the fully qualified name of the calling function or method.
+            cache_group: A string representing the cache group.
+
+        Raises:
+            ValueError: If the computed cache key is too long.
 
         Returns:
             A string representing the computed cache key, which is the MD5 hash of the fully qualified name of the
@@ -161,12 +179,22 @@ class CacheMixin:
             else:
                 values_to_hash.append(key)
 
-        data = pickle.dumps((frame_qualname, values_to_hash))
+        data = pickle.dumps(values_to_hash)
+        cache_key_prefix = class_method_name
+        if cache_group is not None:
+            cache_key_prefix = f"{cache_key_prefix}.{cache_group}"
 
-        class_method_name = ".".join(frame_qualname.split(".")[-2:])
-        cache_key = f"{class_method_name}.{hashlib.md5(data).hexdigest()}"
+        cache_key = f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
+        if len(cache_key) + 1 + len(self._cache_file_suffix) > 255:
+            raise ValueError(
+                f"The computed cache key is too long ({len(cache_key) + len(self._cache_file_suffix)} chars)."
+                "The maximum length of a cache key is 255 chars, and given the current class, the maximum "
+                "length of the provided cache_group is "
+                f"{255 - len(cache_key_prefix) - 32 - 1 - len(self._cache_file_suffix)} chars."
+                "Please reduce the length of the cache_group."
+            )
 
-        return cache_key
+        return f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
 
     def _read_cache_file(self, cache_file_path: Path) -> Any:
         """Reads the cache file from the specified path and returns the deserialized data.

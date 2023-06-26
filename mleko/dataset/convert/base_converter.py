@@ -26,11 +26,14 @@ class BaseConverter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
 
     @abstractmethod
-    def convert(self, file_paths: list[Path] | list[str], force_recompute: bool = False) -> vaex.DataFrame:
+    def convert(
+        self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
         """Abstract method to convert the input file paths to the desired output format.
 
         Args:
             file_paths: A list of input file paths to be converted.
+            cache_group: The cache group to use.
             force_recompute: If set to True, forces recomputation and ignores the cache.
 
         Returns:
