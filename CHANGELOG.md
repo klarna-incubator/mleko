@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2023-06-26)
+
+### Feature
+
+* **cache:** ✨ Add cache_group that can segment an instance cache into different isolated parts. ([`b5c3de5`](https://github.com/ErikBavenstrand/mleko/commit/b5c3de5f1397bfb9422590ba037f431c2eaad9ac))
+
+### Chore
+
+* **deps:** Bump sphinx-autodoc-typehints in /docs ([`de2e720`](https://github.com/ErikBavenstrand/mleko/commit/de2e720515b362f65078b31f545842be997152e0))
+
 ## v0.5.0 (2023-06-17)
 
 ### Feature
