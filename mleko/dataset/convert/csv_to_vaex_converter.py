@@ -6,6 +6,7 @@ from concurrent import futures
 from itertools import repeat
 from pathlib import Path
 
+import pyarrow as pa
 import vaex
 from pyarrow import csv as arrow_csv
 from tqdm.auto import tqdm
@@ -14,6 +15,7 @@ from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
+from mleko.utils.vaex_helpers import get_column
 
 from .base_converter import BaseConverter
 
@@ -221,6 +223,10 @@ class CSVToVaexConverter(BaseConverter):
                 ],
             ),
         ).drop(drop_columns)
+
+        for column_name in df_chunk.get_column_names():
+            if get_column(df_chunk, column_name).dtype in (pa.date32(), pa.date64()):
+                df_chunk[column_name] = get_column(df_chunk, column_name).astype("datetime64[s]")
 
         output_path = output_directory / f"df_chunk_{file_path.stem}.{dataframe_suffix}"
         df_chunk.export(output_path, chunk_size=100_000, parallel=False)

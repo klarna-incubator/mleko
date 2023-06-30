@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import vaex
@@ -68,3 +69,15 @@ class TestExpressionDataSplitter:
         assert df_test.shape == (5, 4)
         assert df_test.column_names == ["a", "b", "target", "date"]
         assert df_test["target"].tolist() == [1, 1, 1, 1, 0]  # type: ignore
+
+    def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
+        """Should test the cache of the expression splitter."""
+        test_expression_data_splitter = ExpressionSplitter(
+            temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
+        )
+
+        test_expression_data_splitter.split(example_vaex_dataframe)
+
+        with patch.object(ExpressionSplitter, "_split") as mocked_split:
+            test_expression_data_splitter.split(example_vaex_dataframe)
+            mocked_split.assert_not_called()

@@ -28,9 +28,9 @@ class TestCSVToVaexConverter:
         dfs = [vaex.open(f) for f in arrow_files]
 
         for df in dfs:
-            assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
-            assert df.column_names == ["Time", "Count", "Name", "Is Best"]
-            assert df.shape == (3, 4)
+            assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool]"
+            assert df.column_names == ["Time", "Date", "Count", "Name", "Is Best"]
+            assert df.shape == (3, 5)
             assert df.Name.countna() == 1
             df.close()
 
@@ -48,9 +48,9 @@ class TestCSVToVaexConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[s], float64, string, bool]"
-        assert df.column_names == ["Time", "Count", "Name", "Is Best"]
-        assert df.shape == (n_files * 3, 4)
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool]"
+        assert df.column_names == ["Time", "Date", "Count", "Name", "Is Best"]
+        assert df.shape == (n_files * 3, 5)
         assert df.Name.countna() == n_files
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
         assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 1
