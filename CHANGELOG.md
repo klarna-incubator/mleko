@@ -2,6 +2,24 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.1 (2023-06-30)
+
+### Fix
+
+* **data cleaning:** 🐛 Fix date32/64[day] not converted to datetime. ([`98f4b26`](https://github.com/ErikBavenstrand/mleko/commit/98f4b26ef5eab26e47cdcc1fd0f31928e063d49a))
+* **data source:** 🐛 Fix bug where S3 buckets with no manifest caused crash. ([`9078845`](https://github.com/ErikBavenstrand/mleko/commit/90788454dc8b2c1665f79746ae1392a8d4d067dd))
+
+### Build
+
+* **config:** 🔧 Switch mypy for pyright and update configuration. ([`5631aed`](https://github.com/ErikBavenstrand/mleko/commit/5631aedd059bdd6aed2c8e78d09629d8894e5cb8))
+
+### Chore
+
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.5.0 to 1.8.7 ([#67](https://github.com/ErikBavenstrand/mleko/issues/67)) ([`74315f4`](https://github.com/ErikBavenstrand/mleko/commit/74315f47f8c31d956ab8040d7688eb88337f6663))
+* **deps:** Bump sphinx-autodoc-typehints from 1.23.2 to 1.23.3 in /docs ([#68](https://github.com/ErikBavenstrand/mleko/issues/68)) ([`54e0845`](https://github.com/ErikBavenstrand/mleko/commit/54e08455cdf408a340077eaefdfa0cbedf973e74))
+* **deps:** Bump sphinx-autodoc-typehints in /docs ([`5c285be`](https://github.com/ErikBavenstrand/mleko/commit/5c285beb7b462c4396380be0c8c17547f21e7d16))
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.5.0 to 1.8.7 ([`b8f0f29`](https://github.com/ErikBavenstrand/mleko/commit/b8f0f29a50c05534c314787dc0b87552d6e25460))
+
 ## v0.6.0 (2023-06-26)
 
 ### Feature

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mleko"
-version = "0.6.0"
+version = "0.6.1"
 description = "ML-Ekosystem"
 authors = ["Erik Båvenstrand <erik@bavenstrand.se>"]
 license = "MIT"
