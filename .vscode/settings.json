@@ -4,6 +4,7 @@
     "config",
     "cache",
     "pipeline",
+    "data cleaning",
     "data splitting",
     "feature selection",
     "semantic versioning",

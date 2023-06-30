@@ -95,7 +95,7 @@ class RandomSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        return self._cached_execute(  # type: ignore
+        return self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
             cache_keys=[
                 self._idx2_size,
@@ -118,9 +118,10 @@ class RandomSplitter(BaseSplitter):
             A tuple containing the split dataframes.
         """
         index_name = "index"
-        dataframe[index_name] = vaex.vrange(0, dataframe.shape[0])
-        index = get_column(dataframe, index_name)
-        target = get_column(dataframe, self._stratify).to_numpy() if self._stratify else None
+        df = dataframe.copy()
+        df[index_name] = vaex.vrange(0, df.shape[0])
+        index = get_column(df, index_name)
+        target = get_column(df, self._stratify).to_numpy() if self._stratify else None
 
         if self._shuffle:
             logger.info("Shuffling data before splitting.")
@@ -137,8 +138,8 @@ class RandomSplitter(BaseSplitter):
             stratify=target,
         )
 
-        df1 = get_filtered_df(dataframe, index.isin(idx1)).extract()
-        df2 = get_filtered_df(dataframe, index.isin(idx2)).extract()
+        df1 = get_filtered_df(df, index.isin(idx1)).extract()
+        df2 = get_filtered_df(df, index.isin(idx2)).extract()
         logger.info(f"Split dataframe into two dataframes with shapes {df1.shape} and {df2.shape}.")
         df1.delete_virtual_column(index_name)
         df2.delete_virtual_column(index_name)

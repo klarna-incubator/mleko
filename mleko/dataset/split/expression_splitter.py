@@ -74,7 +74,7 @@ class ExpressionSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        return self._cached_execute(  # type: ignore
+        return self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
             cache_keys=[
                 self._expression,

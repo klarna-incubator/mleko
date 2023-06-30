@@ -40,7 +40,7 @@ class S3Ingester(BaseIngester):
         aws_profile_name: str | None = None,
         aws_region_name: str = "eu-west-1",
         num_workers: int = 64,
-        manifest_file_name: str = "manifest",
+        manifest_file_name: str | None = "manifest",
         check_s3_timestamps: bool = True,
     ) -> None:
         """Initializes the S3 bucket client, configures the destination directory, and sets client-related parameters.
@@ -111,27 +111,27 @@ class S3Ingester(BaseIngester):
                 raise Exception(
                     "Files in S3 are from muliples dates. This might mean the data is corrupted/duplicated."
                 )
-
-        manifest_file_key = next(
-            entry["Key"]
-            for entry in resp["Contents"]
-            if "Key" in entry and entry["Key"].endswith(self._manifest_file_name)
-        )
-
-        if not force_recompute and manifest_file_key:
-            self._s3_client.download_file(
-                Bucket=self._s3_bucket_name,
-                Key=manifest_file_key,
-                Filename=str(self._destination_directory / self._manifest_file_name),
+        if self._manifest_file_name is not None:
+            manifest_file_key = next(
+                entry["Key"]
+                for entry in resp["Contents"]
+                if "Key" in entry and entry["Key"].endswith(self._manifest_file_name)
             )
-            with open(self._destination_directory / self._manifest_file_name) as f:
-                manifest: dict[str, Any] = json.load(f)
-                if self._is_local_dataset_fresh(manifest):
-                    logger.info(
-                        "\033[32mCache Hit\033[0m: Local dataset is up to date with S3 bucket contents, "
-                        "skipping download."
-                    )
-                    return self._get_local_filenames(["gz", "csv", "zip"])
+
+            if not force_recompute and manifest_file_key:
+                self._s3_client.download_file(
+                    Bucket=self._s3_bucket_name,
+                    Key=manifest_file_key,
+                    Filename=str(self._destination_directory / self._manifest_file_name),
+                )
+                with open(self._destination_directory / self._manifest_file_name) as f:
+                    manifest: dict[str, Any] = json.load(f)
+                    if self._is_local_dataset_fresh(manifest):
+                        logger.info(
+                            "\033[32mCache Hit\033[0m: Local dataset is up to date with S3 bucket contents, "
+                            "skipping download."
+                        )
+                        return self._get_local_filenames(["gz", "csv", "zip"])
 
         if force_recompute:
             logger.info(

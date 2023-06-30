@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import vaex
@@ -62,3 +63,15 @@ class TestRandomSplitter:
         assert df_test.shape == (5, 4)
         assert df_test.column_names == ["a", "b", "target", "date"]
         assert df_test["target"].tolist() == [1, 1, 1, 1, 0]  # type: ignore
+
+    def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
+        """Should test the cache of the random splitter."""
+        test_random_splitter = RandomSplitter(
+            temporary_directory, data_split=(0.5, 0.5), shuffle=False, random_state=1337
+        )
+
+        test_random_splitter.split(example_vaex_dataframe)
+
+        with patch.object(RandomSplitter, "_split") as mocked_split:
+            test_random_splitter.split(example_vaex_dataframe)
+            mocked_split.assert_not_called()

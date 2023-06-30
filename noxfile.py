@@ -6,19 +6,8 @@ import sys
 from pathlib import Path
 from textwrap import dedent
 
-import nox
-
-
-try:
-    from nox_poetry import Session, session
-except ImportError:
-    message = f"""\
-    Nox failed to import the 'nox-poetry' package.
-
-    Please install it using the following command:
-
-    {sys.executable} -m pip install nox-poetry"""
-    raise SystemExit(dedent(message)) from None
+import nox  # type: ignore
+from nox_poetry import Session, session  # type: ignore
 
 
 package = "mleko"
@@ -27,7 +16,7 @@ nox.needs_version = ">= 2021.6.6"
 nox.options.sessions = (
     "pre-commit",
     "safety",
-    "mypy",
+    "pyright",
     "tests",
     "typeguard",
     "docs-build",
@@ -141,21 +130,21 @@ def safety(session: Session) -> None:
 
 
 @session(python=python_versions)
-def mypy(session: Session) -> None:
-    """Type-check using mypy."""
+def pyright(session: Session) -> None:
+    """Type-check using pyright."""
     args = session.posargs or ["mleko", "docs/conf.py"]
     session.install(".")
-    session.install("mypy", "pytest")
-    session.run("mypy", *args)
+    session.install("pyright", "pytest")
+    session.run("pyright", *args)
     if not session.posargs:
-        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+        session.run("pyright", f"--pythonpath={sys.executable}", "noxfile.py")
 
 
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pytest-mock", "pygments", "moto", "mypy_boto3_s3")
+    session.install("coverage[toml]", "pytest", "pytest-mock", "pygments", "moto")
     try:
         session.run(
             "coverage", "run", "--parallel", "--concurrency=multiprocessing,thread", "-m", "pytest", *session.posargs
@@ -183,7 +172,7 @@ def coverage(session: Session) -> None:
 def typeguard(session: Session) -> None:
     """Runtime type checking using Typeguard."""
     session.install(".")
-    session.install("pytest", "typeguard", "pygments", "moto", "mypy_boto3_s3")
+    session.install("pytest", "typeguard", "pygments", "moto")
     session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
 
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 import datetime
 import json
 from pathlib import Path
-from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import boto3
@@ -12,7 +11,6 @@ import moto
 import pytest
 from botocore.exceptions import ProfileNotFound
 from moto.s3.models import s3_backends
-from mypy_boto3_s3.service_resource import Bucket
 
 from mleko.dataset.ingest import S3Ingester
 
@@ -21,14 +19,14 @@ class TestS3Ingester:
     """Test suite for `dataset.ingest.s3_ingester.S3Ingester`."""
 
     @pytest.fixture(scope="class")
-    def s3_bucket(self) -> Generator[Bucket, None, None]:
+    def s3_bucket(self):
         """Mock S3 Bucket."""
         with moto.mock_s3():
             s3 = boto3.resource("s3", region_name="us-east-1")
             s3.create_bucket(Bucket="test-bucket")
             yield s3.Bucket("test-bucket")
 
-    def test_download(self, s3_bucket: Bucket, temporary_directory: Path):
+    def test_download(self, s3_bucket, temporary_directory: Path):
         """Should download data to temp dir."""
         s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
@@ -47,7 +45,7 @@ class TestS3Ingester:
 
         assert (temporary_directory / "test-file.csv").read_text() == "test-file-data"
 
-    def test_different_timestamps(self, s3_bucket: Bucket, temporary_directory: Path):
+    def test_different_timestamps(self, s3_bucket, temporary_directory: Path):
         """Should throw exception due to different timestamps of files."""
         s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
@@ -68,7 +66,7 @@ class TestS3Ingester:
                 force_recompute=True,
             )
 
-    def test_is_cached(self, s3_bucket: Bucket, temporary_directory: Path):
+    def test_is_cached(self, s3_bucket, temporary_directory: Path):
         """Should use cached files if manifest matches with local files in temp dir."""
         s3_bucket.Object("test-prefix/manifest").put(
             Body=json.dumps(
@@ -106,7 +104,7 @@ class TestS3Ingester:
             )
             mocked_s3_fetch_all.assert_not_called()
 
-    def test_is_outdated_cache(self, s3_bucket: Bucket, temporary_directory: Path):
+    def test_is_outdated_cache(self, s3_bucket, temporary_directory: Path):
         """Should not use cached files if manifest does not matche with local files in temp dir."""
         s3_bucket.Object("test-prefix/manifest").put(
             Body=json.dumps(
