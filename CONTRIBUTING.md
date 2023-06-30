@@ -38,9 +38,9 @@ Request features on the [Issue Tracker].
 
 You need Python 3.8+ and the following tools:
 
-- [Poetry]
-- [Nox]
-- [nox-poetry]
+- [poetry](https://python-poetry.org/)
+- [nox](https://nox.thea.codes/)
+- [nox-poetry](https://nox-poetry.readthedocs.io/)
 
 Install the package with development requirements:
 

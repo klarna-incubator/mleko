@@ -16,7 +16,7 @@ classifiers = [
 Changelog = "https://github.com/ErikBavenstrand/mleko/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = "3.10.* || 3.9.* || 3.8.*"
+python = ">=3.8,<3.11.dev0"
 boto3 = "^1.26.91"
 botocore = "^1.29.91"
 tqdm = "^4.65.0"
@@ -37,7 +37,6 @@ flake8-rst-docstrings = ">=0.2.5"
 furo = ">=2021.11.12"
 isort = ">=5.10.1"
 moto = "^4.1.4"
-mypy = ">=0.930"
 pep8-naming = ">=0.12.1"
 pre-commit = ">=2.16.0"
 pre-commit-hooks = ">=4.1.0"
@@ -48,14 +47,12 @@ safety = ">=1.10.3"
 sphinx = ">=4.3.2"
 sphinx-autobuild = ">=2021.3.14"
 typeguard = ">=2.13.3"
-myst-parser = {version = ">=0.16.1"}
+myst-parser = ">=0.16.1"
 ipykernel = "^6.21.3"
-mypy-boto3-s3 = "^1.26.116"
-nox = "^2023.4.22"
-nox-poetry = "^1.0.2"
 sphinx-autodoc-typehints = "^1.23.0"
 sphinx-autoapi = "^2.1.0"
 python-semantic-release = "^7.33.3"
+pyright = "^1.1.316"
 
 [tool.coverage.paths]
 source = ["mleko", "*/site-packages"]
@@ -68,7 +65,7 @@ source = ["mleko"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 100
-exclude_lines = ["pragma: no cover", "raise NotImplementedError", '"""', "self._cached_execute"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", '"""']
 
 [tool.isort]
 profile = "black"
@@ -80,26 +77,10 @@ include_trailing_comma = true
 [tool.black]
 line-length = 120
 
-[tool.mypy]
-strict = true
-warn_unreachable = true
-pretty = true
-show_column_numbers = true
-show_error_codes = true
-show_error_context = true
-
-
-[[tool.mypy.overrides]]
-module = [
-    "vaex.*",
-    "tqdm.*",
-    "boto3.*",
-    "botocore.*",
-    "pyarrow.*",
-    "requests.*",
-    "sklearn.*",
-]
-ignore_missing_imports = true
+[tool.pyright]
+include = ["mleko"]
+reportMissingImports = true
+reportMissingTypeStubs = false
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
