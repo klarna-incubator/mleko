@@ -32,7 +32,9 @@ class LRUCacheMixin(CacheMixin):
     while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.
     """
 
-    def __init__(self, cache_directory: str | Path, cache_file_suffix: str, cache_size: int) -> None:
+    def __init__(
+        self, cache_directory: str | Path, cache_file_suffix: str, cache_size: int, disable_cache: bool
+    ) -> None:
         """Initializes the `LRUCacheMixin` with the provided cache directory and maximum number of cache entries.
 
         Note:
@@ -41,9 +43,10 @@ class LRUCacheMixin(CacheMixin):
             needed.
 
         Args:
-            cache_directory: The directory where cache files will be stored.
+            cache_directory: The directory where cache files will be stored. If None, the cache will be disabled.
             cache_file_suffix: The file extension to use for cache files.
             cache_size: The maximum number of cache entries allowed before eviction.
+            disable_cache: Whether to disable the cache.
 
         Examples:
             >>> from mleko.cache import LRUCacheMixin
@@ -52,7 +55,7 @@ class LRUCacheMixin(CacheMixin):
             ...         super().__init__("cache", "pkl", 2)
             ...
             ...     def my_method(self, x):
-            ...         return self._cached_execute(lambda: x ** 2, [x])
+            ...         return self._cached_execute(lambda: x ** 2, [x])[1]
             >>> my_class = MyClass()
             >>> my_class.my_method(2)
             4 # This is not cached
@@ -67,10 +70,11 @@ class LRUCacheMixin(CacheMixin):
             >>> my_class.my_method(4)
             16 # This is not cached, and the cache is full so the least recently used entry is evicted (x = 2)
         """
-        super().__init__(cache_directory, cache_file_suffix)
-        self._cache_size = cache_size
-        self._cache: dict[str, OrderedDict[str, bool]] = defaultdict(OrderedDict)
-        self._load_cache_from_disk()
+        super().__init__(cache_directory, cache_file_suffix, disable_cache)
+        if not self._disable_cache:
+            self._cache_size = cache_size
+            self._cache: dict[str, OrderedDict[str, bool]] = defaultdict(OrderedDict)
+            self._load_cache_from_disk()
 
     def _load_cache_from_disk(self) -> None:
         """Loads the cache entries from the cache directory and initializes the LRU cache.

@@ -16,14 +16,15 @@ class BaseSplitter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
     Will cache the split dataframes in the output directory.
     """
 
-    def __init__(self, cache_directory: str | Path, cache_size: int):
+    def __init__(self, cache_directory: str | Path, cache_size: int, disable_cache: bool):
         """Initializes the `BaseSplitter` with an output directory.
 
         Args:
             cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of cache entries.
+            disable_cache: Whether to disable caching.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
+        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size, disable_cache)
 
     @abstractmethod
     def split(

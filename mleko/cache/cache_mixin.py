@@ -46,6 +46,24 @@ def get_frame_qualname(frame: inspect.FrameInfo) -> str:
     return f"{module_name}.{caller_function}"
 
 
+def get_class_method_name(frame_depth: int) -> str:
+    """Gets the fully qualified name of the calling function or method.
+
+    The fully qualified name is in the format "module.class.method" for class methods or "module.function" for
+    functions.
+
+    Args:
+        frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+            function or method. For each nested function or method, the frame depth should be increased by 1.
+
+    Returns:
+        A string representing the fully qualified name of the calling function or method.
+    """
+    frame_qualname = get_frame_qualname(inspect.stack()[frame_depth])
+    class_method_name = ".".join(frame_qualname.split(".")[-2:])
+    return class_method_name
+
+
 class CacheMixin:
     """A mixin class for caching the results of method calls based on user-defined cache keys and fingerprints.
 
@@ -63,7 +81,7 @@ class CacheMixin:
         eviction of least recently used cache entries based on a specified maximum number of cache entries.
     """
 
-    def __init__(self, cache_directory: str | Path, cache_file_suffix: str) -> None:
+    def __init__(self, cache_directory: str | Path, cache_file_suffix: str, disable_cache: bool) -> None:
         """Initializes the `CacheMixin` with the provided cache directory.
 
         Note:
@@ -72,6 +90,7 @@ class CacheMixin:
         Args:
             cache_directory: The directory where cache files will be stored.
             cache_file_suffix: The suffix/file ending of the cache files.
+            disable_cache: Whether to disable the cache.
 
         Examples:
             >>> from mleko.cache.cache_mixin import CacheMixin
@@ -94,6 +113,7 @@ class CacheMixin:
         self._cache_directory.mkdir(parents=True, exist_ok=True)
         self._cache_file_suffix = cache_file_suffix
         self._cache_type_name = self._find_cache_type_name(self.__class__)
+        self._disable_cache = disable_cache
 
     def _cached_execute(
         self,
@@ -101,7 +121,7 @@ class CacheMixin:
         cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
         cache_group: str | None = None,
         force_recompute: bool = False,
-    ) -> Any:
+    ) -> tuple[bool, Any]:
         """Executes the given function, caching the results based on the provided cache keys and fingerprints.
 
         Warning:
@@ -121,12 +141,15 @@ class CacheMixin:
                 cached result is available.
 
         Returns:
-            The result of executing the given function. If a cached result is available and `force_recompute` is False,
-            the cached result will be returned instead of recomputing the result.
+            A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
+            given function. If a cached result is available and `force_recompute` is False, the cached result will be
+            returned instead of recomputing the result.
         """
-        frame_qualname = get_frame_qualname(inspect.stack()[1])
-        class_method_name = ".".join(frame_qualname.split(".")[-2:])
-        cache_key = self._compute_cache_key(cache_keys, class_method_name, cache_group)
+        if self._disable_cache:
+            return False, lambda_func()
+
+        class_method_name = get_class_method_name(2)
+        cache_key = self._compute_cache_key(cache_keys, cache_group)
 
         if not force_recompute:
             output = self._load_from_cache(cache_key)
@@ -134,7 +157,7 @@ class CacheMixin:
                 logger.info(
                     f"\033[32mCache Hit\033[0m ({self._cache_type_name}) {class_method_name}: Using cached output."
                 )
-                return output
+                return True, output
             else:
                 logger.info(
                     f"\033[31mCache Miss\033[0m ({self._cache_type_name}) {class_method_name}: Executing method."
@@ -146,22 +169,22 @@ class CacheMixin:
 
         output = lambda_func()
         self._save_to_cache(cache_key, output)
-        return self._load_from_cache(cache_key)
+        return False, self._load_from_cache(cache_key)
 
     def _compute_cache_key(
         self,
         cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
-        class_method_name: str,
         cache_group: str | None = None,
+        frame_depth: int = 3,
     ) -> str:
         """Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
 
         Args:
             cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
                 BaseFingerprinter instance for generating fingerprints.
-            class_method_name: A string of format "class.method" for class methods or "module.function" for
-                functions, representing the fully qualified name of the calling function or method.
             cache_group: A string representing the cache group.
+            frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+                function or method. For each nested function or method, the frame depth should be increased by 1.
 
         Raises:
             ValueError: If the computed cache key is too long.
@@ -180,7 +203,7 @@ class CacheMixin:
                 values_to_hash.append(key)
 
         data = pickle.dumps(values_to_hash)
-        cache_key_prefix = class_method_name
+        cache_key_prefix = get_class_method_name(frame_depth)
         if cache_group is not None:
             cache_key_prefix = f"{cache_key_prefix}.{cache_group}"
 

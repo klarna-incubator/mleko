@@ -30,6 +30,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         cache_directory: str | Path,
         feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...],
         cache_size: int = 1,
+        disable_cache: bool = False,
     ) -> None:
         """Initializes the composite feature selector.
 
@@ -40,6 +41,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             feature_selectors: List of feature selectors to be combined.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -75,8 +77,11 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             8    9    None
             9   10    None
         """
-        super().__init__(cache_directory, None, None, cache_size)
+        super().__init__(cache_directory, None, None, cache_size, disable_cache)
         self._feature_selectors = tuple(feature_selectors)
+
+        for feature_selector in self._feature_selectors:
+            feature_selector._disable_cache = True
 
     def select_features(
         self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
@@ -91,12 +96,13 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         Returns:
             DataFrame with the selected features.
         """
-        return self._cached_execute(
+        _, df = self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
+        return df
 
     def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Selects the features from the DataFrame.
@@ -112,7 +118,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            dataframe = feature_selector._select_features(dataframe).extract()
+            dataframe = feature_selector.select_features(dataframe).extract()
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return dataframe
 

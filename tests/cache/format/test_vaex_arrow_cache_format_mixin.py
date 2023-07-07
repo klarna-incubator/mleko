@@ -17,11 +17,11 @@ class TestVaexCacheFormatMixin:
 
         def __init__(self, cache_directory, max_entries):
             """Initialize cache."""
-            LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, max_entries)
+            LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, max_entries, False)
 
         def my_method(self, a, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a.fingerprint()], None, force_recompute)
+            return self._cached_execute(lambda: a, [a.fingerprint()], None, force_recompute)[1]
 
     def test_vaex_dataframe_arrow_mixin(self, temporary_directory: Path):
         """Should save to cache as expected."""

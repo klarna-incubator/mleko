@@ -38,6 +38,7 @@ class RandomSplitter(BaseSplitter):
         stratify: str | None = None,
         random_state: int | None = None,
         cache_size: int = 1,
+        disable_cache: bool = False,
     ):
         """Initializes the `RandomSplitter` with the given parameters.
 
@@ -46,6 +47,11 @@ class RandomSplitter(BaseSplitter):
             data. For example, if the data is split into 80% train and 20% test, and the stratification column contains
             80% of the rows with value 0 and 20% of the rows with value 1, the resulting split will contain 80% of the
             rows with value 0 and 20% of the rows with value 1.
+
+        Warning:
+            If `stratify` is not None and the target column is a string/categorical, the target feature must not have
+            any missing values. Please make sure to handle missing values before using this splitter by either dropping
+            the rows with missing values, imputing the missing values, or transforming the target to numeric or boolean.
 
         Args:
             cache_directory: The target directory where the split dataframes are to be saved.
@@ -56,6 +62,7 @@ class RandomSplitter(BaseSplitter):
             stratify: The name of the column to use for stratification. If None, stratification will not be performed.
             random_state: The seed to use for random number generation.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Example:
             >>> import vaex
@@ -72,7 +79,7 @@ class RandomSplitter(BaseSplitter):
                 0    2    1
                 1    4    0
         """
-        super().__init__(cache_directory, cache_size)
+        super().__init__(cache_directory, cache_size, disable_cache)
         self._idx2_size = [split / sum(data_split) for split in data_split][1]
         self._shuffle = shuffle
         self._stratify = stratify
@@ -95,7 +102,7 @@ class RandomSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        return self._cached_execute(
+        _, dfs = self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
             cache_keys=[
                 self._idx2_size,
@@ -107,6 +114,7 @@ class RandomSplitter(BaseSplitter):
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
+        return dfs
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.

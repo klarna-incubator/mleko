@@ -30,6 +30,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         cache_size: int = 1,
+        disable_cache: bool = False,
     ) -> None:
         """Initializes the feature selector.
 
@@ -49,6 +50,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -66,7 +68,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ... ).select_features(df).get_column_names()
             ['a', 'b']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(cache_directory, features, ignore_features, cache_size, disable_cache)
         self._missing_rate_threshold = missing_rate_threshold
 
     def select_features(
@@ -84,12 +86,13 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         Returns:
             The DataFrame with the selected features.
         """
-        return self._cached_execute(
+        _, df = self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe),
             cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
+        return df
 
     def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Selects features based on the missing rate.

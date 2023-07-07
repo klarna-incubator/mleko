@@ -23,7 +23,7 @@ class TestMinMaxScalerTransformer:
     def test_min_max_scaling_default_range(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly scale the specified features."""
         min_max_scaler_transformer = MinMaxScalerTransformer(temporary_directory, features=["a", "b"])
-        df = min_max_scaler_transformer._transform(example_vaex_dataframe)
+        df = min_max_scaler_transformer._transform(example_vaex_dataframe, fit=True)
 
         assert df["a"].tolist() == [0.0, 0.25, 0.5, 0.75, 1.0]  # type: ignore
         assert df["b"].tolist() == [0.25, 0.0, 0.5, 0.75, 1.0]  # type: ignore
@@ -33,15 +33,17 @@ class TestMinMaxScalerTransformer:
         min_max_scaler_transformer = MinMaxScalerTransformer(
             temporary_directory, features=["a", "b"], min_value=-1, max_value=1
         )
-        df = min_max_scaler_transformer._transform(example_vaex_dataframe)
+        df = min_max_scaler_transformer._transform(example_vaex_dataframe, fit=True)
 
         assert df["a"].tolist() == [-1.0, -0.5, 0.0, 0.5, 1.0]  # type: ignore
         assert df["b"].tolist() == [-0.5, -1.0, 0.0, 0.5, 1.0]  # type: ignore
 
     def test_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly scale the specified features and use cache if possible."""
-        MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).transform(example_vaex_dataframe)
+        MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).transform(example_vaex_dataframe, fit=True)
 
         with patch.object(MinMaxScalerTransformer, "_transform") as mocked_transform:
-            MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).transform(example_vaex_dataframe)
+            MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).transform(
+                example_vaex_dataframe, fit=False
+            )
             mocked_transform.assert_not_called()

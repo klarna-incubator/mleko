@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Hashable
+from typing import Any, Hashable
 
 import vaex
 
@@ -30,16 +30,19 @@ class CompositeTransformer(BaseTransformer):
         cache_directory: str | Path,
         transformers: list[BaseTransformer] | tuple[BaseTransformer, ...],
         cache_size: int = 1,
+        disable_cache: bool = False,
     ) -> None:
         """Initializes the composite transformer.
 
         The composite transformer will combine the transformers into a single transformer. Each transformer will be
-        applied to the DataFrame in the order they are specified.
+        applied to the DataFrame in the order they are specified. Caching of the intermediate DataFrames is disabled
+        and will only be performed on the final DataFrame.
 
         Args:
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             transformers: List of transformers to be combined.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -71,34 +74,50 @@ class CompositeTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, [], cache_size)
+        super().__init__(cache_directory, [], cache_size, disable_cache)
         self._transformers = tuple(transformers)
+        self._transformer: list[Any] = []
+
+        for transformer in self._transformers:
+            transformer._disable_cache = True
 
     def transform(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
     ) -> vaex.DataFrame:
         """Transforms the DataFrame using the transformers in the order they are specified.
 
         Args:
             dataframe: The DataFrame to transform.
+            fit: Whether to fit the transformers on the input data.
             cache_group: The cache group to use.
             force_recompute: Whether to force the recomputation of the transformation.
 
         Returns:
             The transformed DataFrame.
         """
-        return self._cached_execute(
-            lambda_func=lambda: self._transform(dataframe),
-            cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
+        cached, df = self._cached_execute(
+            lambda_func=lambda: self._transform(dataframe, fit),
+            cache_keys=cache_keys,
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        if fit:
+            self._save_or_load_transformer(cached, cache_keys)
+
+            if cached:
+                for transformer, transformer_pkl in zip(self._transformers, self._transformer):
+                    transformer._transformer = transformer_pkl
+
+        return df
+
+    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
         """Returns the transformed DataFrame.
 
         Args:
             dataframe: The DataFrame to transform.
+            fit: Whether to fit the transformers on the input data.
 
         Returns:
             The transformed DataFrame.
@@ -108,7 +127,8 @@ class CompositeTransformer(BaseTransformer):
                 f"Executing composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            dataframe = transformer._transform(dataframe).extract()
+            dataframe = transformer.transform(dataframe, fit).extract()
+            self._transformer.append(transformer._transformer)
             logger.info(f"Finished composite transformation step {i+1}/{len(self._transformers)}.")
         return dataframe
 

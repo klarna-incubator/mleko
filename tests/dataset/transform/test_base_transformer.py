@@ -28,7 +28,7 @@ class TestBaseTransformer:
 
     def test_abstract_methods(self, temporary_directory: Path):
         """Should return vaex dataframe from feature_select method."""
-        test_derived_transformer = self.DerivedTransformer(temporary_directory, [], 1)
+        test_derived_transformer = self.DerivedTransformer(temporary_directory, [], 1, False)
 
         df_train = test_derived_transformer.transform([])
         assert df_train.shape == (3, 2)

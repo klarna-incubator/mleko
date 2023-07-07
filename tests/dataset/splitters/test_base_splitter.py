@@ -20,7 +20,7 @@ class TestBaseSplitter:
 
     def test_abstract_methods(self, temporary_directory: Path):
         """Should return vaex dataframe from convert method."""
-        test_derived_data_splitter = self.DerivedSplitter(temporary_directory, 1)
+        test_derived_data_splitter = self.DerivedSplitter(temporary_directory, 1, False)
 
         df_train, df_test = test_derived_data_splitter.split([])
         assert df_train.shape == (3, 2)

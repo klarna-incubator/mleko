@@ -141,7 +141,7 @@ class CSVToVaexConverter(BaseConverter):
         Returns:
             The resulting dataframe with the combined converted data.
         """
-        return self._cached_execute(
+        _, df = self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
             cache_keys=[
                 self._forced_numerical_columns,
@@ -157,6 +157,7 @@ class CSVToVaexConverter(BaseConverter):
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
+        return df
 
     @staticmethod
     def _convert_csv_file_to_arrow(
