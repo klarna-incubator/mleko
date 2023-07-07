@@ -29,7 +29,7 @@ class TestPearsonCorrelationFeatureSelector:
         correlation_feature_selector = PearsonCorrelationFeatureSelector(
             temporary_directory, ignore_features=["target"], correlation_threshold=1.0
         )
-        df = correlation_feature_selector._select_features(example_vaex_dataframe)
+        df = correlation_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (5, 5)
         assert df.column_names == ["a", "a_modified", "b", "string_col", "target"]
 
@@ -38,7 +38,7 @@ class TestPearsonCorrelationFeatureSelector:
         correlation_feature_selector = PearsonCorrelationFeatureSelector(
             temporary_directory, ignore_features=["b", "target"], correlation_threshold=0.7
         )
-        df = correlation_feature_selector._select_features(example_vaex_dataframe)
+        df = correlation_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (5, 4)
         assert df.column_names == ["a_modified", "b", "string_col", "target"]
 
@@ -46,12 +46,12 @@ class TestPearsonCorrelationFeatureSelector:
         """Should cache the result of the feature selection."""
         df = PearsonCorrelationFeatureSelector(
             temporary_directory, ignore_features=["target"], correlation_threshold=0.7
-        ).select_features(example_vaex_dataframe)
+        ).select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (5, 4)
         assert df.column_names == ["a", "b", "string_col", "target"]
 
         with patch.object(PearsonCorrelationFeatureSelector, "_select_features") as mocked_select_features:
             PearsonCorrelationFeatureSelector(
                 temporary_directory, ignore_features=["target"], correlation_threshold=0.7
-            ).select_features(example_vaex_dataframe)
+            ).select_features(example_vaex_dataframe, fit=False)
             mocked_select_features.assert_not_called()

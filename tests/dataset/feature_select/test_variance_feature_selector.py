@@ -33,7 +33,7 @@ class TestVarianceFeatureSelector:
         variance_feature_selector = VarianceFeatureSelector(
             temporary_directory, ignore_features=["target"], variance_threshold=0
         )
-        df = variance_feature_selector._select_features(example_vaex_dataframe)
+        df = variance_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (5, 4)
         assert df.column_names == ["a", "a_m", "string_col", "target"]
 
@@ -42,20 +42,20 @@ class TestVarianceFeatureSelector:
         variance_feature_selector = VarianceFeatureSelector(
             temporary_directory, ignore_features=["b", "target"], variance_threshold=0.004
         )
-        df = variance_feature_selector._select_features(example_vaex_dataframe)
+        df = variance_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (5, 3)
         assert df.column_names == ["b", "string_col", "target"]
 
     def test_var_default(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should perform standard deviation feature selection on numeric columns by default."""
         df = VarianceFeatureSelector(temporary_directory, variance_threshold=0.004).select_features(
-            example_vaex_dataframe
+            example_vaex_dataframe, fit=True
         )
         assert df.shape == (5, 2)
         assert df.column_names == ["string_col", "target"]
 
         with patch.object(VarianceFeatureSelector, "_select_features") as mocked_select_features:
             VarianceFeatureSelector(temporary_directory, variance_threshold=0.004).select_features(
-                example_vaex_dataframe
+                example_vaex_dataframe, fit=False
             )
             mocked_select_features.assert_not_called()

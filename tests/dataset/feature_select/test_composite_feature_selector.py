@@ -46,10 +46,10 @@ class TestCompositeFeatureSelector:
             ],
         )
 
-        df_train = test_composite_feature_selector.select_features(example_vaex_dataframe)
+        df_train = test_composite_feature_selector.select_features(example_vaex_dataframe, fit=True)
         assert df_train.shape == (10, 1)
         assert df_train.column_names == ["a"]
 
         with patch.object(CompositeFeatureSelector, "_select_features") as mocked_select_features:
-            test_composite_feature_selector.select_features(example_vaex_dataframe)
+            test_composite_feature_selector.select_features(example_vaex_dataframe, fit=False)
             mocked_select_features.assert_not_called()

@@ -56,7 +56,7 @@ class ConvertStep(PipelineStep):
         """
         file_paths = data_container.data[self._inputs[0]]
         if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
-            raise ValueError
+            raise ValueError(f"Invalid data type: {type(file_paths)}. Expected list of Paths.")
 
         df = self._converter.convert(file_paths, self._cache_group, force_recompute)
         data_container.data[self._outputs[0]] = df

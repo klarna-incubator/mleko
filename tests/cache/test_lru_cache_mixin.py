@@ -79,7 +79,7 @@ class TestLRUCacheMixin:
         cache_file_keys = list(temporary_directory.glob(f"{cache_file_prefix_name}*.{cache_suffix}"))
         cache_file_endings = [int(cache_key.stem[-1]) for cache_key in cache_file_keys]
         assert len(lru_cached_class._cache) == 1
-        assert len(lru_cached_class._cache["test"].keys()) == n_cache_entries
+        assert len(lru_cached_class._cache["MyTestClass.test"].keys()) == n_cache_entries
         assert all([cache_key_ending > n_cache_entries for cache_key_ending in cache_file_endings])
 
     def test_two_classes_same_cache(self, temporary_directory: Path):

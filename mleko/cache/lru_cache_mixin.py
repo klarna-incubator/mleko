@@ -96,7 +96,9 @@ class LRUCacheMixin(CacheMixin):
             cache_key_match = re.search(file_name_pattern, cache_file.stem)
             if cache_key_match:
                 method_name, cache_group = cache_key_match.groups()
-                group_identifier = method_name + cache_group if cache_group else method_name
+                group_identifier = (
+                    f"{class_name}.{method_name}{cache_group}" if cache_group else f"{class_name}.{method_name}"
+                )
                 cache_key = cache_key_match.group(0)
 
                 if cache_key not in self._cache[group_identifier]:
@@ -104,9 +106,12 @@ class LRUCacheMixin(CacheMixin):
                         oldest_key = next(iter(self._cache[group_identifier]))
                         del self._cache[group_identifier][oldest_key]
                         for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                            logger.debug(f"Max cache size reached ({self._cache_size}), deleting file {file}")
                             file.unlink()
 
                     self._cache[group_identifier][cache_key] = True
+
+        self._delete_non_cache_files()
 
     def _load_from_cache(self, cache_key: str) -> Any | None:
         """Loads data from the cache based on the provided cache key and updates the LRU cache.
@@ -132,18 +137,24 @@ class LRUCacheMixin(CacheMixin):
             cache_key: A string representing the cache key.
             output: The data to be saved to the cache.
         """
+        frame_qualname = get_frame_qualname(inspect.stack()[2])
+        class_name = frame_qualname.split(".")[-2]
         cache_key_match = re.match(
             r"[a-zA-Z_][a-zA-Z0-9_]*\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{32}", cache_key
         )
+
         if cache_key_match:
             method_name, cache_group = cache_key_match.groups()
-            group_identifier = method_name + cache_group if cache_group else method_name
+            group_identifier = (
+                f"{class_name}.{method_name}{cache_group}" if cache_group else f"{class_name}.{method_name}"
+            )
 
             if cache_key not in self._cache[group_identifier]:
                 if len(self._cache[group_identifier]) >= self._cache_size:
                     oldest_key = next(iter(self._cache[group_identifier]))
                     del self._cache[group_identifier][oldest_key]
                     for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
+                        logger.debug(f"Max cache size reached ({self._cache_size}), deleting file {file}")
                         file.unlink()
 
                 self._cache[group_identifier][cache_key] = True
@@ -151,3 +162,14 @@ class LRUCacheMixin(CacheMixin):
                 self._cache[group_identifier].move_to_end(cache_key)
 
             super()._save_to_cache(cache_key, output)
+
+        self._delete_non_cache_files()
+
+    def _delete_non_cache_files(self) -> None:
+        """Deletes all non-cached files which are not connected to any in-memory cache entry."""
+        for group_identifier in self._cache.keys():
+            for file in self._cache_directory.glob(f"{group_identifier}*"):
+                cache_key = re.sub(r"_\d+$", "", file.stem)
+                if cache_key not in self._cache[group_identifier]:
+                    logger.debug(f"No matching cache entry found, deleting non-cached file {file}")
+                    file.unlink()

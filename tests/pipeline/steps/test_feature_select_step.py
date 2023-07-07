@@ -18,7 +18,7 @@ class TestFeatureSelectStep:
         """Should init the FeatureSelectStep with a feature_selector."""
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         feature_select_step = FeatureSelectStep(
-            feature_selector=feature_selector, inputs=["df_train"], outputs=["df_train_selected"]
+            feature_selector=feature_selector, fit=True, inputs=["df_train"], outputs=["df_train_selected"]
         )
 
         assert feature_select_step._feature_selector == feature_selector
@@ -32,14 +32,18 @@ class TestFeatureSelectStep:
         feature_selector.select_features = MagicMock(return_value=df)
 
         feature_select_step = FeatureSelectStep(
-            feature_selector=feature_selector, inputs=["df_clean"], outputs=["df_clean_selected"], cache_group=None
+            feature_selector=feature_selector,
+            fit=True,
+            inputs=["df_clean"],
+            outputs=["df_clean_selected"],
+            cache_group=None,
         )
         result = feature_select_step.execute(data_container, force_recompute=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
-        feature_selector.select_features.assert_called_once_with(data_container.data["df_clean"], None, False)
+        feature_selector.select_features.assert_called_once_with(data_container.data["df_clean"], True, None, False)
 
     def test_wrong_data_type(self):
         """Should throw ValueError if not recieving a vaex dataframe."""
@@ -48,7 +52,7 @@ class TestFeatureSelectStep:
 
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         feature_select_step = FeatureSelectStep(
-            feature_selector=feature_selector, inputs=["df_clean"], outputs=["df_train_selected"]
+            feature_selector=feature_selector, fit=True, inputs=["df_clean"], outputs=["df_train_selected"]
         )
 
         with pytest.raises(ValueError):
@@ -58,7 +62,7 @@ class TestFeatureSelectStep:
         """Should throw ValueError inputs or outputs number is incorrect."""
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         with pytest.raises(ValueError):
-            FeatureSelectStep(feature_selector=feature_selector, inputs=[], outputs=["converted_data"])
+            FeatureSelectStep(feature_selector=feature_selector, fit=True, inputs=[], outputs=["converted_data"])
 
         with pytest.raises(ValueError):
-            FeatureSelectStep(feature_selector=feature_selector, inputs=["raw_data"], outputs=[])
+            FeatureSelectStep(feature_selector=feature_selector, fit=True, inputs=["raw_data"], outputs=[])

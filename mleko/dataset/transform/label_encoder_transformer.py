@@ -7,7 +7,6 @@ from typing import Hashable
 import vaex
 import vaex.ml
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -67,35 +66,6 @@ class LabelEncoderTransformer(BaseTransformer):
         super().__init__(cache_directory, features, cache_size, disable_cache)
         self._allow_unseen = allow_unseen
         self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
-
-    def transform(
-        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
-        """Transforms the features of the given DataFrame using label encoding.
-
-        Will cache the resulting DataFrame in the cache directory.
-
-        Args:
-            dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
-            cache_group: The cache group to use.
-            force_recompute: Whether to force recomputation of the transformation.
-
-        Returns:
-            The transformed DataFrame.
-        """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
-        cached, df = self._cached_execute(
-            lambda_func=lambda: self._transform(dataframe, fit),
-            cache_keys=cache_keys,
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-        )
-
-        if fit and not self._disable_cache:
-            self._save_or_load_transformer(cached, cache_keys)
-
-        return df
 
     def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
         """Transforms the features of the given DataFrame using label encoding.

@@ -104,7 +104,7 @@ class CompositeTransformer(BaseTransformer):
         )
 
         if fit:
-            self._save_or_load_transformer(cached, cache_keys)
+            self._save_or_load_transformer(cached, cache_group, cache_keys)
 
             if cached:
                 for transformer, transformer_pkl in zip(self._transformers, self._transformer):

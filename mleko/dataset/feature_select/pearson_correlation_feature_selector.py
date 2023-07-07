@@ -8,7 +8,6 @@ from typing import Hashable
 import numpy as np
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_columns
@@ -73,39 +72,37 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         """
         super().__init__(cache_directory, features, ignore_features, cache_size, disable_cache)
         self._correlation_threshold = correlation_threshold
+        self._feature_selector: set[str] = set()
 
-    def select_features(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
         """Selects features based on the Pearson correlation.
 
         Args:
             dataframe: The DataFrame to select features from.
-            cache_group: The cache group to use.
-            force_recompute: Whether to force recompute the selected features.
+            fit: Whether to fit the feature selector on the input data.
 
         Returns:
             The DataFrame with the selected features.
         """
-        _, df = self._cached_execute(
-            lambda_func=lambda: self._select_features(dataframe),
-            cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-        )
-        return df
+        if fit:
+            self._fit(dataframe)
 
-    def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Selects features based on the Pearson correlation.
+        dropped_features = self._feature_selector
+        logger.info(
+            f"Dropping ({len(dropped_features)}) features with correlation >= {self._correlation_threshold}: "
+            f"{dropped_features}."
+        )
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
+
+    def _fit(self, dataframe: vaex.DataFrame) -> None:
+        """Fits the feature selector on the input data.
 
         Args:
-            dataframe: The DataFrame to select features from.
-
-        Returns:
-            The DataFrame with the selected features.
+            dataframe: The DataFrame to fit the feature selector on.
         """
         features = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
+        logger.info(f"Fitting pearson correlation feature selector on {len(features)} features: {features}.")
 
         corr_matrix = abs(np.array(dataframe.correlation(features)))
         avg_corr = corr_matrix.mean(axis=1)
@@ -150,14 +147,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         }
 
         # Combine guaranteed_dropped and additional_dropped sets
-        dropped_features = guaranteed_dropped.union(additional_dropped)
-        logger.info(
-            f"Dropping ({len(dropped_features)}) features with correlation >= {self._correlation_threshold}: "
-            f"{dropped_features}."
-        )
-
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
+        self._feature_selector = guaranteed_dropped.union(additional_dropped)
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

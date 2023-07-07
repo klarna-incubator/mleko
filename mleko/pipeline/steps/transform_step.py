@@ -55,7 +55,7 @@ class TransformStep(PipelineStep):
         """
         dataframe = data_container.data[self._inputs[0]]
         if not isinstance(dataframe, DataFrame):
-            raise ValueError
+            raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")
 
         df = self._transformer.transform(dataframe, self._fit, self._cache_group, force_recompute)
         data_container.data[self._outputs[0]] = df

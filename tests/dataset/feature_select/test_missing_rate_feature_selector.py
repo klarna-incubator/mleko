@@ -39,7 +39,7 @@ class TestMissingRateFeatureSelector:
             temporary_directory, ignore_features=["target"], missing_rate_threshold=0.2
         )
 
-        df = test_missing_rate_feature_selector._select_features(example_vaex_dataframe)
+        df = test_missing_rate_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (10, 2)
         assert df.column_names == ["a", "target"]
 
@@ -49,20 +49,20 @@ class TestMissingRateFeatureSelector:
             temporary_directory, features=["b"], missing_rate_threshold=0.5
         )
 
-        df = test_missing_rate_feature_selector._select_features(example_vaex_dataframe)
+        df = test_missing_rate_feature_selector._select_features(example_vaex_dataframe, fit=True)
         assert df.shape == (10, 3)
         assert df.column_names == ["a", "b", "target"]
 
     def test_filter_missing_cached(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should filter away columns with missing rate above threshold."""
         df = MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).select_features(
-            example_vaex_dataframe
+            example_vaex_dataframe, fit=True
         )
         assert df.shape == (10, 1)
         assert df.column_names == ["a"]
 
         with patch.object(MissingRateFeatureSelector, "_select_features") as mock_select_features:
             MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).select_features(
-                example_vaex_dataframe
+                example_vaex_dataframe, fit=False
             )
             mock_select_features.assert_not_called()
