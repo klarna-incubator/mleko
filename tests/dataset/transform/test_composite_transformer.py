@@ -71,7 +71,7 @@ class TestCompositeTransformer:
                 LabelEncoderTransformer(temporary_directory, features=["a"]),
                 FrequencyEncoderTransformer(temporary_directory, features=["b"]),
             ],
-        ).transform(example_vaex_dataframe, fit=False)
+        ).transform(example_vaex_dataframe, fit=True)
         second_cache = list(temporary_directory.glob("*"))
 
         assert sorted(df["a"].tolist()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # type: ignore

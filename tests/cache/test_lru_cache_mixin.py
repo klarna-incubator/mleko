@@ -71,6 +71,8 @@ class TestLRUCacheMixin:
         for i in range(n_cache_entries + 3):
             new_file = temporary_directory / f"MyTestClass.test.{cache_file_prefix_name}{i}.{cache_suffix}"
             new_file.touch()
+            new_file_extra = temporary_directory / f"MyTestClass.test.{cache_file_prefix_name}{i}.pkl"
+            new_file_extra.touch()
             new_modified_time = datetime.timestamp(datetime.now() + timedelta(hours=i))
             os.utime(new_file, (new_modified_time, new_modified_time))
 
@@ -78,6 +80,7 @@ class TestLRUCacheMixin:
 
         cache_file_keys = list(temporary_directory.glob(f"{cache_file_prefix_name}*.{cache_suffix}"))
         cache_file_endings = [int(cache_key.stem[-1]) for cache_key in cache_file_keys]
+        assert len(list(temporary_directory.glob("*.pkl"))) == 2
         assert len(lru_cached_class._cache) == 1
         assert len(lru_cached_class._cache["MyTestClass.test"].keys()) == n_cache_entries
         assert all([cache_key_ending > n_cache_entries for cache_key_ending in cache_file_endings])

@@ -53,3 +53,32 @@ class TestCompositeFeatureSelector:
         with patch.object(CompositeFeatureSelector, "_select_features") as mocked_select_features:
             test_composite_feature_selector.select_features(example_vaex_dataframe, fit=False)
             mocked_select_features.assert_not_called()
+
+    def test_persistent_feature_selector_loaded_from_disk(
+        self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame
+    ):
+        """Should fit and transform the data and save the feature selector to disk."""
+        df = CompositeFeatureSelector(
+            temporary_directory,
+            [
+                MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
+                VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
+            ],
+        ).select_features(example_vaex_dataframe, fit=True)
+        first_cache = list(temporary_directory.glob("*"))
+
+        assert df.shape == (10, 1)
+        assert df.column_names == ["a"]
+
+        df = CompositeFeatureSelector(
+            temporary_directory,
+            [
+                MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
+                VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
+            ],
+        ).select_features(example_vaex_dataframe, fit=True)
+        second_cache = list(temporary_directory.glob("*"))
+
+        assert df.shape == (10, 1)
+        assert df.column_names == ["a"]
+        assert first_cache == second_cache
