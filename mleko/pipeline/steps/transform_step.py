@@ -22,6 +22,7 @@ class TransformStep(PipelineStep):
     def __init__(
         self,
         transformer: BaseTransformer,
+        fit: bool,
         inputs: list[str] | tuple[str, ...] | tuple[()] = (),
         outputs: list[str] | tuple[str, ...] | tuple[()] = (),
         cache_group: str | None = None,
@@ -30,12 +31,14 @@ class TransformStep(PipelineStep):
 
         Args:
             transformer: The Transformer responsible for handling feature transformation.
+            fit: Whether to fit the transformer on the input data.
             inputs: List or tuple of input keys expected by this step.
             outputs: List or tuple of output keys produced by this step.
             cache_group: The cache group to use.
         """
         super().__init__(inputs, outputs, cache_group)
         self._transformer = transformer
+        self._fit = fit
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
         """Perform transformation using the configured transformer.
@@ -52,8 +55,8 @@ class TransformStep(PipelineStep):
         """
         dataframe = data_container.data[self._inputs[0]]
         if not isinstance(dataframe, DataFrame):
-            raise ValueError
+            raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")
 
-        df = self._transformer.transform(dataframe, self._cache_group, force_recompute)
+        df = self._transformer.transform(dataframe, self._fit, self._cache_group, force_recompute)
         data_container.data[self._outputs[0]] = df
         return data_container

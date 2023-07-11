@@ -79,7 +79,7 @@ class KaggleCredentialsManager:
             env_credentials = KaggleCredentialsManager._read_environment_config()
 
             if env_credentials is None:
-                logger.warning(
+                logger.info(
                     "Kaggle API credentials not found in environment variables, attempting to fetch from "
                     f"fallback path at {KaggleCredentialsManager._CONFIG_DEFAULT_PATH}."
                 )

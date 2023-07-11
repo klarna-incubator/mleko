@@ -7,7 +7,6 @@ from typing import Hashable
 import vaex
 from tqdm.auto import tqdm
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.dataset.feature_select.base_feature_selector import BaseFeatureSelector
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
@@ -28,6 +27,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         cache_size: int = 1,
+        disable_cache: bool = False,
     ) -> None:
         """Initializes the feature selector.
 
@@ -46,6 +46,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -64,52 +65,42 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             >>> df_selected.get_column_names()
             ['a', 'c', 'd']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(cache_directory, features, ignore_features, cache_size, disable_cache)
+        self._feature_selector: set[str] = set()
 
-    def select_features(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
         """Selects features based on invariance.
 
         Args:
             dataframe: The DataFrame to select features from.
-            cache_group: The cache group to use for caching.
-            force_recompute: Whether to force recompute the selected features.
+            fit: Whether to fit the feature selector on the input data.
 
         Returns:
             The DataFrame with the selected features.
         """
-        return self._cached_execute(
-            lambda_func=lambda: self._select_features(dataframe),
-            cache_keys=[
-                self._fingerprint(),
-                (dataframe, VaexFingerprinter()),
-            ],
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-        )
+        if fit:
+            self._fit(dataframe)
 
-    def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Selects features based on invariance.
+        dropped_features = self._feature_selector
+        logger.info(f"Dropping ({len(dropped_features)}) invariant features: {dropped_features}.")
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
+
+    def _fit(self, dataframe: vaex.DataFrame) -> None:
+        """Fits the feature selector on the input data.
 
         Args:
-            dataframe: The DataFrame to select features from.
-
-        Returns:
-            The DataFrame with the selected features.
+            dataframe: The DataFrame to fit the feature selector on.
         """
         features = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
+        logger.info(f"Fitting invariance feature selector on {len(features)} features: {features}.")
 
         cardinality = {}
         for feature in tqdm(features, desc="Calculating invariance of features"):
             column = get_column(dataframe, feature)
             cardinality[feature] = column.nunique(limit=2, limit_raise=False)
 
-        dropped_features = {feature for feature in features if cardinality[feature] == 1}
-        logger.info(f"Dropping ({len(dropped_features)}) invariant features: {dropped_features}.")
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
+        self._feature_selector = {feature for feature in features if cardinality[feature] == 1}
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

@@ -7,7 +7,6 @@ from typing import Hashable
 import vaex
 from tqdm.auto import tqdm
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_columns
@@ -30,6 +29,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         cache_size: int = 1,
+        disable_cache: bool = False,
     ) -> None:
         """Initializes the feature selector.
 
@@ -49,6 +49,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -66,56 +67,48 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ... ).select_features(df).get_column_names()
             ['a', 'b']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(cache_directory, features, ignore_features, cache_size, disable_cache)
         self._missing_rate_threshold = missing_rate_threshold
+        self._feature_selector: set[str] = set()
 
-    def select_features(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
         """Selects features based on the missing rate.
-
-        Will cache the result of the feature selection.
 
         Args:
             dataframe: The DataFrame to select features from.
-            cache_group: The cache group to use.
-            force_recompute: Whether to force recompute the feature selection.
+            fit: Whether to fit the feature selector on the input data.
 
         Returns:
             The DataFrame with the selected features.
         """
-        return self._cached_execute(
-            lambda_func=lambda: self._select_features(dataframe),
-            cache_keys=[self._fingerprint(), (dataframe, VaexFingerprinter())],
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-        )
+        if fit:
+            self._fit(dataframe)
 
-    def _select_features(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Selects features based on the missing rate.
+        dropped_features = self._feature_selector
+        logger.info(
+            f"Dropping ({len(dropped_features)}) features with missing rate >= {self._missing_rate_threshold}: "
+            f"{dropped_features}."
+        )
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
+
+    def _fit(self, dataframe: vaex.DataFrame) -> None:
+        """Fits the feature selector on the input data.
 
         Args:
-            dataframe: The DataFrame to select features from.
-
-        Returns:
-            The DataFrame with the selected features.
+            dataframe: The DataFrame to fit the feature selector on.
         """
         features = self._feature_set(dataframe)
-        logger.info(f"Selecting features from the following set ({len(features)}): {features}.")
+        logger.info(f"Fitting missing rate feature selector on {len(features)} features: {features}.")
 
         missing_rate: dict[str, float] = {}
         for feature in tqdm(features, desc="Calculating missing rates for features"):
             column = get_column(dataframe, feature)
             missing_rate[feature] = column.countna() / dataframe.shape[0]
 
-        dropped_features = {feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold}
-        logger.info(
-            f"Dropping ({len(dropped_features)}) features with missing rate >= {self._missing_rate_threshold}: "
-            f"{dropped_features}."
-        )
-
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
+        self._feature_selector = {
+            feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold
+        }
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

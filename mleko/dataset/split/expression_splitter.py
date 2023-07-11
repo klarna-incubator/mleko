@@ -25,6 +25,7 @@ class ExpressionSplitter(BaseSplitter):
         cache_directory: str | Path,
         expression: str,
         cache_size: int = 1,
+        disable_cache: bool = False,
     ):
         """Initializes the `ExpressionSplitter` with the given parameters.
 
@@ -43,6 +44,7 @@ class ExpressionSplitter(BaseSplitter):
                 evaluates to True will be returned as the first dataframe, and the remaining rows will be returned
                 as the second dataframe.
             cache_size: The maximum number of entries to keep in the cache.
+            disable_cache: Whether to disable caching.
 
         Example:
             >>> import vaex
@@ -58,7 +60,7 @@ class ExpressionSplitter(BaseSplitter):
                 #    x    y
                 0    1    4
         """
-        super().__init__(cache_directory, cache_size)
+        super().__init__(cache_directory, cache_size, disable_cache)
         self._expression = expression
 
     def split(
@@ -74,7 +76,7 @@ class ExpressionSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        return self._cached_execute(
+        _, dfs = self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
             cache_keys=[
                 self._expression,
@@ -83,6 +85,7 @@ class ExpressionSplitter(BaseSplitter):
             cache_group=cache_group,
             force_recompute=force_recompute,
         )
+        return dfs
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.
