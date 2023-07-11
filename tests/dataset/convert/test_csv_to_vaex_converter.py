@@ -28,9 +28,9 @@ class TestCSVToVaexConverter:
         dfs = [vaex.open(f) for f in arrow_files]
 
         for df in dfs:
-            assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool]"
-            assert df.column_names == ["Time", "Date", "Count", "Name", "Is Best"]
-            assert df.shape == (3, 5)
+            assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, null]"
+            assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column"]
+            assert df.shape == (3, 6)
             assert df.Name.countna() == 1
             df.close()
 
@@ -40,7 +40,7 @@ class TestCSVToVaexConverter:
             temporary_directory,
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
-            forced_boolean_columns=["Is Best"],
+            forced_boolean_columns=["Is_Best"],
             num_workers=1,
         )
 
@@ -48,19 +48,19 @@ class TestCSVToVaexConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool]"
-        assert df.column_names == ["Time", "Date", "Count", "Name", "Is Best"]
-        assert df.shape == (n_files * 3, 5)
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, string]"
+        assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column"]
+        assert df.shape == (n_files * 3, 6)
         assert df.Name.countna() == n_files
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
-        assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 1
+        assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 1
 
         with patch.object(CSVToVaexConverter, "_convert") as patched_convert:
             new_csv_to_arrow_converter = CSVToVaexConverter(
                 temporary_directory,
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
-                forced_boolean_columns=["Is Best"],
+                forced_boolean_columns=["Is_Best"],
                 num_workers=1,
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
@@ -82,6 +82,6 @@ class TestCSVToVaexConverter:
         )
         df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 2
+        assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 2
         df.close()
         df_new.close()

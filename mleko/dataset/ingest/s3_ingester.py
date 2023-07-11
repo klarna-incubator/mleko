@@ -79,7 +79,9 @@ class S3Ingester(BaseIngester):
         super().__init__(destination_directory)
         self._s3_bucket_name = s3_bucket_name
         self._s3_key_prefix = s3_key_prefix
-        self._s3_client = self._get_s3_client(aws_profile_name, aws_region_name)
+        self._aws_profile_name = aws_profile_name
+        self._aws_region_name = aws_region_name
+        self._s3_client = self._get_s3_client(self._aws_profile_name, self._aws_region_name)
         self._num_workers = num_workers
         self._manifest_file_name = manifest_file_name
         self._check_s3_timestamps = check_s3_timestamps
@@ -100,6 +102,7 @@ class S3Ingester(BaseIngester):
         Returns:
             A list of Path objects pointing to the downloaded data files.
         """
+        self._s3_client = self._get_s3_client(self._aws_profile_name, self._aws_region_name)
         resp = self._s3_client.list_objects(
             Bucket=self._s3_bucket_name,
             Prefix=self._s3_key_prefix,
@@ -107,7 +110,7 @@ class S3Ingester(BaseIngester):
 
         if self._check_s3_timestamps:
             modification_dates = {key["LastModified"].day for key in resp["Contents"] if "LastModified" in key}
-            if len(modification_dates) != 1:
+            if len(modification_dates) > 1:
                 raise Exception(
                     "Files in S3 are from muliples dates. This might mean the data is corrupted/duplicated."
                 )

@@ -33,4 +33,4 @@ class TestVaexCacheFormatMixin:
         df = my_test_instance.my_method(vaex.from_arrays(x=[1, 2, 3]))
         assert df.x.tolist() == [1, 2, 3]
 
-        assert len(list(temporary_directory.glob("*.arrow"))) == 1
+        assert len(list(temporary_directory.glob("*.hdf5"))) == 1

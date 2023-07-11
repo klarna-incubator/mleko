@@ -163,7 +163,6 @@ class CSVToVaexConverter(BaseConverter):
     def _convert_csv_file_to_arrow(
         file_path: Path | str,
         output_directory: Path,
-        dataframe_suffix: str,
         forced_numerical_columns: tuple[str, ...],
         forced_categorical_columns: tuple[str, ...],
         forced_boolean_columns: tuple[str, ...],
@@ -181,7 +180,6 @@ class CSVToVaexConverter(BaseConverter):
         Args:
             file_path: The path of the CSV file to be converted.
             output_directory: The directory where the converted file should be saved.
-            dataframe_suffix: The suffix for the converted dataframe files.
             forced_numerical_columns: A sequence of column names to be forced to numerical type.
             forced_categorical_columns: A sequence of column names to be forced to categorical type.
             forced_boolean_columns: A sequence of column names to be forced to boolean type.
@@ -229,7 +227,7 @@ class CSVToVaexConverter(BaseConverter):
             if get_column(df_chunk, column_name).dtype in (pa.date32(), pa.date64()):
                 df_chunk[column_name] = get_column(df_chunk, column_name).astype("datetime64[s]")
 
-        output_path = output_directory / f"df_chunk_{file_path.stem}.{dataframe_suffix}"
+        output_path = output_directory / f"df_chunk_{file_path.stem}.arrow"
         df_chunk.export(output_path, chunk_size=100_000, parallel=False)
         df_chunk.close()
 
@@ -250,7 +248,6 @@ class CSVToVaexConverter(BaseConverter):
                     CSVToVaexConverter._convert_csv_file_to_arrow,
                     file_paths,
                     repeat(self._cache_directory),
-                    repeat(self._cache_file_suffix),
                     repeat(self._forced_numerical_columns),
                     repeat(self._forced_categorical_columns),
                     repeat(self._forced_boolean_columns),
@@ -262,7 +259,11 @@ class CSVToVaexConverter(BaseConverter):
                 ):
                     pbar.update(1)
 
-        return vaex.open(self._cache_directory / f"df_chunk_*.{self._cache_file_suffix}")
+        df = vaex.open(self._cache_directory / "df_chunk_*.arrow")
+        for column_name in df.get_column_names(dtype=pa.null()):
+            df[column_name] = df[column_name].astype("string")
+
+        return df
 
     def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
         """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
@@ -272,4 +273,4 @@ class CSVToVaexConverter(BaseConverter):
             output: The Vaex DataFrame to be saved in the cache file.
         """
         super()._write_cache_file(cache_file_path, output)
-        clear_directory(cache_file_path.parent, pattern=f"df_chunk_*.{self._cache_file_suffix}")
+        clear_directory(cache_file_path.parent, pattern="df_chunk_*.arrow")
