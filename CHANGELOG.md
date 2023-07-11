@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2023-07-11)
+
+### Feature
+
+* ✨ Add fit transform support to all `FeatureSelector` along with refactoring the `LRUCacheMixin`. ([`3df0601`](https://github.com/ErikBavenstrand/mleko/commit/3df06011085a1230c00250260374e5fd5d325fad))
+* ✨ Add support for separate fitting and transforming inside the pipeline. ([`bb9b7a4`](https://github.com/ErikBavenstrand/mleko/commit/bb9b7a4ea9920d5588972a29e390bac4017b45af))
+
+### Fix
+
+* **data cleaning:** 🐛 Switched to HDF5 as file format for faster I/O and better SageMaker support. ([`61f9e42`](https://github.com/ErikBavenstrand/mleko/commit/61f9e42ef215485b16d83be9726040b829d5a3e7))
+
+### Chore
+
+* **deps:** Bump nox-poetry from 1.0.2 to 1.0.3 in /.github/workflows ([#70](https://github.com/ErikBavenstrand/mleko/issues/70)) ([`5aa535d`](https://github.com/ErikBavenstrand/mleko/commit/5aa535d3f3e3f3999d8bfce3409bd993ff500af2))
+* **deps:** Bump nox-poetry from 1.0.2 to 1.0.3 in /.github/workflows ([`b55b7e2`](https://github.com/ErikBavenstrand/mleko/commit/b55b7e2b6aa6c88c2afec1711c37ff7d31345a4e))
+
 ## v0.6.1 (2023-06-30)
 
 ### Fix
