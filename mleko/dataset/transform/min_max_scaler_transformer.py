@@ -28,7 +28,6 @@ class MinMaxScalerTransformer(BaseTransformer):
         min_value: float = 0.0,
         max_value: float = 1.0,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the min-max scaler transformer.
 
@@ -45,7 +44,6 @@ class MinMaxScalerTransformer(BaseTransformer):
             min_value: The minimum value of the range.
             max_value: The maximum value of the range.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -63,7 +61,7 @@ class MinMaxScalerTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [-0.2, -0.4, -0.6, -0.8, -1.0, 0.0, 0.2, 0.4, 0.6, 0.8]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._min_value = min_value
         self._max_value = max_value
         self._transformer = vaex.ml.MinMaxScaler(

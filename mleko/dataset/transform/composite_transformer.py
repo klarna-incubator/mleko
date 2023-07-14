@@ -30,7 +30,6 @@ class CompositeTransformer(BaseTransformer):
         cache_directory: str | Path,
         transformers: list[BaseTransformer] | tuple[BaseTransformer, ...],
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the composite transformer.
 
@@ -42,7 +41,6 @@ class CompositeTransformer(BaseTransformer):
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             transformers: List of transformers to be combined.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -74,7 +72,7 @@ class CompositeTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, [], cache_size, disable_cache)
+        super().__init__(cache_directory, [], cache_size)
         self._transformers = tuple(transformers)
         self._transformer: list[Any] = []
 

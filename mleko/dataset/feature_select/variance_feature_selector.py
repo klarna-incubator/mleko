@@ -29,7 +29,6 @@ class VarianceFeatureSelector(BaseFeatureSelector):
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the feature selector.
 
@@ -49,7 +48,6 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -70,7 +68,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             >>> df_selected.get_column_names()
             ['a', 'c', 'd']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, ignore_features, cache_size)
         self._variance_threshold = variance_threshold
         self._feature_selector: set[str] = set()
 

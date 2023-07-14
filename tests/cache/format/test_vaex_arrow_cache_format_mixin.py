@@ -17,7 +17,7 @@ class TestVaexCacheFormatMixin:
 
         def __init__(self, cache_directory, max_entries):
             """Initialize cache."""
-            LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, max_entries, False)
+            LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, max_entries)
 
         def my_method(self, a, force_recompute=False):
             """Cached execute."""

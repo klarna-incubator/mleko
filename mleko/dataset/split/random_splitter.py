@@ -38,7 +38,6 @@ class RandomSplitter(BaseSplitter):
         stratify: str | None = None,
         random_state: int | None = None,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ):
         """Initializes the `RandomSplitter` with the given parameters.
 
@@ -62,7 +61,6 @@ class RandomSplitter(BaseSplitter):
             stratify: The name of the column to use for stratification. If None, stratification will not be performed.
             random_state: The seed to use for random number generation.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Example:
             >>> import vaex
@@ -79,7 +77,7 @@ class RandomSplitter(BaseSplitter):
                 0    2    1
                 1    4    0
         """
-        super().__init__(cache_directory, cache_size, disable_cache)
+        super().__init__(cache_directory, cache_size)
         self._idx2_size = [split / sum(data_split) for split in data_split][1]
         self._shuffle = shuffle
         self._stratify = stratify

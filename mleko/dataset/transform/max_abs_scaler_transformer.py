@@ -26,7 +26,6 @@ class MaxAbsScalerTransformer(BaseTransformer):
         cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the max absolute scaler transformer.
 
@@ -41,7 +40,6 @@ class MaxAbsScalerTransformer(BaseTransformer):
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -59,7 +57,7 @@ class MaxAbsScalerTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [-0.2, -0.4, -0.6, -0.8, -1.0, 0.0, 0.2, 0.4, 0.6, 0.8]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._transformer = vaex.ml.MaxAbsScaler(features=self._features, prefix="")
 
     def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:

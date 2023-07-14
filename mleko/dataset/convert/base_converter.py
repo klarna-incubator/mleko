@@ -23,7 +23,7 @@ class BaseConverter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             cache_directory: The directory to store the cache in.
             cache_size: The maximum number of cache entries.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size, False)
+        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
 
     @abstractmethod
     def convert(

@@ -31,7 +31,6 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
         cache_size: int,
-        disable_cache: bool,
     ) -> None:
         """Initializes the transformer and ensures the destination directory exists.
 
@@ -39,9 +38,8 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of cache entries to keep in the cache.
-            disable_cache: Whether to disable the cache.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size, disable_cache)
+        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
         self._features: tuple[str, ...] = tuple(features)
         self._transformer = None
 

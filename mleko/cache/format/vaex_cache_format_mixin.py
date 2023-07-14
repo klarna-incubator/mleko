@@ -25,6 +25,7 @@ class VaexCacheFormatMixin:
     """
 
     _cache_file_suffix = "hdf5"
+    _type = vaex.DataFrame
     """The file extension to use for cache files."""
 
     def _read_cache_file(self, cache_file_path: Path) -> vaex.DataFrame:

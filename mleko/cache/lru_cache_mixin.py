@@ -32,9 +32,7 @@ class LRUCacheMixin(CacheMixin):
     while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.
     """
 
-    def __init__(
-        self, cache_directory: str | Path, cache_file_suffix: str, cache_size: int, disable_cache: bool
-    ) -> None:
+    def __init__(self, cache_directory: str | Path, cache_file_suffix: str, cache_size: int) -> None:
         """Initializes the `LRUCacheMixin` with the provided cache directory and maximum number of cache entries.
 
         Note:
@@ -46,7 +44,6 @@ class LRUCacheMixin(CacheMixin):
             cache_directory: The directory where cache files will be stored. If None, the cache will be disabled.
             cache_file_suffix: The file extension to use for cache files.
             cache_size: The maximum number of cache entries allowed before eviction.
-            disable_cache: Whether to disable the cache.
 
         Examples:
             >>> from mleko.cache import LRUCacheMixin
@@ -70,7 +67,7 @@ class LRUCacheMixin(CacheMixin):
             >>> my_class.my_method(4)
             16 # This is not cached, and the cache is full so the least recently used entry is evicted (x = 2)
         """
-        super().__init__(cache_directory, cache_file_suffix, disable_cache)
+        super().__init__(cache_directory, cache_file_suffix, cache_size <= 0)
         if not self._disable_cache:
             self._cache_size = cache_size
             self._cache: dict[str, OrderedDict[str, bool]] = defaultdict(OrderedDict)

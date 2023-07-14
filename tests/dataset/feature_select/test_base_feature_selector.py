@@ -33,7 +33,7 @@ class TestBaseFeatureSelector:
 
     def test_abstract_methods(self, temporary_directory: Path):
         """Should return vaex dataframe from feature_select method."""
-        test_derived_feature_selector = self.DerivedFeatureSelector(temporary_directory, [], None, 1, False)
+        test_derived_feature_selector = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
 
         df_train = test_derived_feature_selector.select_features([])
         assert df_train.shape == (3, 2)
@@ -42,4 +42,4 @@ class TestBaseFeatureSelector:
     def test_mutually_exclusive_arguments(self, temporary_directory: Path):
         """Should raise ValueError when both `features` and `exclude_features` are provided."""
         with pytest.raises(ValueError):
-            self.DerivedFeatureSelector(temporary_directory, [], [], 1, False)
+            self.DerivedFeatureSelector(temporary_directory, [], [], 1)

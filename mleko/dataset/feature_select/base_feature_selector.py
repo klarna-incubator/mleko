@@ -38,7 +38,6 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         features: list[str] | tuple[str, ...] | None,
         ignore_features: list[str] | tuple[str, ...] | None,
         cache_size: int,
-        disable_cache: bool,
     ) -> None:
         """Initializes the feature selector and ensures the destination directory exists.
 
@@ -53,12 +52,11 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             ignore_features: List of feature names to be ignored by the feature selector. If None, the default is to
                 ignore no features.
             cache_size: The maximum number of cache entries.
-            disable_cache: Whether to disable the cache.
 
         Raises:
             ValueError: If both `features` and `ignore_features` are specified.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size, disable_cache)
+        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
         if features is not None and ignore_features is not None:
             error_msg = (
                 "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."

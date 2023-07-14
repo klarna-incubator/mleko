@@ -27,7 +27,6 @@ class LabelEncoderTransformer(BaseTransformer):
         features: list[str] | tuple[str, ...],
         allow_unseen: bool = True,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the transformer.
 
@@ -43,7 +42,6 @@ class LabelEncoderTransformer(BaseTransformer):
             features: List of feature names to be used by the transformer.
             allow_unseen: Whether to allow unseen values once the transformer is fitted.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -63,7 +61,7 @@ class LabelEncoderTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._allow_unseen = allow_unseen
         self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
 

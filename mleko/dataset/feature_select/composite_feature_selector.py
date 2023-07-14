@@ -30,7 +30,6 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         cache_directory: str | Path,
         feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...],
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the composite feature selector.
 
@@ -41,7 +40,6 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             cache_directory: Directory where the resulting DataFrame will be stored locally.
             feature_selectors: List of feature selectors to be combined.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -77,7 +75,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             8    9    None
             9   10    None
         """
-        super().__init__(cache_directory, None, None, cache_size, disable_cache)
+        super().__init__(cache_directory, None, None, cache_size)
         self._feature_selectors = tuple(feature_selectors)
         self._feature_selector: list[Any] = []
 
