@@ -11,8 +11,8 @@ import vaex
 from pyarrow import csv as arrow_csv
 from tqdm.auto import tqdm
 
-from mleko.cache.cache_mixin import CacheHandler
 from mleko.cache.fingerprinters import CSVFingerprinter
+from mleko.cache.handlers import CacheHandler
 from mleko.cache.handlers.vaex_cache_handler import (
     VAEX_DATAFRAME_CACHE_HANDLER,
     read_vaex_dataframe,

@@ -16,7 +16,8 @@ from typing import Any, Sequence
 
 from mleko.utils.custom_logger import CustomLogger
 
-from .cache_mixin import CacheHandler, CacheMixin, get_qualified_name_from_frame
+from .cache_mixin import CacheMixin, get_qualified_name_from_frame
+from .handlers import CacheHandler
 
 
 METHOD_GROUP_CACHE_KEY_PATTERN = r"\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{32}"
