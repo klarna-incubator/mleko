@@ -74,6 +74,7 @@ class TestLRUCacheMixin:
             new_file_extra.touch()
             new_modified_time = datetime.timestamp(datetime.now() + timedelta(hours=i))
             os.utime(new_file, (new_modified_time, new_modified_time))
+            os.utime(new_file_extra, (new_modified_time, new_modified_time))
 
         lru_cached_class = self.MyTestClass(temporary_directory, 2)
 
