@@ -6,11 +6,10 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 
 
-class BaseSplitter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseSplitter(LRUCacheMixin, ABC):
     """Abstract base class for data splitter.
 
     Will cache the split dataframes in the output directory.
@@ -23,7 +22,7 @@ class BaseSplitter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of cache entries.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
+        LRUCacheMixin.__init__(self, cache_directory, cache_size)
 
     @abstractmethod
     def split(

@@ -6,11 +6,10 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 
 
-class BaseConverter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseConverter(LRUCacheMixin, ABC):
     """Abstract base class for data converter."""
 
     def __init__(self, cache_directory: str | Path, cache_size: int):
@@ -23,7 +22,7 @@ class BaseConverter(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             cache_directory: The directory to store the cache in.
             cache_size: The maximum number of cache entries.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
+        LRUCacheMixin.__init__(self, cache_directory, cache_size)
 
     @abstractmethod
     def convert(

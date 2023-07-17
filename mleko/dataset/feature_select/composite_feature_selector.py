@@ -7,6 +7,7 @@ from typing import Any, Hashable
 import vaex
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -99,9 +100,10 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
         cached, df = self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe, fit),
-            cache_keys=cache_keys,
+            cache_key_inputs=cache_keys,
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
 
         if fit:

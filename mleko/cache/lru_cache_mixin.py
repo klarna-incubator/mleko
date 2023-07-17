@@ -12,12 +12,15 @@ import inspect
 import re
 from collections import OrderedDict, defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from mleko.utils.custom_logger import CustomLogger
 
-from .cache_mixin import CacheMixin, get_frame_qualname
+from .cache_mixin import CacheHandler, CacheMixin, get_qualified_name_from_frame
 
+
+METHOD_GROUP_CACHE_KEY_PATTERN = r"\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{32}"
+"""A regular expression pattern for matching cache keys in the format `.<method_name>.<cache_key>.<fingerprint>`."""
 
 logger = CustomLogger()
 """A module-level custom logger."""
@@ -32,7 +35,7 @@ class LRUCacheMixin(CacheMixin):
     while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.
     """
 
-    def __init__(self, cache_directory: str | Path, cache_file_suffix: str, cache_size: int) -> None:
+    def __init__(self, cache_directory: str | Path, cache_size: int) -> None:
         """Initializes the `LRUCacheMixin` with the provided cache directory and maximum number of cache entries.
 
         Note:
@@ -42,7 +45,6 @@ class LRUCacheMixin(CacheMixin):
 
         Args:
             cache_directory: The directory where cache files will be stored. If None, the cache will be disabled.
-            cache_file_suffix: The file extension to use for cache files.
             cache_size: The maximum number of cache entries allowed before eviction.
 
         Examples:
@@ -67,7 +69,7 @@ class LRUCacheMixin(CacheMixin):
             >>> my_class.my_method(4)
             16 # This is not cached, and the cache is full so the least recently used entry is evicted (x = 2)
         """
-        super().__init__(cache_directory, cache_file_suffix, cache_size <= 0)
+        super().__init__(cache_directory, cache_size <= 0)
         if not self._disable_cache:
             self._cache_size = cache_size
             self._cache: dict[str, OrderedDict[str, bool]] = defaultdict(OrderedDict)
@@ -78,19 +80,17 @@ class LRUCacheMixin(CacheMixin):
 
         Cache entries are ordered by their modification time, and the cache is trimmed if needed.
         """
-        frame_qualname = get_frame_qualname(inspect.stack()[2])
+        frame_qualname = get_qualified_name_from_frame(inspect.stack()[2])
         class_name = frame_qualname.split(".")[-2]
-        file_name_pattern = rf"{class_name}\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{{32}}"
+        file_name_pattern = rf"{class_name}{METHOD_GROUP_CACHE_KEY_PATTERN}"
 
-        cache_files = [
-            f
-            for f in self._cache_directory.glob(f"*.{self._cache_file_suffix}")
-            if re.search(file_name_pattern, str(f.stem))
-        ]
-        ordered_cache_files = sorted(cache_files, key=lambda x: x.stat().st_mtime)
+        cache_files = [f for f in self._cache_directory.glob("*") if re.search(file_name_pattern, str(f.stem))]
+        ordered_cache_files = list(
+            dict.fromkeys([f.stem for f in sorted(cache_files, key=lambda x: x.stat().st_mtime)])
+        )
 
         for cache_file in ordered_cache_files:
-            cache_key_match = re.search(file_name_pattern, cache_file.stem)
+            cache_key_match = re.search(file_name_pattern, cache_file)
             if cache_key_match:
                 method_name, cache_group = cache_key_match.groups()
                 group_identifier = (
@@ -99,22 +99,21 @@ class LRUCacheMixin(CacheMixin):
                 cache_key = cache_key_match.group(0)
 
                 if cache_key not in self._cache[group_identifier]:
-                    if len(self._cache[group_identifier]) >= self._cache_size:
-                        oldest_key = next(iter(self._cache[group_identifier]))
-                        del self._cache[group_identifier][oldest_key]
-                        for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
-                            logger.debug(f"Max cache size reached ({self._cache_size}), deleting file {file}")
-                            file.unlink()
-
+                    self._evict_least_recently_used_if_full(group_identifier)
                     self._cache[group_identifier][cache_key] = True
 
-        self._delete_non_cache_files()
-
-    def _load_from_cache(self, cache_key: str) -> Any | None:
+    def _load_from_cache(
+        self,
+        cache_key: str,
+        cache_handlers: CacheHandler | list[CacheHandler],
+    ) -> Any | None:
         """Loads data from the cache based on the provided cache key and updates the LRU cache.
 
         Args:
             cache_key: A string representing the cache key.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                provided, each CacheHandler instance will be used for each cache file.
 
         Returns:
             The cached data if it exists, or None if there is no data for the given cache key.
@@ -122,10 +121,15 @@ class LRUCacheMixin(CacheMixin):
         for group_identifier in self._cache.keys():
             if cache_key in self._cache[group_identifier]:
                 self._cache[group_identifier].move_to_end(cache_key)
-            return super()._load_from_cache(cache_key)
+                return super()._load_from_cache(cache_key, cache_handlers)
         return None
 
-    def _save_to_cache(self, cache_key: str, output: Any) -> None:
+    def _save_to_cache(
+        self,
+        cache_key: str,
+        output: Any | Sequence[Any],
+        cache_handlers: CacheHandler | list[CacheHandler],
+    ) -> None:
         """Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
 
         If the cache reaches its maximum size, the least recently used entry will be evicted.
@@ -133,12 +137,13 @@ class LRUCacheMixin(CacheMixin):
         Args:
             cache_key: A string representing the cache key.
             output: The data to be saved to the cache.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                provided, each CacheHandler instance will be used for each cache file.
         """
-        frame_qualname = get_frame_qualname(inspect.stack()[2])
+        frame_qualname = get_qualified_name_from_frame(inspect.stack()[2])
         class_name = frame_qualname.split(".")[-2]
-        cache_key_match = re.match(
-            r"[a-zA-Z_][a-zA-Z0-9_]*\.([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)?\.[a-fA-F\d]{32}", cache_key
-        )
+        cache_key_match = re.match(rf"[a-zA-Z_][a-zA-Z0-9_]*{METHOD_GROUP_CACHE_KEY_PATTERN}", cache_key)
 
         if cache_key_match:
             method_name, cache_group = cache_key_match.groups()
@@ -147,26 +152,22 @@ class LRUCacheMixin(CacheMixin):
             )
 
             if cache_key not in self._cache[group_identifier]:
-                if len(self._cache[group_identifier]) >= self._cache_size:
-                    oldest_key = next(iter(self._cache[group_identifier]))
-                    del self._cache[group_identifier][oldest_key]
-                    for file in self._cache_directory.glob(f"{oldest_key}*.{self._cache_file_suffix}"):
-                        logger.debug(f"Max cache size reached ({self._cache_size}), deleting file {file}")
-                        file.unlink()
-
+                self._evict_least_recently_used_if_full(group_identifier)
                 self._cache[group_identifier][cache_key] = True
             else:
                 self._cache[group_identifier].move_to_end(cache_key)
 
-            super()._save_to_cache(cache_key, output)
+            super()._save_to_cache(cache_key, output, cache_handlers)
 
-        self._delete_non_cache_files()
+    def _evict_least_recently_used_if_full(self, group_identifier: str) -> None:
+        """Evicts the least recently used cache entry if the cache is full.
 
-    def _delete_non_cache_files(self) -> None:
-        """Deletes all non-cached files which are not connected to any in-memory cache entry."""
-        for group_identifier in self._cache.keys():
-            for file in self._cache_directory.glob(f"{group_identifier}*"):
-                cache_key = re.sub(r"_\d+$", "", file.stem)
-                if cache_key not in self._cache[group_identifier]:
-                    logger.debug(f"No matching cache entry found, deleting non-cached file {file}")
-                    file.unlink()
+        Args:
+            group_identifier: The group identifier for the cache entries.
+        """
+        if len(self._cache[group_identifier]) >= self._cache_size:
+            oldest_key = next(iter(self._cache[group_identifier]))
+            del self._cache[group_identifier][oldest_key]
+            for file in self._cache_directory.glob(f"{oldest_key}*.*"):
+                logger.debug(f"Max cache size reached ({self._cache_size}), deleting file {file}")
+                file.unlink()

@@ -11,6 +11,7 @@ import vaex
 from sklearn.model_selection import train_test_split
 
 from mleko.cache.fingerprinters import VaexFingerprinter
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_filtered_df
@@ -102,7 +103,7 @@ class RandomSplitter(BaseSplitter):
         """
         _, dfs = self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
-            cache_keys=[
+            cache_key_inputs=[
                 self._idx2_size,
                 self._shuffle,
                 self._stratify,
@@ -111,6 +112,7 @@ class RandomSplitter(BaseSplitter):
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
         return dfs
 

@@ -10,7 +10,7 @@ import vaex
 
 from mleko.cache.fingerprinters.base_fingerprinter import BaseFingerprinter
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 
@@ -19,7 +19,7 @@ logger = CustomLogger()
 """The logger for the module."""
 
 
-class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseTransformer(LRUCacheMixin, ABC):
     """Abstract class for feature transformation.
 
     The feature transformation process is implemented in the `transform` method, which takes a DataFrame as input and
@@ -39,7 +39,7 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of cache entries to keep in the cache.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
+        LRUCacheMixin.__init__(self, cache_directory, cache_size)
         self._features: tuple[str, ...] = tuple(features)
         self._transformer = None
 
@@ -57,16 +57,17 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Returns:
             Transformed DataFrame.
         """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
+        cache_key_inputs = [self._fingerprint(), (dataframe, VaexFingerprinter())]
         cached, df = self._cached_execute(
             lambda_func=lambda: self._transform(dataframe, fit),
-            cache_keys=cache_keys,
+            cache_key_inputs=cache_key_inputs,
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
 
         if fit and not self._disable_cache:
-            self._save_or_load_transformer(cached, cache_group, cache_keys)
+            self._save_or_load_transformer(cached, cache_group, cache_key_inputs)
 
         return df
 
@@ -103,7 +104,7 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         return self.__class__.__name__, self._features
 
     def _save_or_load_transformer(
-        self, load: bool, cache_group: str | None, cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]]
+        self, load: bool, cache_group: str | None, cache_key_inputs: list[Hashable | tuple[Any, BaseFingerprinter]]
     ) -> None:
         """Saves or loads the transformer to/from the cache.
 
@@ -114,9 +115,9 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Args:
             load: Whether to load the transformer from the cache or save it to the cache.
             cache_group: The cache group to use.
-            cache_keys: The cache keys to use for the transformer.
+            cache_key_inputs: The cache keys to use for the transformer.
         """
-        cache_key = self._compute_cache_key(cache_keys, cache_group, frame_depth=3)
+        cache_key = self._compute_cache_key(cache_key_inputs, cache_group, frame_depth=3)
         transformer_path = self._cache_directory / f"{cache_key}.transformer"
 
         if load:

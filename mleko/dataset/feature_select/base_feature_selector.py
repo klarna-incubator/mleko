@@ -10,7 +10,7 @@ import vaex
 
 from mleko.cache.fingerprinters.base_fingerprinter import BaseFingerprinter
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 
@@ -19,7 +19,7 @@ logger = CustomLogger()
 """The logger for the module."""
 
 
-class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseFeatureSelector(LRUCacheMixin, ABC):
     """Abstract class for feature selection.
 
     The feature selection process is implemented in the `select_features` method, which takes a DataFrame as input and
@@ -56,7 +56,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Raises:
             ValueError: If both `features` and `ignore_features` are specified.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size)
+        LRUCacheMixin.__init__(self, cache_directory, cache_size)
         if features is not None and ignore_features is not None:
             error_msg = (
                 "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
@@ -82,15 +82,16 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Returns:
             A DataFrame with the selected features.
         """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
+        cache_key_inputs = [self._fingerprint(), (dataframe, VaexFingerprinter())]
         cached, df = self._cached_execute(
             lambda_func=lambda: self._select_features(dataframe, fit),
-            cache_keys=cache_keys,
+            cache_key_inputs=cache_key_inputs,
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
         if fit and not self._disable_cache:
-            self._save_or_load_feature_selector(cached, cache_group, cache_keys)
+            self._save_or_load_feature_selector(cached, cache_group, cache_key_inputs)
 
         return df
 
@@ -158,7 +159,7 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         )
 
     def _save_or_load_feature_selector(
-        self, load: bool, cache_group: str | None, cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]]
+        self, load: bool, cache_group: str | None, cache_key_inputs: list[Hashable | tuple[Any, BaseFingerprinter]]
     ) -> None:
         """Saves or loads the feature selector to/from the cache.
 
@@ -169,9 +170,9 @@ class BaseFeatureSelector(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         Args:
             load: Whether to load the feature selector from the cache or save it to the cache.
             cache_group: The cache group to use.
-            cache_keys: The cache keys to use for the feature selector.
+            cache_key_inputs: The cache keys to use for the feature selector.
         """
-        cache_key = self._compute_cache_key(cache_keys, cache_group, frame_depth=3)
+        cache_key = self._compute_cache_key(cache_key_inputs, cache_group, frame_depth=3)
         feature_selector_path = self._cache_directory / f"{cache_key}.feature_selector"
 
         if load:

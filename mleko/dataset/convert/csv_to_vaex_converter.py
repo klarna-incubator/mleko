@@ -11,7 +11,13 @@ import vaex
 from pyarrow import csv as arrow_csv
 from tqdm.auto import tqdm
 
+from mleko.cache.cache_mixin import CacheHandler
 from mleko.cache.fingerprinters import CSVFingerprinter
+from mleko.cache.handlers.vaex_cache_handler import (
+    VAEX_DATAFRAME_CACHE_HANDLER,
+    read_vaex_dataframe,
+    write_vaex_dataframe,
+)
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
@@ -25,6 +31,17 @@ logger = CustomLogger()
 
 V_CPU_COUNT = multiprocessing.cpu_count()
 """A module-level constant representing the total number of CPUs available on the current system."""
+
+
+def write_vaex_dataframe_with_cleanup(cache_file_path: Path, output: vaex.DataFrame) -> None:
+    """Writes the results of the DataFrame conversion to a file and cleans up the cache directory.
+
+    Args:
+        cache_file_path: The path of the cache file to be written.
+        output: The Vaex DataFrame to be saved in the cache file.
+    """
+    write_vaex_dataframe(cache_file_path, output)
+    clear_directory(cache_file_path.parent, pattern="df_chunk_*.arrow")
 
 
 class CSVToVaexConverter(BaseConverter):
@@ -143,7 +160,7 @@ class CSVToVaexConverter(BaseConverter):
         """
         _, df = self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
-            cache_keys=[
+            cache_key_inputs=[
                 self._forced_numerical_columns,
                 self._forced_categorical_columns,
                 self._forced_boolean_columns,
@@ -156,6 +173,11 @@ class CSVToVaexConverter(BaseConverter):
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=CacheHandler(
+                writer=write_vaex_dataframe_with_cleanup,
+                reader=read_vaex_dataframe,
+                suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
+            ),
         )
         return df
 
@@ -264,13 +286,3 @@ class CSVToVaexConverter(BaseConverter):
             df[column_name] = df[column_name].astype("string")
 
         return df
-
-    def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
-        """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
-
-        Args:
-            cache_file_path: The path of the cache file to be written.
-            output: The Vaex DataFrame to be saved in the cache file.
-        """
-        super()._write_cache_file(cache_file_path, output)
-        clear_directory(cache_file_path.parent, pattern="df_chunk_*.arrow")
