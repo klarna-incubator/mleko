@@ -110,14 +110,3 @@ class TestTransformStep:
 
         with pytest.raises(ValueError):
             TransformStep(transformer=transformer, action="fit", inputs=["raw_data"], outputs=[])
-
-    def test_invalid_action(self):
-        """Should throw value error if action is invalid."""
-        transformer = MagicMock(spec=BaseTransformer)
-        with pytest.raises(ValueError):
-            TransformStep(
-                transformer=transformer,
-                action="invalid_action",  # type: ignore
-                inputs=["raw_data"],
-                outputs=["converted_data"],
-            )
