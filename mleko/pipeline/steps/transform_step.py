@@ -47,7 +47,9 @@ class TransformStep(PipelineStep):
             ValueError: If action is not one of "fit", "transform", or "fit_transform".
         """
         if action not in ("fit", "transform", "fit_transform"):
-            raise ValueError(f"Invalid action: {action}. Expected one of 'fit', 'transform', or 'fit_transform'.")
+            raise ValueError(
+                f"Invalid action: {action}. Expected one of 'fit', 'transform', or 'fit_transform'."
+            )  # pragma: no cover
 
         if action == "fit_transform":
             self._num_outputs = 2
@@ -72,7 +74,7 @@ class TransformStep(PipelineStep):
         """
         dataframe = data_container.data[self._inputs[0]]
         if not isinstance(dataframe, DataFrame):
-            raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")  # pragma: no cover
+            raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")
 
         if self._action == "fit":
             transformer = self._transformer.fit(dataframe, self._cache_group, force_recompute)
