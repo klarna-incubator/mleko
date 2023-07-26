@@ -69,19 +69,15 @@ class FrequencyEncoderTransformer(BaseTransformer):
             features=self._features, unseen_strategy=self._unseen_strategy, prefix=""
         )
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features in the DataFrame using frequency encoding.
 
         Args:
             dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
 
         Returns:
             The transformed DataFrame.
         """
-        if fit:
-            self._fit(dataframe)
-
         logger.info(f"Transforming features using frequency encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df

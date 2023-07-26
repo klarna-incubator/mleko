@@ -25,7 +25,7 @@ class TestFrequencyEncoderTransformer:
     def test_frequency_encoding(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should drop invariant categorical and boolean columns."""
         invariance_feature_selector = FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"])
-        df = invariance_feature_selector._transform(example_vaex_dataframe, fit=True)
+        _, df = invariance_feature_selector._fit_transform(example_vaex_dataframe)
         c = df["c"].tolist()  # type: ignore
 
         assert df["a"].tolist() == [0.5, 0.5, 0.5, 0.5]  # type: ignore
@@ -35,12 +35,10 @@ class TestFrequencyEncoderTransformer:
 
     def test_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly frequency encode features and use cache if possible."""
-        FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"]).transform(
-            example_vaex_dataframe, fit=True
-        )
+        FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"]).fit_transform(example_vaex_dataframe)
 
-        with patch.object(FrequencyEncoderTransformer, "_transform") as mocked_transform:
-            FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"]).transform(
-                example_vaex_dataframe, fit=False
+        with patch.object(FrequencyEncoderTransformer, "_fit_transform") as mocked_fit_transform:
+            FrequencyEncoderTransformer(temporary_directory, features=["a", "b", "c"]).fit_transform(
+                example_vaex_dataframe
             )
-            mocked_transform.assert_not_called()
+            mocked_fit_transform.assert_not_called()

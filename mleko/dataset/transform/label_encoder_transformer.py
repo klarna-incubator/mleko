@@ -65,19 +65,15 @@ class LabelEncoderTransformer(BaseTransformer):
         self._allow_unseen = allow_unseen
         self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features of the given DataFrame using label encoding.
 
         Args:
             dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
 
         Returns:
             The transformed DataFrame.
         """
-        if fit:
-            self._fit(dataframe)
-
         logger.info(f"Transforming features using label encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df

@@ -60,19 +60,15 @@ class MaxAbsScalerTransformer(BaseTransformer):
         super().__init__(cache_directory, features, cache_size)
         self._transformer = vaex.ml.MaxAbsScaler(features=self._features, prefix="")
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features in the DataFrame using max-abs scaling.
 
         Args:
             dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
 
         Returns:
             The transformed DataFrame.
         """
-        if fit:
-            self._fit(dataframe)
-
         logger.info(f"Transforming features using max-abs scaling ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df
