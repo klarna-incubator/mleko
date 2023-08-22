@@ -21,7 +21,7 @@ class TestLRUCacheMixin:
 
         def my_method(self, a, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)[1]
+            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)
 
     class MyTestClass2(LRUCacheMixin):
         """Cached test class."""
@@ -32,7 +32,7 @@ class TestLRUCacheMixin:
 
         def my_method(self, a, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)[1]
+            return self._cached_execute(lambda: a, [a], cache_group, force_recompute)
 
     def test_eviction(self, temporary_directory: Path):
         """Should evict the least recently used cache entries correctly."""

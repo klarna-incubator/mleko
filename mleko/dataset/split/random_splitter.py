@@ -101,7 +101,7 @@ class RandomSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        _, dfs = self._cached_execute(
+        return self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
             cache_key_inputs=[
                 self._idx2_size,
@@ -114,7 +114,6 @@ class RandomSplitter(BaseSplitter):
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
-        return dfs
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.

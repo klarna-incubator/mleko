@@ -6,8 +6,6 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -63,7 +61,8 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             ...         ),
             ...     ],
             ... )
-            >>> feature_selector.select_features(df)
+            >>> _, df = feature_selector.fit_transform(df)
+            >>> df
             #    a    c
             0    1    1
             1    2    2
@@ -80,47 +79,31 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         self._feature_selectors = tuple(feature_selectors)
         self._feature_selector: list[Any] = []
 
-        for feature_selector in self._feature_selectors:
-            feature_selector._disable_cache = True
-
-    def select_features(
-        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
-        """Selects the features from the DataFrame.
+    def _fit(self, dataframe: vaex.DataFrame) -> list[Any]:
+        """Fits the feature selector on the DataFrame.
 
         Args:
-            dataframe: DataFrame from which the features will be selected.
-            fit: Whether to fit the feature selectors on the input data.
-            cache_group: The cache group to use for caching.
-            force_recompute: If True, the features will be recomputed even if they are cached.
+            dataframe: DataFrame on which the feature selector will be fitted.
 
         Returns:
-            DataFrame with the selected features.
+            List of fitted feature selectors.
         """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
-        cached, df = self._cached_execute(
-            lambda_func=lambda: self._select_features(dataframe, fit),
-            cache_key_inputs=cache_keys,
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
-        )
+        feature_selectors: list[Any] = []
+        for i, feature_selector in enumerate(self._feature_selectors):
+            logger.info(
+                f"Fitting composite feature selection step {i+1}/{len(self._feature_selectors)}: "
+                f"{feature_selector.__class__.__name__}."
+            )
+            feature_selector = feature_selector._fit(dataframe)
+            feature_selectors.append(feature_selector)
+            logger.info(f"Finished fitting composite feature selection step {i+1}/{len(self._feature_selectors)}.")
+        return feature_selectors
 
-        if fit:
-            self._save_or_load_feature_selector(cached, cache_group, cache_keys)
-
-            if cached:
-                for feature_selector, feature_selector_pkl in zip(self._feature_selectors, self._feature_selector):
-                    feature_selector._feature_selector = feature_selector_pkl
-
-        return df
-
-    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Selects the features from the DataFrame.
 
         Args:
             dataframe: DataFrame from which the features will be selected.
-            fit: Whether to fit the feature selectors on the input data.
 
         Returns:
             DataFrame with the selected features.
@@ -130,10 +113,21 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            dataframe = feature_selector.select_features(dataframe, fit).extract()
-            self._feature_selector.append(feature_selector._feature_selector)
+            dataframe = feature_selector._transform(dataframe).extract()
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return dataframe
+
+    def _assign_feature_selector(self, feature_selector: Any) -> None:
+        """Assigns the specified feature selector to the feature_selector attribute.
+
+        Can be overridden by subclasses to assign the feature selector using a different method.
+
+        Args:
+            feature_selector: Feature selector to be assigned.
+        """
+        self._feature_selector = feature_selector
+        for feature_selector_obj, fitted_feature_selector in zip(self._feature_selectors, feature_selector):
+            feature_selector_obj._feature_selector = fitted_feature_selector
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:  # pragma: no cover
         """Returns the default features of the DataFrame.

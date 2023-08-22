@@ -64,40 +64,22 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             ...     ignore_features=["c"],
             ...     variance_threshold=0.1,
             ... )
-            >>> df_selected = selector.select_features(df)
-            >>> df_selected.get_column_names()
+            >>> _, df = selector.fit_transform(df)
+            >>> df.get_column_names()
             ['a', 'c', 'd']
         """
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._variance_threshold = variance_threshold
         self._feature_selector: set[str] = set()
 
-    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Selects features based on the variance.
-
-        Args:
-            dataframe: The DataFrame to select features from.
-            fit: Whether to fit the feature selector on the input data.
-
-        Returns:
-            The DataFrame with the selected features.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        dropped_features = self._feature_selector
-        logger.info(
-            f"Dropping ({len(dropped_features)}) features with normalized variance <= {self._variance_threshold}: "
-            f"{dropped_features}."
-        )
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> set[str]:
         """Fits the feature selector on the input data.
 
         Args:
             dataframe: The DataFrame to fit the feature selector on.
+
+        Returns:
+            The set of selected features.
         """
         features = self._feature_set(dataframe)
         logger.info(f"Fitting variance feature selector on {len(features)} features: {features}.")
@@ -114,6 +96,24 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             variance[feature] = column.var()
 
         self._feature_selector = {feature for feature in features if variance[feature] <= self._variance_threshold}
+        return self._feature_selector
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Selects features based on the variance.
+
+        Args:
+            dataframe: The DataFrame to select features from.
+
+        Returns:
+            The DataFrame with the selected features.
+        """
+        dropped_features = self._feature_selector
+        logger.info(
+            f"Dropping ({len(dropped_features)}) features with normalized variance <= {self._variance_threshold}: "
+            f"{dropped_features}."
+        )
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

@@ -117,7 +117,7 @@ class CacheMixin:
         cache_group: str | None = None,
         force_recompute: bool = False,
         cache_handlers: CacheHandler | list[CacheHandler] | None = None,
-    ) -> tuple[bool, Any]:
+    ) -> Any:
         """Executes the given function, caching the results based on the provided cache keys and fingerprints.
 
         Warning:
@@ -146,7 +146,7 @@ class CacheMixin:
             returned instead of recomputing the result.
         """
         if self._disable_cache:
-            return False, lambda_func()
+            return lambda_func()
 
         if cache_handlers is None:
             cache_handlers = PICKLE_CACHE_HANDLER
@@ -160,7 +160,7 @@ class CacheMixin:
                 logger.info(
                     f"\033[32mCache Hit\033[0m ({self._cache_type_name}) {class_method_name}: Using cached output."
                 )
-                return True, output
+                return output
             else:
                 logger.info(
                     f"\033[31mCache Miss\033[0m ({self._cache_type_name}) {class_method_name}: Executing method."
@@ -172,7 +172,7 @@ class CacheMixin:
 
         output = lambda_func()
         self._save_to_cache(cache_key, output, cache_handlers)
-        return False, self._load_from_cache(cache_key, cache_handlers)
+        return self._load_from_cache(cache_key, cache_handlers)
 
     def _compute_cache_key(
         self,

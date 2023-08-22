@@ -54,10 +54,10 @@ class FrequencyEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> df = FrequencyEncoderTransformer(
+            >>> _, df = FrequencyEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
             >>> df["b"].tolist()
@@ -68,6 +68,19 @@ class FrequencyEncoderTransformer(BaseTransformer):
         self._transformer = vaex.ml.FrequencyEncoder(
             features=self._features, unseen_strategy=self._unseen_strategy, prefix=""
         )
+
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.FrequencyEncoder:
+        """Fits the transformer on the input data.
+
+        Args:
+            dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
+        """
+        logger.info(f"Fitting frequency encoder transformer ({len(self._features)}): {self._features}.")
+        self._transformer.fit(dataframe)
+        return self._transformer
 
     def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features in the DataFrame using frequency encoding.
@@ -81,15 +94,6 @@ class FrequencyEncoderTransformer(BaseTransformer):
         logger.info(f"Transforming features using frequency encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
-        """Fits the transformer on the input data.
-
-        Args:
-            dataframe: The DataFrame to fit the transformer on.
-        """
-        logger.info(f"Fitting frequency encoder transformer ({len(self._features)}): {self._features}.")
-        self._transformer.fit(dataframe)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

@@ -52,10 +52,10 @@ class MinMaxScalerTransformer(BaseTransformer):
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[-1, -2, -3, -4, -5, 0, 1, 2, 3, 4]
             ... )
-            >>> df = MaxAbsScalerTransformer(
+            >>> _, df = MaxAbsScalerTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
             >>> df["b"].tolist()
@@ -67,6 +67,19 @@ class MinMaxScalerTransformer(BaseTransformer):
         self._transformer = vaex.ml.MinMaxScaler(
             features=self._features, prefix="", feature_range=(self._min_value, self._max_value)
         )
+
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.MinMaxScaler:
+        """Fits the transformer on the given DataFrame.
+
+        Args:
+            dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
+        """
+        logger.info(f"Fitting min-max scaler transformer ({len(self._features)}): {self._features}.")
+        self._transformer.fit(dataframe)
+        return self._transformer
 
     def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features in the DataFrame using min-max scaling.
@@ -80,15 +93,6 @@ class MinMaxScalerTransformer(BaseTransformer):
         logger.info(f"Transforming features using min-max scaling ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
-        """Fits the transformer on the given DataFrame.
-
-        Args:
-            dataframe: The DataFrame to fit the transformer on.
-        """
-        logger.info(f"Fitting min-max scaler transformer ({len(self._features)}): {self._features}.")
-        self._transformer.fit(dataframe)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

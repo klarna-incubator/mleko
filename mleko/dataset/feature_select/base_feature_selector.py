@@ -5,11 +5,10 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Hashable
 
-import joblib
 import vaex
 
-from mleko.cache.fingerprinters.base_fingerprinter import BaseFingerprinter
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
@@ -68,46 +67,145 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
         self._feature_selector = None
 
-    def select_features(
-        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
-        """Selects features from the given DataFrame, using the cached result if available.
+    def fit(self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False) -> Any:
+        """Fits the feature selector to the specified DataFrame, using the cached result if available.
 
         Args:
-            dataframe: DataFrame from which to select features.
-            fit: Whether to fit the feature selector on the input data.
+            dataframe: DataFrame to be fitted.
             cache_group: The cache group to use.
-            force_recompute: Whether to force the feature selector to recompute its output, even if it already exists.
+            force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
 
         Returns:
-            A DataFrame with the selected features.
+            Fitted feature selector.
         """
-        cache_key_inputs = [self._fingerprint(), (dataframe, VaexFingerprinter())]
-        cached, df = self._cached_execute(
-            lambda_func=lambda: self._select_features(dataframe, fit),
-            cache_key_inputs=cache_key_inputs,
+        feature_selector = self._cached_execute(
+            lambda_func=lambda: self._fit(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
+            force_recompute=force_recompute,
+            cache_handlers=JOBLIB_CACHE_HANDLER,
+        )
+        self._assign_feature_selector(feature_selector)
+        return feature_selector
+
+    def transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> vaex.DataFrame:
+        """Extracts the selected features from the DataFrame, using the cached result if available.
+
+        Args:
+            dataframe: DataFrame to be transformed.
+            cache_group: The cache group to use.
+            force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+
+        Raises:
+            RuntimeError: If the feature selector has not been fitted.
+
+        Returns:
+            Transformed DataFrame.
+        """
+        if self._feature_selector is None:
+            raise RuntimeError("Feature selector must be fitted before it can be used to extract selected features.")
+
+        return self._cached_execute(
+            lambda_func=lambda: self._transform(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
-        if fit and not self._disable_cache:
-            self._save_or_load_feature_selector(cached, cache_group, cache_key_inputs)
 
-        return df
+    def fit_transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> tuple[Any, vaex.DataFrame]:
+        """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
 
-    @abstractmethod
-    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Selects features from the given DataFrame.
+        Args:
+            dataframe: DataFrame to be fitted and transformed.
+            cache_group: The cache group to use.
+            force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                cached.
+
+        Returns:
+            Tuple of fitted feature selector and transformed DataFrame.
+        """
+        feature_selector, df = self._cached_execute(
+            lambda_func=lambda: self._fit_transform(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
+            force_recompute=force_recompute,
+            cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+        )
+        self._assign_feature_selector(feature_selector)
+        return feature_selector, df
+
+    def _fit_transform(self, dataframe: vaex.DataFrame) -> tuple[Any, vaex.DataFrame]:
+        """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+        Args:
+            dataframe: DataFrame used for feature selection.
+
+        Returns:
+            Tuple of fitted feature selector and transformed DataFrame.
+        """
+        fitted_feature_selector = self._fit(dataframe)
+        return fitted_feature_selector, self._transform(dataframe)
+
+    def _assign_feature_selector(self, feature_selector: Any) -> None:
+        """Assigns the specified feature selector to the feature_selector attribute.
+
+        Can be overridden by subclasses to assign the feature selector using a different method.
+
+        Args:
+            feature_selector: Feature selector to be assigned.
+        """
+        self._feature_selector = feature_selector
+
+    def _feature_set(self, dataframe: vaex.DataFrame) -> list[str]:
+        """Returns the list of features to be used by the feature selector.
+
+        It is the default set of features minus the features to be ignored if the `features` argument is None, or the
+        list of names in the `features` argument if it is not None.
 
         Args:
             dataframe: DataFrame from which to select features.
-            fit: Whether to fit the feature selector on the input data.
+
+        Returns:
+            Sorted list of feature names to be used by the feature selector.
+        """
+        return sorted(
+            set(self._default_features(dataframe)) - set(self._ignore_features)
+            if self._features is None
+            else self._features
+        )
+
+    @abstractmethod
+    def _fit(self, dataframe: vaex.DataFrame) -> Any:
+        """Fits the feature selector to the specified DataFrame.
+
+        Args:
+            dataframe: DataFrame to be fitted.
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
 
         Returns:
-            A DataFrame with the selected features.
+            Fitted feature selector.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Transforms the dataframe by extracting the selected features.
+
+        Args:
+            dataframe: DataFrame to be transformed.
+
+        Raises:
+            NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
+
+        Returns:
+            Transformed DataFrame.
         """
         raise NotImplementedError
 
@@ -139,45 +237,3 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             Hashable object that uniquely identifies the feature selector.
         """
         return self.__class__.__name__, self._features, self._ignore_features
-
-    def _feature_set(self, dataframe: vaex.DataFrame) -> list[str]:
-        """Returns the list of features to be used by the feature selector.
-
-        It is the default set of features minus the features to be ignored if the `features` argument is None, or the
-        list of names in the `features` argument if it is not None.
-
-        Args:
-            dataframe: DataFrame from which to select features.
-
-        Returns:
-            Sorted list of feature names to be used by the feature selector.
-        """
-        return sorted(
-            set(self._default_features(dataframe)) - set(self._ignore_features)
-            if self._features is None
-            else self._features
-        )
-
-    def _save_or_load_feature_selector(
-        self, load: bool, cache_group: str | None, cache_key_inputs: list[Hashable | tuple[Any, BaseFingerprinter]]
-    ) -> None:
-        """Saves or loads the feature selector to/from the cache.
-
-        Will save the feature selector to the cache if `load` is False, otherwise will load the feature selector
-        from the cache. The cache key is computed using the specified cache keys and will be used to save the
-        feature selector to the cache using joblib.
-
-        Args:
-            load: Whether to load the feature selector from the cache or save it to the cache.
-            cache_group: The cache group to use.
-            cache_key_inputs: The cache keys to use for the feature selector.
-        """
-        cache_key = self._compute_cache_key(cache_key_inputs, cache_group, frame_depth=3)
-        feature_selector_path = self._cache_directory / f"{cache_key}.feature_selector"
-
-        if load:
-            logger.info(f"Loading feature selector from {feature_selector_path}.")
-            self._feature_selector = joblib.load(feature_selector_path)
-        else:
-            logger.info(f"Saving feature selector to {feature_selector_path}.")
-            joblib.dump(self._feature_selector, feature_selector_path)

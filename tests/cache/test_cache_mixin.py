@@ -73,15 +73,15 @@ class TestCacheMixin:
 
         def my_method_1(self, a, b, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a + b, [a, b], cache_group, force_recompute)[1]
+            return self._cached_execute(lambda: a + b, [a, b], cache_group, force_recompute)
 
         def my_method_2(self, a, b, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: a * b, [a, b], cache_group, force_recompute)[1]
+            return self._cached_execute(lambda: a * b, [a, b], cache_group, force_recompute)
 
         def my_method_3(self, list_vals, cache_group=None, force_recompute=False):
             """Cached execute."""
-            return self._cached_execute(lambda: list_vals, [list_vals], cache_group, force_recompute)[1]
+            return self._cached_execute(lambda: list_vals, [list_vals], cache_group, force_recompute)
 
         def multiple_output(self, list_vals, cache_group=None, force_recompute=False):
             """Cached execute with mulyiple outputs."""
@@ -200,7 +200,7 @@ class TestCacheMixin:
         values_tuple = tuple(range(102))
         result = my_test_instance.multiple_output(values_tuple)
 
-        assert result == (values_tuple, values_tuple)
+        assert result == values_tuple
         assert len(list(temporary_directory.glob("*.pkl"))) == 1
         assert len(list(temporary_directory.glob("*.joblib"))) == 1
 
@@ -208,4 +208,4 @@ class TestCacheMixin:
             cached_result = my_test_instance.multiple_output(values_tuple)
             patched_save_to_cache.assert_not_called()
 
-        assert cached_result == (values_tuple, values_tuple)
+        assert cached_result == values_tuple

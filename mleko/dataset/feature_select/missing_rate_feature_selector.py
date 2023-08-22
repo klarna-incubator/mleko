@@ -58,43 +58,26 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ...     b=[1, 2, 3, 4, 5, None, None, None, None, None],
             ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
             ... )
-            >>> MissingRateFeatureSelector(
+            >>> _, df = MissingRateFeatureSelector(
             ...     cache_directory=".",
             ...     ignore_features=["c"],
             ...     missing_rate_threshold=0.3,
-            ... ).select_features(df).get_column_names()
+            ... ).fit_transform(df)
+            >>> df.get_column_names()
             ['a', 'b']
         """
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._missing_rate_threshold = missing_rate_threshold
         self._feature_selector: set[str] = set()
 
-    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Selects features based on the missing rate.
-
-        Args:
-            dataframe: The DataFrame to select features from.
-            fit: Whether to fit the feature selector on the input data.
-
-        Returns:
-            The DataFrame with the selected features.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        dropped_features = self._feature_selector
-        logger.info(
-            f"Dropping ({len(dropped_features)}) features with missing rate >= {self._missing_rate_threshold}: "
-            f"{dropped_features}."
-        )
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> set[str]:
         """Fits the feature selector on the input data.
 
         Args:
             dataframe: The DataFrame to fit the feature selector on.
+
+        Returns:
+            The set of selected features.
         """
         features = self._feature_set(dataframe)
         logger.info(f"Fitting missing rate feature selector on {len(features)} features: {features}.")
@@ -107,6 +90,24 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         self._feature_selector = {
             feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold
         }
+        return self._feature_selector
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Selects features based on the missing rate.
+
+        Args:
+            dataframe: The DataFrame to select features from.
+
+        Returns:
+            The DataFrame with the selected features.
+        """
+        dropped_features = self._feature_selector
+        logger.info(
+            f"Dropping ({len(dropped_features)}) features with missing rate >= {self._missing_rate_threshold}: "
+            f"{dropped_features}."
+        )
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

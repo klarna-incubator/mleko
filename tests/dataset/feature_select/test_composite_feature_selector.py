@@ -46,37 +46,37 @@ class TestCompositeFeatureSelector:
             ],
         )
 
-        df_train = test_composite_feature_selector.select_features(example_vaex_dataframe, fit=True)
+        _, df_train = test_composite_feature_selector.fit_transform(example_vaex_dataframe)
         assert df_train.shape == (10, 1)
         assert df_train.column_names == ["a"]
 
-        with patch.object(CompositeFeatureSelector, "_select_features") as mocked_select_features:
-            test_composite_feature_selector.select_features(example_vaex_dataframe, fit=False)
-            mocked_select_features.assert_not_called()
+        with patch.object(CompositeFeatureSelector, "_fit_transform") as mocked_fit_transform:
+            test_composite_feature_selector.fit_transform(example_vaex_dataframe)
+            mocked_fit_transform.assert_not_called()
 
     def test_persistent_feature_selector_loaded_from_disk(
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should fit and transform the data and save the feature selector to disk."""
-        df = CompositeFeatureSelector(
+        _, df = CompositeFeatureSelector(
             temporary_directory,
             [
                 MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
                 VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
             ],
-        ).select_features(example_vaex_dataframe, fit=True)
+        ).fit_transform(example_vaex_dataframe)
         first_cache = list(temporary_directory.glob("*"))
 
         assert df.shape == (10, 1)
         assert df.column_names == ["a"]
 
-        df = CompositeFeatureSelector(
+        _, df = CompositeFeatureSelector(
             temporary_directory,
             [
                 MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
                 VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
             ],
-        ).select_features(example_vaex_dataframe, fit=True)
+        ).fit_transform(example_vaex_dataframe)
         second_cache = list(temporary_directory.glob("*"))
 
         assert df.shape == (10, 1)

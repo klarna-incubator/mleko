@@ -59,36 +59,21 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             >>> selector = InvarianceFeatureSelector(
             ...     cache_directory=".",
             ... )
-            >>> df_selected = selector.select_features(df)
+            >>> _, df_selected = selector.fit_transform(df)
             >>> df_selected.get_column_names()
             ['a', 'c', 'd']
         """
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._feature_selector: set[str] = set()
 
-    def _select_features(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Selects features based on invariance.
-
-        Args:
-            dataframe: The DataFrame to select features from.
-            fit: Whether to fit the feature selector on the input data.
-
-        Returns:
-            The DataFrame with the selected features.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        dropped_features = self._feature_selector
-        logger.info(f"Dropping ({len(dropped_features)}) invariant features: {dropped_features}.")
-        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> set[str]:
         """Fits the feature selector on the input data.
 
         Args:
             dataframe: The DataFrame to fit the feature selector on.
+
+        Returns:
+            The set of invariant features.
         """
         features = self._feature_set(dataframe)
         logger.info(f"Fitting invariance feature selector on {len(features)} features: {features}.")
@@ -99,6 +84,21 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             cardinality[feature] = column.nunique(limit=2, limit_raise=False)
 
         self._feature_selector = {feature for feature in features if cardinality[feature] == 1}
+        return self._feature_selector
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Selects features based on invariance.
+
+        Args:
+            dataframe: The DataFrame to select features from.
+
+        Returns:
+            The DataFrame with the selected features.
+        """
+        dropped_features = self._feature_selector
+        logger.info(f"Dropping ({len(dropped_features)}) invariant features: {dropped_features}.")
+        selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
+        return get_columns(dataframe, selected_features)
 
     def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
         """Returns the default set of features.

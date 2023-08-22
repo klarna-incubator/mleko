@@ -65,7 +65,7 @@ class CompositeTransformer(BaseTransformer):
             ...         ),
             ...     ],
             ... )
-            >>> df = transformer.transform(df)
+            >>> _, df = transformer.fit_transform(df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
@@ -75,14 +75,14 @@ class CompositeTransformer(BaseTransformer):
         self._transformers = tuple(transformers)
         self._transformer: list[Any] = []
 
-    def _fit(self, dataframe: vaex.DataFrame) -> Any:
+    def _fit(self, dataframe: vaex.DataFrame) -> list[Any]:
         """Fits the transformer to the specified DataFrame.
 
         Args:
             dataframe: DataFrame to be fitted.
 
         Returns:
-            Fitted transformer.
+            List of fitted transformers.
         """
         fitted_transformers: list[Any] = []
         for i, transformer in enumerate(self._transformers):

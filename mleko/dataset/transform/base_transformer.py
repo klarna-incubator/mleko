@@ -53,7 +53,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         Returns:
             Fitted transformer.
         """
-        _, transformer = self._cached_execute(
+        transformer = self._cached_execute(
             lambda_func=lambda: self._fit(dataframe),
             cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
@@ -82,14 +82,13 @@ class BaseTransformer(LRUCacheMixin, ABC):
         if self._transformer is None:
             raise RuntimeError("Transformer must be fitted before it can be used to transform data.")
 
-        _, df = self._cached_execute(
+        return self._cached_execute(
             lambda_func=lambda: self._transform(dataframe),
             cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
-        return df
 
     def fit_transform(
         self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
@@ -104,7 +103,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         Returns:
             Transformed DataFrame.
         """
-        _, (transformer, df) = self._cached_execute(
+        transformer, df = self._cached_execute(
             lambda_func=lambda: self._fit_transform(dataframe),
             cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,

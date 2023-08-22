@@ -51,11 +51,11 @@ class LabelEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> df = LabelEncoderTransformer(
+            >>> _, df = LabelEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
             ...     allow_unseen=True,
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
@@ -64,6 +64,19 @@ class LabelEncoderTransformer(BaseTransformer):
         super().__init__(cache_directory, features, cache_size)
         self._allow_unseen = allow_unseen
         self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
+
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.LabelEncoder:
+        """Fits the transformer on the given DataFrame.
+
+        Args:
+            dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
+        """
+        logger.info(f"Fitting label encoder transformer ({len(self._features)}): {self._features}.")
+        self._transformer.fit(dataframe)
+        return self._transformer
 
     def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Transforms the features of the given DataFrame using label encoding.
@@ -77,15 +90,6 @@ class LabelEncoderTransformer(BaseTransformer):
         logger.info(f"Transforming features using label encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
         return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
-        """Fits the transformer on the given DataFrame.
-
-        Args:
-            dataframe: The DataFrame to fit the transformer on.
-        """
-        logger.info(f"Fitting label encoder transformer ({len(self._features)}): {self._features}.")
-        self._transformer.fit(dataframe)
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.
