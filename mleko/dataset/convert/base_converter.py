@@ -7,6 +7,7 @@ from pathlib import Path
 import vaex
 
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
+from mleko.dataset.data_schema import DataSchema
 
 
 class BaseConverter(LRUCacheMixin, ABC):
@@ -27,7 +28,7 @@ class BaseConverter(LRUCacheMixin, ABC):
     @abstractmethod
     def convert(
         self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    ) -> tuple[DataSchema, vaex.DataFrame]:
         """Abstract method to convert the input file paths to the desired output format.
 
         Args:

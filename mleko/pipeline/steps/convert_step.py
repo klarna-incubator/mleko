@@ -19,7 +19,7 @@ class ConvertStep(PipelineStep):
     _num_inputs = 1
     """Number of inputs expected by the ConvertStep."""
 
-    _num_outputs = 1
+    _num_outputs = 2
     """Number of outputs expected by the ConvertStep."""
 
     @auto_repr
@@ -52,12 +52,13 @@ class ConvertStep(PipelineStep):
             ValueError: If data container contains invalid data - not a list of Paths.
 
         Returns:
-            A DataContainer containing the converted data as a vaex dataframe.
+            A DataContainer containing the DataSchema and DataFrame after conversion.
         """
         file_paths = data_container.data[self._inputs[0]]
         if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
             raise ValueError(f"Invalid data type: {type(file_paths)}. Expected list of Paths.")
 
-        df = self._converter.convert(file_paths, self._cache_group, force_recompute)
-        data_container.data[self._outputs[0]] = df
+        data_schema, dataframe = self._converter.convert(file_paths, self._cache_group, force_recompute)
+        data_container.data[self._outputs[0]] = data_schema
+        data_container.data[self._outputs[1]] = dataframe
         return data_container

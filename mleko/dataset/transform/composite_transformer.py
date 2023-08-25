@@ -37,7 +37,7 @@ class CompositeTransformer(BaseTransformer):
         and will only be performed on the final DataFrame.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             transformers: List of transformers to be combined.
             cache_size: The maximum number of entries to keep in the cache.
 

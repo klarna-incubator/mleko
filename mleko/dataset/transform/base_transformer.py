@@ -21,8 +21,10 @@ logger = CustomLogger()
 class BaseTransformer(LRUCacheMixin, ABC):
     """Abstract class for feature transformation.
 
-    The feature transformation process is implemented in the `transform` method, which takes a DataFrame as input and
-    returns a transformed DataFrame.
+    The feature transformation process is implemented in the `fit`, `transform`, and `fit_transform` methods. The
+    `fit` method fits the transformer to the specified DataFrame, the `transform` method transforms the specified
+    features in the DataFrame, and the `fit_transform` method fits the transformer to the specified DataFrame and
+    transforms the specified features in the DataFrame.
     """
 
     def __init__(
@@ -34,11 +36,11 @@ class BaseTransformer(LRUCacheMixin, ABC):
         """Initializes the transformer and ensures the destination directory exists.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of cache entries to keep in the cache.
         """
-        LRUCacheMixin.__init__(self, cache_directory, cache_size)
+        super().__init__(cache_directory, cache_size)
         self._features: tuple[str, ...] = tuple(features)
         self._transformer = None
 
@@ -122,8 +124,8 @@ class BaseTransformer(LRUCacheMixin, ABC):
         Returns:
             Fitted transformer and transformed DataFrame.
         """
-        fitted_transformer = self._fit(dataframe)
-        return fitted_transformer, self._transform(dataframe)
+        transformer = self._fit(dataframe)
+        return transformer, self._transform(dataframe)
 
     def _assign_transformer(self, transformer: Any) -> None:
         """Assigns the specified transformer to the transformer attribute.
@@ -152,7 +154,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
     @abstractmethod
     def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Transfigures the specified features in the DataFrame.
+        """Transforms the specified features in the DataFrame.
 
         Args:
             dataframe: DataFrame to be transformed.

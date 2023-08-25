@@ -10,6 +10,8 @@ from pathlib import Path
 
 import vaex
 
+from mleko.dataset.data_schema import DataSchema
+
 
 @dataclass
 class DataContainer:
@@ -25,7 +27,7 @@ class DataContainer:
         [Path("path/to/data")]
     """
 
-    data: dict[str, list[Path] | vaex.DataFrame] = field(default_factory=dict)
+    data: dict[str, list[Path] | vaex.DataFrame | DataSchema] = field(default_factory=dict)
     """The data stored in the DataContainer.
 
     The data is stored in a dictionary, where the keys are the names of the data and the values are the data itself.

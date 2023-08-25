@@ -13,11 +13,13 @@ from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.cache.handlers import CacheHandler
+from mleko.cache.handlers.pickle_cache_handler import PICKLE_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import (
     VAEX_DATAFRAME_CACHE_HANDLER,
     read_vaex_dataframe,
     write_vaex_dataframe,
 )
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
@@ -138,7 +140,7 @@ class CSVToVaexConverter(BaseConverter):
 
     def convert(
         self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    ) -> tuple[DataSchema, vaex.DataFrame]:
         """Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
 
         The method takes care of caching, and results will be reused accordingly unless `force_recompute`
@@ -158,7 +160,7 @@ class CSVToVaexConverter(BaseConverter):
         Returns:
             The resulting dataframe with the combined converted data.
         """
-        return self._cached_execute(
+        ds, df = self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
             cache_key_inputs=[
                 self._forced_numerical_columns,
@@ -173,12 +175,16 @@ class CSVToVaexConverter(BaseConverter):
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
-            cache_handlers=CacheHandler(
-                writer=write_vaex_dataframe_with_cleanup,
-                reader=read_vaex_dataframe,
-                suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
-            ),
+            cache_handlers=[
+                PICKLE_CACHE_HANDLER,
+                CacheHandler(
+                    writer=write_vaex_dataframe_with_cleanup,
+                    reader=read_vaex_dataframe,
+                    suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
+                ),
+            ],
         )
+        return ds, df
 
     @staticmethod
     def _convert_csv_file_to_arrow(
@@ -252,7 +258,7 @@ class CSVToVaexConverter(BaseConverter):
         df_chunk.export(output_path, chunk_size=100_000, parallel=False)
         df_chunk.close()
 
-    def _convert(self, file_paths: list[Path] | list[str]) -> vaex.DataFrame:
+    def _convert(self, file_paths: list[Path] | list[str]) -> tuple[DataSchema, vaex.DataFrame]:
         """Converts a list of CSV files to Arrow format using parallel processing.
 
         Chunks of files are processed in parallel and saved in the output directory.
@@ -280,8 +286,16 @@ class CSVToVaexConverter(BaseConverter):
                 ):
                     pbar.update(1)
 
-        df = vaex.open(self._cache_directory / "df_chunk_*.arrow")
+        df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
         for column_name in df.get_column_names(dtype=pa.null()):
-            df[column_name] = df[column_name].astype("string")
+            df[column_name] = get_column(df, column_name).astype("string")
 
-        return df
+        ds = DataSchema(
+            numerical=df.get_column_names(dtype="numeric"),
+            categorical=df.get_column_names(dtype="string"),
+            boolean=df.get_column_names(dtype="bool"),
+            datetime=df.get_column_names(dtype="datetime"),
+            timedelta=df.get_column_names(dtype="timedelta"),
+        )
+
+        return ds, df

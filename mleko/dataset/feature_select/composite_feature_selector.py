@@ -6,6 +6,7 @@ from typing import Any, Hashable
 
 import vaex
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -36,7 +37,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         selector will be applied to the DataFrame in the order they are specified.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             feature_selectors: List of feature selectors to be combined.
             cache_size: The maximum number of entries to keep in the cache.
 
@@ -47,6 +48,9 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[1, 2, 3, 4, None, None, None, None, None, None],
             ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
+            ... )
+            >>> ds = DataSchema(
+            ...     numerical=["a", "b", "c"],
             ... )
             >>> feature_selector = CompositeFeatureSelector(
             ...     cache_directory=".",
@@ -61,7 +65,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             ...         ),
             ...     ],
             ... )
-            >>> _, df = feature_selector.fit_transform(df)
+            >>> _, ds, df = feature_selector.fit_transform(ds, df)
             >>> df
             #    a    c
             0    1    1
@@ -79,10 +83,11 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         self._feature_selectors = tuple(feature_selectors)
         self._feature_selector: list[Any] = []
 
-    def _fit(self, dataframe: vaex.DataFrame) -> list[Any]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> list[Any]:
         """Fits the feature selector on the DataFrame.
 
         Args:
+            data_schema: DataSchema of the DataFrame.
             dataframe: DataFrame on which the feature selector will be fitted.
 
         Returns:
@@ -94,15 +99,16 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Fitting composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            feature_selector = feature_selector._fit(dataframe)
+            feature_selector = feature_selector._fit(data_schema, dataframe)
             feature_selectors.append(feature_selector)
             logger.info(f"Finished fitting composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return feature_selectors
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects the features from the DataFrame.
 
         Args:
+            data_schema: DataSchema of the DataFrame.
             dataframe: DataFrame from which the features will be selected.
 
         Returns:
@@ -113,9 +119,10 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            dataframe = feature_selector._transform(dataframe).extract()
+            data_schema, dataframe = feature_selector._transform(data_schema, dataframe)
+            dataframe = dataframe.extract()
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
-        return dataframe
+        return data_schema, dataframe
 
     def _assign_feature_selector(self, feature_selector: Any) -> None:
         """Assigns the specified feature selector to the feature_selector attribute.
@@ -129,16 +136,16 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         for feature_selector_obj, fitted_feature_selector in zip(self._feature_selectors, feature_selector):
             feature_selector_obj._feature_selector = fitted_feature_selector
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:  # pragma: no cover
+    def _default_features(self, data_schema: DataSchema) -> tuple[str, ...]:  # pragma: no cover
         """Returns the default features of the DataFrame.
 
         Args:
-            dataframe: DataFrame from which the default features will be extracted.
+            data_schema: DataSchema of the DataFrame.
 
         Returns:
             Tuple of default features.
         """
-        features = dataframe.get_column_names()
+        features = data_schema.get_features()
         return tuple(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:

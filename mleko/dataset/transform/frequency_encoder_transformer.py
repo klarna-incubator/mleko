@@ -40,7 +40,7 @@ class FrequencyEncoderTransformer(BaseTransformer):
             result in very small frequencies.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             unseen_strategy: Strategy to use for unseen values once the transformer is fitted.
             cache_size: The maximum number of entries to keep in the cache.

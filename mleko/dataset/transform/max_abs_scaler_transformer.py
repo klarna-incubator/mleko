@@ -37,7 +37,7 @@ class MaxAbsScalerTransformer(BaseTransformer):
             or an error will be raised.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of entries to keep in the cache.
 

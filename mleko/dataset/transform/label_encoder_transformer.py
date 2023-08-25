@@ -38,7 +38,7 @@ class LabelEncoderTransformer(BaseTransformer):
             Should only be used with categorical features.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             allow_unseen: Whether to allow unseen values once the transformer is fitted.
             cache_size: The maximum number of entries to keep in the cache.

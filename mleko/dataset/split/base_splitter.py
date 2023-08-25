@@ -22,7 +22,7 @@ class BaseSplitter(LRUCacheMixin, ABC):
             cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of cache entries.
         """
-        LRUCacheMixin.__init__(self, cache_directory, cache_size)
+        super().__init__(cache_directory, cache_size)
 
     @abstractmethod
     def split(

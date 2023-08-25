@@ -7,6 +7,7 @@ from typing import Hashable
 import vaex
 from tqdm.auto import tqdm
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_columns
@@ -43,7 +44,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
@@ -58,11 +59,12 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ...     b=[1, 2, 3, 4, 5, None, None, None, None, None],
             ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
             ... )
-            >>> _, df = MissingRateFeatureSelector(
+            >>> ds = DataSchema(numerical=["a", "b", "c"])
+            >>> _, ds, df = MissingRateFeatureSelector(
             ...     cache_directory=".",
             ...     ignore_features=["c"],
             ...     missing_rate_threshold=0.3,
-            ... ).fit_transform(df)
+            ... ).fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'b']
         """
@@ -70,16 +72,17 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         self._missing_rate_threshold = missing_rate_threshold
         self._feature_selector: set[str] = set()
 
-    def _fit(self, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
         """Fits the feature selector on the input data.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
             The set of selected features.
         """
-        features = self._feature_set(dataframe)
+        features = self._feature_set(data_schema)
         logger.info(f"Fitting missing rate feature selector on {len(features)} features: {features}.")
 
         missing_rate: dict[str, float] = {}
@@ -92,10 +95,11 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         }
         return self._feature_selector
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on the missing rate.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to select features from.
 
         Returns:
@@ -107,18 +111,23 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
+        ds = DataSchema()
+        for selected_feature in selected_features:
+            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+
+        return ds, get_columns(dataframe, selected_features)
+
+    def _default_features(self, data_schema: DataSchema) -> tuple[str, ...]:
         """Returns the default set of features.
 
         Args:
-            dataframe: The DataFrame to select features from.
+            data_schema: The DataSchema of the DataFrame.
 
         Returns:
             Tuple of default features.
         """
-        features = dataframe.get_column_names()
+        features = data_schema.get_features()
         return tuple(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:

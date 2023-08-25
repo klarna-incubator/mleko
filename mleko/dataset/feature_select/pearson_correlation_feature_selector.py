@@ -8,6 +8,7 @@ from typing import Hashable
 import numpy as np
 import vaex
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_columns
@@ -45,7 +46,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             correlation_threshold: The maximum correlation allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
@@ -60,11 +61,12 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             ...     b=[1, 2, 3, 4, 5, 6, 7, 8, 9, 9],
             ...     c=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             ... )
+            >>> ds = DataSchema(numerical=["a", "b", "c"])
             >>> feature_selector = PearsonCorrelationFeatureSelector(
             ...     cache_directory=".",
             ...     correlation_threshold=0.75,
             ... )
-            >>> _, df = feature_selector.fit_transform(df)
+            >>> _, ds, df = feature_selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c']
         """
@@ -72,16 +74,17 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         self._correlation_threshold = correlation_threshold
         self._feature_selector: set[str] = set()
 
-    def _fit(self, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
         """Fits the feature selector on the input data.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
             The set of selected features.
         """
-        features = self._feature_set(dataframe)
+        features = self._feature_set(data_schema)
         logger.info(f"Fitting pearson correlation feature selector on {len(features)} features: {features}.")
 
         corr_matrix = abs(np.array(dataframe.correlation(features)))
@@ -130,14 +133,15 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         self._feature_selector = guaranteed_dropped.union(additional_dropped)
         return self._feature_selector
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on the Pearson correlation.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to select features from.
 
         Returns:
-            The DataFrame with the selected features.
+            The updated DataSchema and DataFrame with the selected features.
         """
         dropped_features = self._feature_selector
         logger.info(
@@ -145,18 +149,23 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        return get_columns(dataframe, selected_features)
 
-    def _default_features(self, dataframe: vaex.DataFrame) -> tuple[str, ...]:
+        ds = DataSchema()
+        for selected_feature in selected_features:
+            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+
+        return ds, get_columns(dataframe, selected_features)
+
+    def _default_features(self, data_schema: DataSchema) -> tuple[str, ...]:
         """Returns the default set of features.
 
         Args:
-            dataframe: The DataFrame to select features from.
+            data_schema: The DataSchema of the DataFrame.
 
         Returns:
             Tuple of default features.
         """
-        features = dataframe.get_column_names(dtype="numeric")
+        features = data_schema.get_features(["numerical"])
         return tuple(str(feature) for feature in features)
 
     def _fingerprint(self) -> Hashable:

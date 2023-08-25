@@ -39,7 +39,7 @@ class MinMaxScalerTransformer(BaseTransformer):
             or an error will be raised.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             min_value: The minimum value of the range.
             max_value: The maximum value of the range.
