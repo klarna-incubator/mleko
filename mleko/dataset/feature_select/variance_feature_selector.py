@@ -69,7 +69,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             ...     ignore_features=["c"],
             ...     variance_threshold=0.1,
             ... )
-            >>> _, ds, df = selector.fit_transform(ds, df)
+            >>> ds, _, df = selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c', 'd']
         """
@@ -77,7 +77,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
         self._variance_threshold = variance_threshold
         self._feature_selector: set[str] = set()
 
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, set[str]]:
         """Fits the feature selector on the input data.
 
         Args:
@@ -85,7 +85,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
-            The set of selected features.
+            Updated DataSchema and the set of features with a variance below the threshold.
         """
         features = self._feature_set(data_schema)
         logger.info(f"Fitting variance feature selector on {len(features)} features: {features}.")
@@ -102,7 +102,9 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             variance[feature] = column.var()
 
         self._feature_selector = {feature for feature in features if variance[feature] <= self._variance_threshold}
-        return self._feature_selector
+        ds = data_schema.copy(drop=self._feature_selector)
+
+        return ds, self._feature_selector
 
     def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on the variance.
@@ -120,10 +122,7 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-
-        ds = DataSchema()
-        for selected_feature in selected_features:
-            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+        ds = data_schema.copy(drop=dropped_features)
 
         return ds, get_columns(dataframe, selected_features)
 

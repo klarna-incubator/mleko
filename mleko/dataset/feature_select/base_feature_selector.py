@@ -77,7 +77,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
-    ) -> Any:
+    ) -> tuple[DataSchema, Any]:
         """Fits the feature selector to the specified DataFrame, using the cached result if available.
 
         Args:
@@ -87,9 +87,9 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
 
         Returns:
-            Fitted feature selector.
+            Updated DataSchema and fitted feature selector.
         """
-        feature_selector = self._cached_execute(
+        ds, feature_selector = self._cached_execute(
             lambda_func=lambda: self._fit(data_schema, dataframe),
             cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
@@ -97,7 +97,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_handlers=JOBLIB_CACHE_HANDLER,
         )
         self._assign_feature_selector(feature_selector)
-        return feature_selector
+        return ds, feature_selector
 
     def transform(
         self,
@@ -138,7 +138,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
-    ) -> tuple[Any, DataSchema, vaex.DataFrame]:
+    ) -> tuple[DataSchema, Any, vaex.DataFrame]:
         """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
 
         Args:
@@ -149,9 +149,9 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
                 cached.
 
         Returns:
-            Tuple of fitted feature selector, updated DataSchema, and transformed DataFrame.
+            Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
         """
-        feature_selector, ds, df = self._cached_execute(
+        ds, feature_selector, df = self._cached_execute(
             lambda_func=lambda: self._fit_transform(data_schema, dataframe),
             cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
@@ -159,11 +159,11 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_handlers=[JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
         )
         self._assign_feature_selector(feature_selector)
-        return feature_selector, ds, df
+        return ds, feature_selector, df
 
     def _fit_transform(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
-    ) -> tuple[Any, DataSchema, vaex.DataFrame]:
+    ) -> tuple[DataSchema, Any, vaex.DataFrame]:
         """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
 
         Args:
@@ -171,11 +171,11 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             dataframe: DataFrame used for feature selection.
 
         Returns:
-            Tuple of fitted feature selector and transformed DataFrame.
+            Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
         """
-        feature_selector = self._fit(data_schema, dataframe)
+        ds, feature_selector = self._fit(data_schema, dataframe)
         ds, df = self._transform(data_schema, dataframe)
-        return feature_selector, ds, df
+        return ds, feature_selector, df
 
     def _assign_feature_selector(self, feature_selector: Any) -> None:
         """Assigns the specified feature selector to the feature_selector attribute.
@@ -206,7 +206,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         )
 
     @abstractmethod
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> Any:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, Any]:
         """Fits the feature selector to the specified DataFrame.
 
         Args:
@@ -217,7 +217,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
 
         Returns:
-            Fitted feature selector.
+            Updated DataSchema and fitted feature selector.
         """
         raise NotImplementedError
 

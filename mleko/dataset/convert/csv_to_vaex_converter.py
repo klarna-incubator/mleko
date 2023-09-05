@@ -57,6 +57,8 @@ class CSVToVaexConverter(BaseConverter):
         forced_categorical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_boolean_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         drop_columns: list[str] | tuple[str, ...] | tuple[()] = (),
+        meta_columns: list[str] | tuple[str, ...] | tuple[()] = (),
+        drop_rows_with_na_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         na_values: list[str]
         | tuple[str, ...]
         | tuple[()] = (
@@ -93,6 +95,8 @@ class CSVToVaexConverter(BaseConverter):
             forced_categorical_columns: A sequence of column names to force as categorical type.
             forced_boolean_columns: A sequence of column names to force as boolean type.
             drop_columns: A sequence of column names to drop during conversion.
+            meta_columns: A sequence of column names to be considered as metadata (e.g. ID or target columns).
+            drop_rows_with_na_columns: A sequence of column names to drop rows with missing values.
             na_values: A sequence of strings to consider as NaN or missing values.
             true_values: A sequence of strings to consider as True values.
             false_values: A sequence of strings to consider as False values.
@@ -131,6 +135,8 @@ class CSVToVaexConverter(BaseConverter):
         self._forced_categorical_columns = tuple(forced_categorical_columns)
         self._forced_boolean_columns = tuple(forced_boolean_columns)
         self._drop_columns = tuple(drop_columns)
+        self._meta_columns = tuple(meta_columns)
+        self._drop_rows_with_na_columns = tuple(drop_rows_with_na_columns)
         self._na_values = tuple(na_values)
         self._true_values = tuple(true_values)
         self._false_values = tuple(false_values)
@@ -167,6 +173,8 @@ class CSVToVaexConverter(BaseConverter):
                 self._forced_categorical_columns,
                 self._forced_boolean_columns,
                 self._drop_columns,
+                self._meta_columns,
+                self._drop_rows_with_na_columns,
                 self._na_values,
                 self._true_values,
                 self._false_values,
@@ -194,6 +202,7 @@ class CSVToVaexConverter(BaseConverter):
         forced_categorical_columns: tuple[str, ...],
         forced_boolean_columns: tuple[str, ...],
         drop_columns: tuple[str, ...],
+        drop_rows_with_na_columns: tuple[str, ...],
         na_values: tuple[str, ...],
         true_values: tuple[str, ...],
         false_values: tuple[str, ...],
@@ -211,6 +220,7 @@ class CSVToVaexConverter(BaseConverter):
             forced_categorical_columns: A sequence of column names to be forced to categorical type.
             forced_boolean_columns: A sequence of column names to be forced to boolean type.
             drop_columns: A sequence of column names to be dropped from the dataframe.
+            drop_rows_with_na_columns: A sequence of column names to drop rows with missing values.
             na_values: A sequence of values to be considered as NaN.
             true_values: A sequence of values to be considered as True.
             false_values: A sequence of values to be considered as False.
@@ -250,6 +260,9 @@ class CSVToVaexConverter(BaseConverter):
             ),
         ).drop(drop_columns)
 
+        if drop_rows_with_na_columns:
+            df_chunk = df_chunk.dropna(column_names=drop_rows_with_na_columns)
+
         for column_name in df_chunk.get_column_names():
             if get_column(df_chunk, column_name).dtype in (pa.date32(), pa.date64()):
                 df_chunk[column_name] = get_column(df_chunk, column_name).astype("datetime64[s]")
@@ -279,6 +292,7 @@ class CSVToVaexConverter(BaseConverter):
                     repeat(self._forced_categorical_columns),
                     repeat(self._forced_boolean_columns),
                     repeat(self._drop_columns),
+                    repeat(self._drop_rows_with_na_columns),
                     repeat(self._na_values),
                     repeat(self._true_values),
                     repeat(self._false_values),
@@ -297,5 +311,10 @@ class CSVToVaexConverter(BaseConverter):
             datetime=df.get_column_names(dtype="datetime"),
             timedelta=df.get_column_names(dtype="timedelta"),
         )
+        for meta_column in self._meta_columns:
+            ds.drop_feature(meta_column)
+
+        for column_name in df.get_column_names(dtype="bool"):
+            df[column_name] = get_column(df, column_name).astype("string")
 
         return ds, df

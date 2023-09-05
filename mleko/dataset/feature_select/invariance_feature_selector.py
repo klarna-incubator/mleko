@@ -64,14 +64,14 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             >>> selector = InvarianceFeatureSelector(
             ...     cache_directory=".",
             ... )
-            >>> _, ds, df = selector.fit_transform(ds, df)
+            >>> ds, _, df = selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c', 'd']
         """
         super().__init__(cache_directory, features, ignore_features, cache_size)
         self._feature_selector: set[str] = set()
 
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, set[str]]:
         """Fits the feature selector on the input data.
 
         Args:
@@ -79,7 +79,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
-            The set of invariant features.
+            Updated DataSchema and the set of invariant features.
         """
         features = self._feature_set(data_schema)
         logger.info(f"Fitting invariance feature selector on {len(features)} features: {features}.")
@@ -90,7 +90,9 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             cardinality[feature] = column.nunique(limit=2, limit_raise=False)
 
         self._feature_selector = {feature for feature in features if cardinality[feature] == 1}
-        return self._feature_selector
+        ds = data_schema.copy(drop=self._feature_selector)
+
+        return ds, self._feature_selector
 
     def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on invariance.
@@ -105,10 +107,7 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
         dropped_features = self._feature_selector
         logger.info(f"Dropping ({len(dropped_features)}) invariant features: {dropped_features}.")
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-
-        ds = DataSchema()
-        for selected_feature in selected_features:
-            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+        ds = data_schema.copy(drop=dropped_features)
 
         return ds, get_columns(dataframe, selected_features)
 

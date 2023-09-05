@@ -43,7 +43,7 @@ class TestBaseFeatureSelector:
 
         def _fit(self, _data_schema, _dataframe):
             """Fit feature selector."""
-            return 1337
+            return _data_schema, 1337
 
         def _transform(self, _data_schema, _dataframe):
             """Select features."""
@@ -55,7 +55,7 @@ class TestBaseFeatureSelector:
         """Should fit and transform dataframe."""
         test_derived_transformer = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
 
-        transformer = test_derived_transformer.fit(example_data_schema, example_vaex_dataframe)
+        _, transformer = test_derived_transformer.fit(example_data_schema, example_vaex_dataframe)
         _, df = test_derived_transformer.transform(example_data_schema, example_vaex_dataframe)
         assert transformer == 1337
         assert df.shape == (4, 3)
@@ -75,7 +75,7 @@ class TestBaseFeatureSelector:
         """Should return vaex dataframe from feature_select method."""
         test_derived_feature_selector = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
 
-        feature_selector, _, df = test_derived_feature_selector.fit_transform(
+        _, feature_selector, df = test_derived_feature_selector.fit_transform(
             example_data_schema, example_vaex_dataframe
         )
         assert feature_selector == 1337

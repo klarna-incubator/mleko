@@ -66,7 +66,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             ...     cache_directory=".",
             ...     correlation_threshold=0.75,
             ... )
-            >>> _, ds, df = feature_selector.fit_transform(ds, df)
+            >>> ds, _, df = feature_selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c']
         """
@@ -74,7 +74,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
         self._correlation_threshold = correlation_threshold
         self._feature_selector: set[str] = set()
 
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, set[str]]:
         """Fits the feature selector on the input data.
 
         Args:
@@ -82,7 +82,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
-            The set of selected features.
+            Updated DataSchema and the set of features to be dropped.
         """
         features = self._feature_set(data_schema)
         logger.info(f"Fitting pearson correlation feature selector on {len(features)} features: {features}.")
@@ -131,7 +131,9 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
 
         # Combine guaranteed_dropped and additional_dropped sets
         self._feature_selector = guaranteed_dropped.union(additional_dropped)
-        return self._feature_selector
+        ds = data_schema.copy(drop=self._feature_selector)
+
+        return ds, self._feature_selector
 
     def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on the Pearson correlation.
@@ -149,10 +151,7 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-
-        ds = DataSchema()
-        for selected_feature in selected_features:
-            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+        ds = data_schema.copy(dropped_features)
 
         return ds, get_columns(dataframe, selected_features)
 

@@ -65,7 +65,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             ...         ),
             ...     ],
             ... )
-            >>> _, ds, df = feature_selector.fit_transform(ds, df)
+            >>> ds, _, df = feature_selector.fit_transform(ds, df)
             >>> df
             #    a    c
             0    1    1
@@ -83,7 +83,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         self._feature_selectors = tuple(feature_selectors)
         self._feature_selector: list[Any] = []
 
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> list[Any]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, list[Any]]:
         """Fits the feature selector on the DataFrame.
 
         Args:
@@ -91,7 +91,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             dataframe: DataFrame on which the feature selector will be fitted.
 
         Returns:
-            List of fitted feature selectors.
+            Tuple of updated DataSchema and list of fitted feature selectors.
         """
         feature_selectors: list[Any] = []
         for i, feature_selector in enumerate(self._feature_selectors):
@@ -99,10 +99,10 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Fitting composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            feature_selector = feature_selector._fit(data_schema, dataframe)
+            data_schema, feature_selector = feature_selector._fit(data_schema, dataframe)
             feature_selectors.append(feature_selector)
             logger.info(f"Finished fitting composite feature selection step {i+1}/{len(self._feature_selectors)}.")
-        return feature_selectors
+        return data_schema, feature_selectors
 
     def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects the features from the DataFrame.
@@ -123,6 +123,33 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             dataframe = dataframe.extract()
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return data_schema, dataframe
+
+    def _fit_transform(
+        self, data_schema: DataSchema, dataframe: vaex.DataFrame
+    ) -> tuple[DataSchema, Any, vaex.DataFrame]:
+        """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+        Args:
+            data_schema: DataSchema of the DataFrame.
+            dataframe: DataFrame used for feature selection.
+
+        Returns:
+            Tuple of fitted feature selector and transformed DataFrame.
+        """
+        feature_selectors: list[Any] = []
+        for i, feature_selector in enumerate(self._feature_selectors):
+            logger.info(
+                f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
+                f"{feature_selector.__class__.__name__}."
+            )
+            data_schema, feature_selector, dataframe = feature_selector._fit_transform(data_schema, dataframe)
+            feature_selectors.append(feature_selector)
+            dataframe = dataframe.extract()
+            logger.info(
+                "Finished fitting and transforming composite feature "
+                f"selection step {i+1}/{len(self._feature_selectors)}."
+            )
+        return data_schema, feature_selectors, dataframe
 
     def _assign_feature_selector(self, feature_selector: Any) -> None:
         """Assigns the specified feature selector to the feature_selector attribute.

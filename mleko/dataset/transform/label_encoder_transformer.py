@@ -63,7 +63,7 @@ class LabelEncoderTransformer(BaseTransformer):
         """
         super().__init__(cache_directory, features, cache_size)
         self._allow_unseen = allow_unseen
-        self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
+        self._transformer = vaex.ml.LabelEncoder(allow_unseen=self._allow_unseen, features=self._features, prefix="")
 
     def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.LabelEncoder:
         """Fits the transformer on the given DataFrame.

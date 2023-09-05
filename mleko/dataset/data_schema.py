@@ -1,6 +1,7 @@
 """Module for DataSchema class, used for storing type information about the dataset."""
 from __future__ import annotations
 
+import copy
 from typing import Literal
 
 
@@ -121,3 +122,18 @@ class DataSchema:
             Dict representation of DataSchema.
         """
         return {dtype: features for dtype, features in self.features.items()}
+
+    def copy(self, drop: set[str] | list[str] | tuple[str, ...] | tuple[()] = ()) -> DataSchema:
+        """Create a copy of this DataSchema.
+
+        Args:
+            drop: List of features to drop from the copy.
+
+        Returns:
+            A copy of this DataSchema.
+        """
+        copied_features = {dtype: copy.deepcopy(features) for dtype, features in self.features.items()}
+        data_schema_copy = DataSchema(**copied_features)
+        for dropped_feature in drop:
+            data_schema_copy.drop_feature(dropped_feature)
+        return data_schema_copy

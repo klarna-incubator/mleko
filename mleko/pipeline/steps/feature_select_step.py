@@ -18,7 +18,7 @@ class FeatureSelectStep(PipelineStep):
     _num_inputs = 2
     """Number of inputs expected by the FeatureSelectStep."""
 
-    _num_outputs = 1
+    _num_outputs = 2
     """Number of outputs expected by the FeatureSelectStep."""
 
     @auto_repr
@@ -47,9 +47,7 @@ class FeatureSelectStep(PipelineStep):
                 f"Invalid action: {action}. Expected one of 'fit', 'transform', or 'fit_transform'."
             )  # pragma: no cover
 
-        if action == "transform":
-            self._num_outputs = 2
-        elif action == "fit_transform":
+        if action == "fit_transform":
             self._num_outputs = 3
 
         super().__init__(inputs, outputs, cache_group)
@@ -78,18 +76,21 @@ class FeatureSelectStep(PipelineStep):
             raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")
 
         if self._action == "fit":
-            feature_selector = self._feature_selector.fit(data_schema, dataframe, self._cache_group, force_recompute)
-            data_container.data[self._outputs[0]] = feature_selector
+            ds, feature_selector = self._feature_selector.fit(
+                data_schema, dataframe, self._cache_group, force_recompute
+            )
+            data_container.data[self._outputs[0]] = ds
+            data_container.data[self._outputs[1]] = feature_selector
         elif self._action == "transform":
             ds, df = self._feature_selector.transform(data_schema, dataframe, self._cache_group, force_recompute)
             data_container.data[self._outputs[0]] = ds
             data_container.data[self._outputs[1]] = df
         elif self._action == "fit_transform":
-            feature_selector, ds, df = self._feature_selector.fit_transform(
+            ds, feature_selector, df = self._feature_selector.fit_transform(
                 data_schema, dataframe, self._cache_group, force_recompute
             )
-            data_container.data[self._outputs[0]] = feature_selector
-            data_container.data[self._outputs[1]] = ds
+            data_container.data[self._outputs[0]] = ds
+            data_container.data[self._outputs[1]] = feature_selector
             data_container.data[self._outputs[2]] = df
 
         return data_container

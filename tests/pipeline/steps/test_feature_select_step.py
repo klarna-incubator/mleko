@@ -69,14 +69,14 @@ class TestFeatureSelectStep:
 
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         df = vaex.from_dict({"col2": [4, 5, 6]})
-        feature_selector.fit = MagicMock(return_value="feature_selector")
+        feature_selector.fit = MagicMock(return_value=(ds, "feature_selector"))
         feature_selector.transform = MagicMock(return_value=(ds, df))
 
         feature_select_step_fit = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit",
             inputs=["data_schema", "df_clean"],
-            outputs=["feature_selector"],
+            outputs=["data_schema", "feature_selector"],
             cache_group=None,
         )
         feature_select_step_fit_result = feature_select_step_fit.execute(data_container, force_recompute=False)

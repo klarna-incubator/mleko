@@ -63,6 +63,27 @@ class TestCompositeFeatureSelector:
             test_composite_feature_selector.fit_transform(example_data_schema, example_vaex_dataframe)
             mocked_fit_transform.assert_not_called()
 
+    def test_select_chained_missing_std_cached_separate_fit_transform(
+        self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
+    ):
+        """Should return vaex dataframe from feature_select method using separate fit and transform calls."""
+        test_composite_feature_selector = CompositeFeatureSelector(
+            temporary_directory,
+            [
+                MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.5),
+                VarianceFeatureSelector(temporary_directory, variance_threshold=0.0),
+            ],
+        )
+
+        _, _ = test_composite_feature_selector.fit(example_data_schema, example_vaex_dataframe)
+        _, df_train = test_composite_feature_selector.transform(example_data_schema, example_vaex_dataframe)
+        assert df_train.shape == (10, 1)
+        assert df_train.column_names == ["a"]
+
+        with patch.object(CompositeFeatureSelector, "_transform") as mocked_transform:
+            test_composite_feature_selector.transform(example_data_schema, example_vaex_dataframe)
+            mocked_transform.assert_not_called()
+
     def test_persistent_feature_selector_loaded_from_disk(
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):

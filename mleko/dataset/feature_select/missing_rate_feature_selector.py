@@ -60,7 +60,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
             ... )
             >>> ds = DataSchema(numerical=["a", "b", "c"])
-            >>> _, ds, df = MissingRateFeatureSelector(
+            >>> ds, _, df = MissingRateFeatureSelector(
             ...     cache_directory=".",
             ...     ignore_features=["c"],
             ...     missing_rate_threshold=0.3,
@@ -72,7 +72,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         self._missing_rate_threshold = missing_rate_threshold
         self._feature_selector: set[str] = set()
 
-    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> set[str]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, set[str]]:
         """Fits the feature selector on the input data.
 
         Args:
@@ -80,7 +80,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             dataframe: The DataFrame to fit the feature selector on.
 
         Returns:
-            The set of selected features.
+            Updated DataSchema and the set of features with a missing rate above the threshold.
         """
         features = self._feature_set(data_schema)
         logger.info(f"Fitting missing rate feature selector on {len(features)} features: {features}.")
@@ -93,7 +93,9 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         self._feature_selector = {
             feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold
         }
-        return self._feature_selector
+        ds = data_schema.copy(drop=self._feature_selector)
+
+        return ds, self._feature_selector
 
     def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Selects features based on the missing rate.
@@ -111,10 +113,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-
-        ds = DataSchema()
-        for selected_feature in selected_features:
-            ds.add_feature(selected_feature, data_schema.get_type(selected_feature))
+        ds = data_schema.copy(drop=dropped_features)
 
         return ds, get_columns(dataframe, selected_features)
 
