@@ -202,7 +202,6 @@ class CSVToVaexConverter(BaseConverter):
         forced_categorical_columns: tuple[str, ...],
         forced_boolean_columns: tuple[str, ...],
         drop_columns: tuple[str, ...],
-        drop_rows_with_na_columns: tuple[str, ...],
         na_values: tuple[str, ...],
         true_values: tuple[str, ...],
         false_values: tuple[str, ...],
@@ -220,7 +219,6 @@ class CSVToVaexConverter(BaseConverter):
             forced_categorical_columns: A sequence of column names to be forced to categorical type.
             forced_boolean_columns: A sequence of column names to be forced to boolean type.
             drop_columns: A sequence of column names to be dropped from the dataframe.
-            drop_rows_with_na_columns: A sequence of column names to drop rows with missing values.
             na_values: A sequence of values to be considered as NaN.
             true_values: A sequence of values to be considered as True.
             false_values: A sequence of values to be considered as False.
@@ -260,9 +258,6 @@ class CSVToVaexConverter(BaseConverter):
             ),
         ).drop(drop_columns)
 
-        if drop_rows_with_na_columns:
-            pass  # df_chunk = df_chunk.dropna(column_names=drop_rows_with_na_columns)
-
         for column_name in df_chunk.get_column_names():
             if get_column(df_chunk, column_name).dtype in (pa.date32(), pa.date64()):
                 df_chunk[column_name] = get_column(df_chunk, column_name).astype("datetime64[s]")
@@ -292,7 +287,6 @@ class CSVToVaexConverter(BaseConverter):
                     repeat(self._forced_categorical_columns),
                     repeat(self._forced_boolean_columns),
                     repeat(self._drop_columns),
-                    repeat(self._drop_rows_with_na_columns),
                     repeat(self._na_values),
                     repeat(self._true_values),
                     repeat(self._false_values),
@@ -303,6 +297,9 @@ class CSVToVaexConverter(BaseConverter):
         df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
+
+        if self._drop_rows_with_na_columns:
+            df = df.dropna(column_names=self._drop_rows_with_na_columns)
 
         ds = DataSchema(
             numerical=df.get_column_names(dtype="numeric"),
