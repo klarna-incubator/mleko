@@ -6,6 +6,7 @@ from pathlib import Path
 import vaex
 
 from mleko.cache.fingerprinters import VaexFingerprinter
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -25,7 +26,6 @@ class ExpressionSplitter(BaseSplitter):
         cache_directory: str | Path,
         expression: str,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ):
         """Initializes the `ExpressionSplitter` with the given parameters.
 
@@ -44,7 +44,6 @@ class ExpressionSplitter(BaseSplitter):
                 evaluates to True will be returned as the first dataframe, and the remaining rows will be returned
                 as the second dataframe.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Example:
             >>> import vaex
@@ -60,7 +59,7 @@ class ExpressionSplitter(BaseSplitter):
                 #    x    y
                 0    1    4
         """
-        super().__init__(cache_directory, cache_size, disable_cache)
+        super().__init__(cache_directory, cache_size)
         self._expression = expression
 
     def split(
@@ -76,16 +75,16 @@ class ExpressionSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        _, dfs = self._cached_execute(
+        return self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
-            cache_keys=[
+            cache_key_inputs=[
                 self._expression,
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
-        return dfs
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.

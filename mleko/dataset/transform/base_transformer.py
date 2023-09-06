@@ -5,12 +5,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Hashable
 
-import joblib
 import vaex
 
-from mleko.cache.fingerprinters.base_fingerprinter import BaseFingerprinter
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.format.vaex_cache_format_mixin import VaexCacheFormatMixin
+from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.utils.custom_logger import CustomLogger
 
@@ -19,11 +18,13 @@ logger = CustomLogger()
 """The logger for the module."""
 
 
-class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
+class BaseTransformer(LRUCacheMixin, ABC):
     """Abstract class for feature transformation.
 
-    The feature transformation process is implemented in the `transform` method, which takes a DataFrame as input and
-    returns a transformed DataFrame.
+    The feature transformation process is implemented in the `fit`, `transform`, and `fit_transform` methods. The
+    `fit` method fits the transformer to the specified DataFrame, the `transform` method transforms the specified
+    features in the DataFrame, and the `fit_transform` method fits the transformer to the specified DataFrame and
+    transforms the specified features in the DataFrame.
     """
 
     def __init__(
@@ -31,60 +32,132 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
         cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
         cache_size: int,
-        disable_cache: bool,
     ) -> None:
         """Initializes the transformer and ensures the destination directory exists.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             cache_size: The maximum number of cache entries to keep in the cache.
-            disable_cache: Whether to disable the cache.
         """
-        LRUCacheMixin.__init__(self, cache_directory, self._cache_file_suffix, cache_size, disable_cache)
+        super().__init__(cache_directory, cache_size)
         self._features: tuple[str, ...] = tuple(features)
         self._transformer = None
 
+    def fit(self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False) -> Any:
+        """Fits the transformer to the specified DataFrame, using the cached result if available.
+
+        Args:
+            dataframe: DataFrame to be fitted.
+            cache_group: The cache group to use.
+            force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+
+        Returns:
+            Fitted transformer.
+        """
+        transformer = self._cached_execute(
+            lambda_func=lambda: self._fit(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
+            force_recompute=force_recompute,
+            cache_handlers=JOBLIB_CACHE_HANDLER,
+        )
+        self._assign_transformer(transformer)
+        return transformer
+
     def transform(
-        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
     ) -> vaex.DataFrame:
-        """Transfigures the specified features in the DataFrame, using the cached result if available.
+        """Transforms the specified features in the DataFrame, using the cached result if available.
 
         Args:
             dataframe: DataFrame to be transformed.
-            fit: Whether to fit the transformer on the input data.
             cache_group: The cache group to use.
             force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+
+        Raises:
+            RuntimeError: If the transformer has not been fitted.
 
         Returns:
             Transformed DataFrame.
         """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
-        cached, df = self._cached_execute(
-            lambda_func=lambda: self._transform(dataframe, fit),
-            cache_keys=cache_keys,
+        if self._transformer is None:
+            raise RuntimeError("Transformer must be fitted before it can be used to transform data.")
+
+        return self._cached_execute(
+            lambda_func=lambda: self._transform(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
 
-        if fit and not self._disable_cache:
-            self._save_or_load_transformer(cached, cache_group, cache_keys)
-
-        return df
-
-    @abstractmethod
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Transfigures the specified features in the DataFrame.
+    def fit_transform(
+        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+    ) -> tuple[Any, vaex.DataFrame]:
+        """Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
 
         Args:
-            dataframe: DataFrame to be transformed.
-            fit: Whether to fit the transformer on the input data.
-
-        Raises:
-            NotImplementedError: Must be implemented by subclasses.
+            dataframe: DataFrame used for fitting and transformation.
+            cache_group: The cache group to use.
+            force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
 
         Returns:
             Transformed DataFrame.
+        """
+        transformer, df = self._cached_execute(
+            lambda_func=lambda: self._fit_transform(dataframe),
+            cache_key_inputs=[self._fingerprint(), (dataframe, VaexFingerprinter())],
+            cache_group=cache_group,
+            force_recompute=force_recompute,
+            cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+        )
+        self._assign_transformer(transformer)
+        return transformer, df
+
+    def _fit_transform(self, dataframe: vaex.DataFrame) -> tuple[Any, vaex.DataFrame]:
+        """Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+        Args:
+            dataframe: DataFrame used for fitting and transformation.
+
+        Returns:
+            Fitted transformer and transformed DataFrame.
+        """
+        transformer = self._fit(dataframe)
+        return transformer, self._transform(dataframe)
+
+    def _assign_transformer(self, transformer: Any) -> None:
+        """Assigns the specified transformer to the transformer attribute.
+
+        Can be overridden by subclasses to assign the transformer using a different method.
+
+        Args:
+            transformer: Transformer to be assigned.
+        """
+        self._transformer = transformer
+
+    @abstractmethod
+    def _fit(self, dataframe: vaex.DataFrame) -> Any:
+        """Fits the transformer to the specified DataFrame.
+
+        Args:
+            dataframe: DataFrame to be fitted.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Transforms the specified features in the DataFrame.
+
+        Args:
+            dataframe: DataFrame to be transformed.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
         """
         raise NotImplementedError
 
@@ -103,27 +176,3 @@ class BaseTransformer(VaexCacheFormatMixin, LRUCacheMixin, ABC):
             Hashable object that uniquely identifies the transformer.
         """
         return self.__class__.__name__, self._features
-
-    def _save_or_load_transformer(
-        self, load: bool, cache_group: str | None, cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]]
-    ) -> None:
-        """Saves or loads the transformer to/from the cache.
-
-        Will save the transformer to the cache if `load` is False, otherwise will load the transformer from the cache.
-        The cache key is computed using the specified cache keys and will be used to save the transformer to the cache
-        using joblib.
-
-        Args:
-            load: Whether to load the transformer from the cache or save it to the cache.
-            cache_group: The cache group to use.
-            cache_keys: The cache keys to use for the transformer.
-        """
-        cache_key = self._compute_cache_key(cache_keys, cache_group, frame_depth=3)
-        transformer_path = self._cache_directory / f"{cache_key}.transformer"
-
-        if load:
-            logger.info(f"Loading transformer from {transformer_path}.")
-            self._transformer = joblib.load(transformer_path)
-        else:
-            logger.info(f"Saving transformer to {transformer_path}.")
-            joblib.dump(self._transformer, transformer_path)

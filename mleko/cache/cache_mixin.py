@@ -3,10 +3,6 @@
 This class can be used as a mixin to add caching functionality to a class. It provides the basic
 functionality for caching the results of method calls based on user-defined cache keys and fingerprints.
 
-The class can be extended to provide additional functionality by inheriting from it and overriding
-the `_read_cache_file()` and `_write_cache_file()` methods to customize the cache loading and saving
-processes, respectively.
-
 Combining this class with the format mixins can be used to add support for caching different data
 formats, such as Vaex DataFrames in Arrow format.
 """
@@ -20,6 +16,7 @@ from pathlib import Path
 from typing import Any, Callable, Hashable, Sequence
 
 from mleko.cache.fingerprinters.base_fingerprinter import BaseFingerprinter
+from mleko.cache.handlers import PICKLE_CACHE_HANDLER, CacheHandler
 from mleko.utils.custom_logger import CustomLogger
 
 
@@ -27,7 +24,7 @@ logger = CustomLogger()
 """A module-level logger instance."""
 
 
-def get_frame_qualname(frame: inspect.FrameInfo) -> str:
+def get_qualified_name_from_frame(frame: inspect.FrameInfo) -> str:
     """Gets the fully qualified name of the function or method associated with the provided frame.
 
     Args:
@@ -46,7 +43,7 @@ def get_frame_qualname(frame: inspect.FrameInfo) -> str:
     return f"{module_name}.{caller_function}"
 
 
-def get_class_method_name(frame_depth: int) -> str:
+def get_qualified_name_of_caller(frame_depth: int) -> str:
     """Gets the fully qualified name of the calling function or method.
 
     The fully qualified name is in the format "module.class.method" for class methods or "module.function" for
@@ -59,7 +56,7 @@ def get_class_method_name(frame_depth: int) -> str:
     Returns:
         A string representing the fully qualified name of the calling function or method.
     """
-    frame_qualname = get_frame_qualname(inspect.stack()[frame_depth])
+    frame_qualname = get_qualified_name_from_frame(inspect.stack()[frame_depth])
     class_method_name = ".".join(frame_qualname.split(".")[-2:])
     return class_method_name
 
@@ -81,7 +78,7 @@ class CacheMixin:
         eviction of least recently used cache entries based on a specified maximum number of cache entries.
     """
 
-    def __init__(self, cache_directory: str | Path, cache_file_suffix: str, disable_cache: bool) -> None:
+    def __init__(self, cache_directory: str | Path, disable_cache: bool) -> None:
         """Initializes the `CacheMixin` with the provided cache directory.
 
         Note:
@@ -89,7 +86,6 @@ class CacheMixin:
 
         Args:
             cache_directory: The directory where cache files will be stored.
-            cache_file_suffix: The suffix/file ending of the cache files.
             disable_cache: Whether to disable the cache.
 
         Examples:
@@ -111,17 +107,17 @@ class CacheMixin:
         """
         self._cache_directory = Path(cache_directory)
         self._cache_directory.mkdir(parents=True, exist_ok=True)
-        self._cache_file_suffix = cache_file_suffix
         self._cache_type_name = self._find_cache_type_name(self.__class__)
         self._disable_cache = disable_cache
 
     def _cached_execute(
         self,
         lambda_func: Callable[[], Any],
-        cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
+        cache_key_inputs: list[Hashable | tuple[Any, BaseFingerprinter]],
         cache_group: str | None = None,
         force_recompute: bool = False,
-    ) -> tuple[bool, Any]:
+        cache_handlers: CacheHandler | list[CacheHandler] | None = None,
+    ) -> Any:
         """Executes the given function, caching the results based on the provided cache keys and fingerprints.
 
         Warning:
@@ -133,12 +129,16 @@ class CacheMixin:
 
         Args:
             lambda_func: A lambda function to execute.
-            cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
-                BaseFingerprinter instance for generating fingerprints.
+            cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing
+                a value and a BaseFingerprinter instance for generating fingerprints.
             cache_group: A string representing the cache group, used to group related cache keys together when methods
                 are called independently.
             force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
                 cached result is available.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If None, the cache files will
+                be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
+                files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
+                each cache file.
 
         Returns:
             A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
@@ -146,18 +146,21 @@ class CacheMixin:
             returned instead of recomputing the result.
         """
         if self._disable_cache:
-            return False, lambda_func()
+            return lambda_func()
 
-        class_method_name = get_class_method_name(2)
-        cache_key = self._compute_cache_key(cache_keys, cache_group)
+        if cache_handlers is None:
+            cache_handlers = PICKLE_CACHE_HANDLER
+
+        class_method_name = get_qualified_name_of_caller(2)
+        cache_key = self._compute_cache_key(cache_key_inputs, cache_group)
 
         if not force_recompute:
-            output = self._load_from_cache(cache_key)
+            output = self._load_from_cache(cache_key, cache_handlers)
             if output is not None:
                 logger.info(
                     f"\033[32mCache Hit\033[0m ({self._cache_type_name}) {class_method_name}: Using cached output."
                 )
-                return True, output
+                return output
             else:
                 logger.info(
                     f"\033[31mCache Miss\033[0m ({self._cache_type_name}) {class_method_name}: Executing method."
@@ -168,20 +171,20 @@ class CacheMixin:
             )
 
         output = lambda_func()
-        self._save_to_cache(cache_key, output)
-        return False, self._load_from_cache(cache_key)
+        self._save_to_cache(cache_key, output, cache_handlers)
+        return self._load_from_cache(cache_key, cache_handlers)
 
     def _compute_cache_key(
         self,
-        cache_keys: list[Hashable | tuple[Any, BaseFingerprinter]],
+        cache_key_inputs: list[Hashable | tuple[Any, BaseFingerprinter]],
         cache_group: str | None = None,
         frame_depth: int = 3,
     ) -> str:
         """Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
 
         Args:
-            cache_keys: A list of cache keys that can be a mix of hashable values and tuples containing a value and a
-                BaseFingerprinter instance for generating fingerprints.
+            cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing a
+                value and a BaseFingerprinter instance for generating fingerprints.
             cache_group: A string representing the cache group.
             frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
                 function or method. For each nested function or method, the frame depth should be increased by 1.
@@ -195,49 +198,41 @@ class CacheMixin:
         """
         values_to_hash: list[Hashable] = []
 
-        for key in cache_keys:
-            if isinstance(key, tuple) and len(key) == 2 and isinstance(key[1], BaseFingerprinter):
-                value, fingerprinter = key
+        for key_input in cache_key_inputs:
+            if isinstance(key_input, tuple) and len(key_input) == 2 and isinstance(key_input[1], BaseFingerprinter):
+                value, fingerprinter = key_input
                 values_to_hash.append(fingerprinter.fingerprint(value))
             else:
-                values_to_hash.append(key)
+                values_to_hash.append(key_input)
 
         data = pickle.dumps(values_to_hash)
-        cache_key_prefix = get_class_method_name(frame_depth)
+        cache_key_prefix = get_qualified_name_of_caller(frame_depth)
         if cache_group is not None:
             cache_key_prefix = f"{cache_key_prefix}.{cache_group}"
 
         cache_key = f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
-        if len(cache_key) + 1 + len(self._cache_file_suffix) > 255:
+        if len(cache_key) > 235:
             raise ValueError(
-                f"The computed cache key is too long ({len(cache_key) + len(self._cache_file_suffix)} chars)."
-                "The maximum length of a cache key is 255 chars, and given the current class, the maximum "
-                "length of the provided cache_group is "
-                f"{255 - len(cache_key_prefix) - 32 - 1 - len(self._cache_file_suffix)} chars."
+                f"The computed cache key is too long ({len(cache_key)} chars)."
+                "The maximum length of a cache key is 235 chars, and given the current class, the maximum "
+                f"length of the provided cache_group is {235 - len(cache_key)} chars. "
                 "Please reduce the length of the cache_group."
             )
 
         return f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
 
-    def _read_cache_file(self, cache_file_path: Path) -> Any:
-        """Reads the cache file from the specified path and returns the deserialized data.
-
-        This method can be overridden in subclasses to customize the cache loading process.
-
-        Args:
-            cache_file_path: A Path object representing the location of the cache file.
-
-        Returns:
-            The deserialized data stored in the cache file.
-        """
-        with open(cache_file_path, "rb") as cache_file:
-            return pickle.load(cache_file)
-
-    def _load_from_cache(self, cache_key: str) -> Any | None:
+    def _load_from_cache(
+        self,
+        cache_key: str,
+        cache_handlers: CacheHandler | list[CacheHandler],
+    ) -> Any | None:
         """Loads data from the cache based on the provided cache key.
 
         Args:
             cache_key: A string representing the cache key.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                provided, each CacheHandler instance will be used for each cache file.
 
         Returns:
             The cached data if it exists, or None if there is no data for the given cache key.
@@ -247,29 +242,30 @@ class CacheMixin:
             result = re.search(r"[a-fA-F\d]{32}_(\d+).", str(file_path))
             return int(result.group(1)) if result else 0
 
-        cache_file_paths = sorted(
-            list(self._cache_directory.glob(f"{cache_key}*.{self._cache_file_suffix}")), key=extract_number
+        cache_handler_suffixes = (
+            {f".{cache_handler.suffix}" for cache_handler in cache_handlers}
+            if isinstance(cache_handlers, list)
+            else {f".{cache_handlers.suffix}"}
         )
+        cache_file_paths = [
+            f
+            for f in sorted(list(self._cache_directory.glob(f"{cache_key}*.*")), key=extract_number)
+            if f.suffix in cache_handler_suffixes
+        ]
         if cache_file_paths:
             output_data = []
-            for cache_file_path in cache_file_paths:
-                output_data.append(self._read_cache_file(cache_file_path))
+            for i, cache_file_path in enumerate(cache_file_paths):
+                reader = cache_handlers[i].reader if isinstance(cache_handlers, list) else cache_handlers.reader
+                output_data.append(reader(cache_file_path))
             return tuple(output_data) if len(output_data) > 1 else output_data[0]
         return None
 
-    def _write_cache_file(self, cache_file_path: Path, output: Any) -> None:
-        """Writes the given data to a cache file at the specified path, serializing it using pickle.
-
-        This method can be overridden in subclasses to customize the cache saving process.
-
-        Args:
-            cache_file_path: A Path object representing the location where the cache file should be saved.
-            output: The data to be serialized and saved to the cache file.
-        """
-        with open(cache_file_path, "wb") as cache_file:
-            pickle.dump(output, cache_file)
-
-    def _save_to_cache(self, cache_key: str, output: Any | Sequence[Any]) -> None:
+    def _save_to_cache(
+        self,
+        cache_key: str,
+        output: Any | Sequence[Any],
+        cache_handlers: CacheHandler | list[CacheHandler],
+    ) -> None:
         """Saves the given data to the cache using the provided cache key.
 
         If the output is a sequence, each element will be saved to a separate cache file. Otherwise, the output will be
@@ -279,14 +275,21 @@ class CacheMixin:
         Args:
             cache_key: A string representing the cache key.
             output: The data to be saved to the cache.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                provided, each CacheHandler instance will be used for each cache file.
         """
         if isinstance(output, Sequence):
             for i in range(len(output)):
-                cache_file_path = self._cache_directory / f"{cache_key}_{i}.{self._cache_file_suffix}"
-                self._write_cache_file(cache_file_path, output[i])
+                writer = cache_handlers[i].writer if isinstance(cache_handlers, list) else cache_handlers.writer
+                suffix = cache_handlers[i].suffix if isinstance(cache_handlers, list) else cache_handlers.suffix
+                cache_file_path = self._cache_directory / f"{cache_key}_{i}.{suffix}"
+                writer(cache_file_path, output[i])
         else:
-            cache_file_path = self._cache_directory / f"{cache_key}.{self._cache_file_suffix}"
-            self._write_cache_file(cache_file_path, output)
+            writer = cache_handlers[0].writer if isinstance(cache_handlers, list) else cache_handlers.writer
+            suffix = cache_handlers[0].suffix if isinstance(cache_handlers, list) else cache_handlers.suffix
+            cache_file_path = self._cache_directory / f"{cache_key}.{suffix}"
+            writer(cache_file_path, output)
 
     def _find_cache_type_name(self, cls: type) -> str | None:
         """Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.
@@ -304,4 +307,4 @@ class CacheMixin:
             found_class_name = self._find_cache_type_name(base)
             if found_class_name:
                 return found_class_name
-        return None
+        return None  # pragma: no cover

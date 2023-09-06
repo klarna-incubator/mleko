@@ -27,7 +27,6 @@ class FrequencyEncoderTransformer(BaseTransformer):
         features: list[str] | tuple[str, ...],
         unseen_strategy: Literal["zero", "nan"] = "nan",
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the transformer.
 
@@ -41,11 +40,10 @@ class FrequencyEncoderTransformer(BaseTransformer):
             result in very small frequencies.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             unseen_strategy: Strategy to use for unseen values once the transformer is fitted.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -56,46 +54,46 @@ class FrequencyEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> df = FrequencyEncoderTransformer(
+            >>> _, df = FrequencyEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._unseen_strategy = unseen_strategy
         self._transformer = vaex.ml.FrequencyEncoder(
             features=self._features, unseen_strategy=self._unseen_strategy, prefix=""
         )
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Transforms the features in the DataFrame using frequency encoding.
-
-        Args:
-            dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
-
-        Returns:
-            The transformed DataFrame.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        logger.info(f"Transforming features using frequency encoding ({len(self._features)}): {self._features}.")
-        transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.FrequencyEncoder:
         """Fits the transformer on the input data.
 
         Args:
             dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
         """
         logger.info(f"Fitting frequency encoder transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
+        return self._transformer
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Transforms the features in the DataFrame using frequency encoding.
+
+        Args:
+            dataframe: The DataFrame to transform.
+
+        Returns:
+            The transformed DataFrame.
+        """
+        logger.info(f"Transforming features using frequency encoding ({len(self._features)}): {self._features}.")
+        transformed_df = self._transformer.transform(dataframe)
+        return transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

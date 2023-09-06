@@ -6,9 +6,7 @@ enforcing shared structure and behavior. The goal is to facilitate data handling
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
-
-import vaex
+from typing import Any
 
 
 @dataclass
@@ -25,7 +23,7 @@ class DataContainer:
         [Path("path/to/data")]
     """
 
-    data: dict[str, list[Path] | vaex.DataFrame] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     """The data stored in the DataContainer.
 
     The data is stored in a dictionary, where the keys are the names of the data and the values are the data itself.

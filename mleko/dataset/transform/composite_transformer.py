@@ -6,7 +6,6 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -30,7 +29,6 @@ class CompositeTransformer(BaseTransformer):
         cache_directory: str | Path,
         transformers: list[BaseTransformer] | tuple[BaseTransformer, ...],
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the composite transformer.
 
@@ -39,10 +37,9 @@ class CompositeTransformer(BaseTransformer):
         and will only be performed on the final DataFrame.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             transformers: List of transformers to be combined.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -68,56 +65,41 @@ class CompositeTransformer(BaseTransformer):
             ...         ),
             ...     ],
             ... )
-            >>> df = transformer.transform(df)
+            >>> _, df = transformer.fit_transform(df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, [], cache_size, disable_cache)
+        super().__init__(cache_directory, [], cache_size)
         self._transformers = tuple(transformers)
         self._transformer: list[Any] = []
 
-        for transformer in self._transformers:
-            transformer._disable_cache = True
-
-    def transform(
-        self, dataframe: vaex.DataFrame, fit: bool, cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
-        """Transforms the DataFrame using the transformers in the order they are specified.
+    def _fit(self, dataframe: vaex.DataFrame) -> list[Any]:
+        """Fits the transformer to the specified DataFrame.
 
         Args:
-            dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformers on the input data.
-            cache_group: The cache group to use.
-            force_recompute: Whether to force the recomputation of the transformation.
+            dataframe: DataFrame to be fitted.
 
         Returns:
-            The transformed DataFrame.
+            List of fitted transformers.
         """
-        cache_keys = [self._fingerprint(), (dataframe, VaexFingerprinter())]
-        cached, df = self._cached_execute(
-            lambda_func=lambda: self._transform(dataframe, fit),
-            cache_keys=cache_keys,
-            cache_group=cache_group,
-            force_recompute=force_recompute,
-        )
+        fitted_transformers: list[Any] = []
+        for i, transformer in enumerate(self._transformers):
+            logger.info(
+                f"Fitting composite feature transformation step {i+1}/{len(self._transformers)}: "
+                f"{transformer.__class__.__name__}."
+            )
+            fitted_transformer = transformer._fit(dataframe)
+            fitted_transformers.append(fitted_transformer)
+            logger.info(f"Finished fitting composite transformation step {i+1}/{len(self._transformers)}.")
+        return fitted_transformers
 
-        if fit:
-            self._save_or_load_transformer(cached, cache_group, cache_keys)
-
-            if cached:
-                for transformer, transformer_pkl in zip(self._transformers, self._transformer):
-                    transformer._transformer = transformer_pkl
-
-        return df
-
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Returns the transformed DataFrame.
 
         Args:
             dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformers on the input data.
 
         Returns:
             The transformed DataFrame.
@@ -127,10 +109,21 @@ class CompositeTransformer(BaseTransformer):
                 f"Executing composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            dataframe = transformer.transform(dataframe, fit).extract()
-            self._transformer.append(transformer._transformer)
+            dataframe = transformer._transform(dataframe).extract()
             logger.info(f"Finished composite transformation step {i+1}/{len(self._transformers)}.")
         return dataframe
+
+    def _assign_transformer(self, transformer: Any) -> None:
+        """Assigns the specified transformer to the transformer attribute.
+
+        Can be overridden by subclasses to assign the transformer using a different method.
+
+        Args:
+            transformer: Transformer to be assigned.
+        """
+        self._transformer = transformer
+        for transformer_obj, fitted_transformer in zip(self._transformers, transformer):
+            transformer_obj._transformer = fitted_transformer
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

@@ -23,17 +23,15 @@ class TestMaxAbsScalerTransformer:
     def test_max_abs_scaling(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly scale the specified features."""
         max_abs_scaler_transformer = MaxAbsScalerTransformer(temporary_directory, features=["a", "b"])
-        df = max_abs_scaler_transformer._transform(example_vaex_dataframe, fit=True)
+        _, df = max_abs_scaler_transformer._fit_transform(example_vaex_dataframe)
 
         assert df["a"].tolist() == [0.2, 0.4, 0.6, 0.8, 1.0]  # type: ignore
         assert df["b"].tolist() == [-0.5, -1.0, 0.0, 0.5, 1.0]  # type: ignore
 
     def test_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should correctly scale the specified features and use cache if possible."""
-        MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).transform(example_vaex_dataframe, fit=True)
+        MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(example_vaex_dataframe)
 
-        with patch.object(MaxAbsScalerTransformer, "_transform") as mocked_transform:
-            MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).transform(
-                example_vaex_dataframe, fit=False
-            )
-            mocked_transform.assert_not_called()
+        with patch.object(MaxAbsScalerTransformer, "_fit_transform") as mocked_fit_transform:
+            MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(example_vaex_dataframe)
+            mocked_fit_transform.assert_not_called()

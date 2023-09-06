@@ -10,3 +10,8 @@ The following submodules are provided:
     - `feature_select`: The submodule provides functionality for selecting features from data.
 """
 from __future__ import annotations
+
+from .data_schema import DataSchema
+
+
+__all__ = ["DataSchema"]

@@ -31,9 +31,6 @@ class BaseIngester(ABC):
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseIngester`.
-
-        Returns:
-            A list of Path objects pointing to the downloaded data files.
         """
         raise NotImplementedError
 

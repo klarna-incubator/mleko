@@ -41,17 +41,19 @@ class TestCSVToVaexConverter:
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is_Best"],
+            meta_columns=["Extra_Column"],
+            drop_rows_with_na_columns=["Name"],
             num_workers=1,
         )
 
         n_files = 1
         file_paths = generate_csv_files(temporary_directory, n_files)
-        df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
+        _, df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, string]"
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, string, string]"
         assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column"]
-        assert df.shape == (n_files * 3, 6)
-        assert df.Name.countna() == n_files
+        assert df.shape == (n_files * 2, 6)
+        assert df.Name.countna() == 0
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 1
 
@@ -61,6 +63,8 @@ class TestCSVToVaexConverter:
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is_Best"],
+                meta_columns=["Extra_Column"],
+                drop_rows_with_na_columns=["Name"],
                 num_workers=1,
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
@@ -75,12 +79,12 @@ class TestCSVToVaexConverter:
 
         n_files = 1
         file_paths = generate_csv_files(temporary_directory, n_files, gzipped=True)
-        df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
+        _, df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CSVToVaexConverter(
             temporary_directory, downcast_float=False, num_workers=1, cache_size=2
         )
-        df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
+        _, df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 2
         df.close()

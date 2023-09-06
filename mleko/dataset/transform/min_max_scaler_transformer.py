@@ -28,7 +28,6 @@ class MinMaxScalerTransformer(BaseTransformer):
         min_value: float = 0.0,
         max_value: float = 1.0,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the min-max scaler transformer.
 
@@ -40,12 +39,11 @@ class MinMaxScalerTransformer(BaseTransformer):
             or an error will be raised.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             min_value: The minimum value of the range.
             max_value: The maximum value of the range.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -54,47 +52,47 @@ class MinMaxScalerTransformer(BaseTransformer):
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[-1, -2, -3, -4, -5, 0, 1, 2, 3, 4]
             ... )
-            >>> df = MaxAbsScalerTransformer(
+            >>> _, df = MaxAbsScalerTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
             >>> df["b"].tolist()
             [-0.2, -0.4, -0.6, -0.8, -1.0, 0.0, 0.2, 0.4, 0.6, 0.8]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._min_value = min_value
         self._max_value = max_value
         self._transformer = vaex.ml.MinMaxScaler(
             features=self._features, prefix="", feature_range=(self._min_value, self._max_value)
         )
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Transforms the features in the DataFrame using min-max scaling.
-
-        Args:
-            dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
-
-        Returns:
-            The transformed DataFrame.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        logger.info(f"Transforming features using min-max scaling ({len(self._features)}): {self._features}.")
-        transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.MinMaxScaler:
         """Fits the transformer on the given DataFrame.
 
         Args:
             dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
         """
         logger.info(f"Fitting min-max scaler transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
+        return self._transformer
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Transforms the features in the DataFrame using min-max scaling.
+
+        Args:
+            dataframe: The DataFrame to transform.
+
+        Returns:
+            The transformed DataFrame.
+        """
+        logger.info(f"Transforming features using min-max scaling ({len(self._features)}): {self._features}.")
+        transformed_df = self._transformer.transform(dataframe)
+        return transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

@@ -36,28 +36,28 @@ class TestCompositeTransformer:
             ],
         )
 
-        df = test_composite_transformer.transform(example_vaex_dataframe, fit=True)
+        _, df = test_composite_transformer.fit_transform(example_vaex_dataframe)
 
         assert sorted(df["a"].tolist()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # type: ignore
         for value in df["b"].tolist():  # type: ignore
             if not np.isnan(value):
                 assert value == 0.4
 
-        with patch.object(CompositeTransformer, "_transform") as mocked_select_features:
-            test_composite_transformer.transform(example_vaex_dataframe, fit=False)
-            mocked_select_features.assert_not_called()
+        with patch.object(CompositeTransformer, "_fit_transform") as mocked_fit_transform:
+            test_composite_transformer.fit_transform(example_vaex_dataframe)
+            mocked_fit_transform.assert_not_called()
 
     def test_persistent_transformer_loaded_from_disk(
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should fit and transform the data and save the transformer to disk."""
-        df = CompositeTransformer(
+        _, df = CompositeTransformer(
             temporary_directory,
             [
                 LabelEncoderTransformer(temporary_directory, features=["a"]),
                 FrequencyEncoderTransformer(temporary_directory, features=["b"]),
             ],
-        ).transform(example_vaex_dataframe, fit=True)
+        ).fit_transform(example_vaex_dataframe)
         first_cache = list(temporary_directory.glob("*"))
 
         assert sorted(df["a"].tolist()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # type: ignore
@@ -65,13 +65,13 @@ class TestCompositeTransformer:
             if not np.isnan(value):
                 assert value == 0.4
 
-        df = CompositeTransformer(
+        _, df = CompositeTransformer(
             temporary_directory,
             [
                 LabelEncoderTransformer(temporary_directory, features=["a"]),
                 FrequencyEncoderTransformer(temporary_directory, features=["b"]),
             ],
-        ).transform(example_vaex_dataframe, fit=True)
+        ).fit_transform(example_vaex_dataframe)
         second_cache = list(temporary_directory.glob("*"))
 
         assert sorted(df["a"].tolist()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # type: ignore

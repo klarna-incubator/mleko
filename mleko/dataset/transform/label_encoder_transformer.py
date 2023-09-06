@@ -27,7 +27,6 @@ class LabelEncoderTransformer(BaseTransformer):
         features: list[str] | tuple[str, ...],
         allow_unseen: bool = True,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ) -> None:
         """Initializes the transformer.
 
@@ -39,11 +38,10 @@ class LabelEncoderTransformer(BaseTransformer):
             Should only be used with categorical features.
 
         Args:
-            cache_directory: Directory where the resulting DataFrame will be stored locally.
+            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             allow_unseen: Whether to allow unseen values once the transformer is fitted.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Examples:
             >>> import vaex
@@ -53,45 +51,45 @@ class LabelEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> df = LabelEncoderTransformer(
+            >>> _, df = LabelEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
             ...     allow_unseen=True,
-            ... ).transform(df)
+            ... ).fit_transform(df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
             [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
         """
-        super().__init__(cache_directory, features, cache_size, disable_cache)
+        super().__init__(cache_directory, features, cache_size)
         self._allow_unseen = allow_unseen
-        self._transformer = vaex.ml.LabelEncoder(features=self._features, prefix="")
+        self._transformer = vaex.ml.LabelEncoder(allow_unseen=self._allow_unseen, features=self._features, prefix="")
 
-    def _transform(self, dataframe: vaex.DataFrame, fit: bool) -> vaex.DataFrame:
-        """Transforms the features of the given DataFrame using label encoding.
-
-        Args:
-            dataframe: The DataFrame to transform.
-            fit: Whether to fit the transformer on the input data.
-
-        Returns:
-            The transformed DataFrame.
-        """
-        if fit:
-            self._fit(dataframe)
-
-        logger.info(f"Transforming features using label encoding ({len(self._features)}): {self._features}.")
-        transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
-
-    def _fit(self, dataframe: vaex.DataFrame) -> None:
+    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.LabelEncoder:
         """Fits the transformer on the given DataFrame.
 
         Args:
             dataframe: The DataFrame to fit the transformer on.
+
+        Returns:
+            The fitted transformer.
         """
         logger.info(f"Fitting label encoder transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
+        return self._transformer
+
+    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        """Transforms the features of the given DataFrame using label encoding.
+
+        Args:
+            dataframe: The DataFrame to transform.
+
+        Returns:
+            The transformed DataFrame.
+        """
+        logger.info(f"Transforming features using label encoding ({len(self._features)}): {self._features}.")
+        transformed_df = self._transformer.transform(dataframe)
+        return transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

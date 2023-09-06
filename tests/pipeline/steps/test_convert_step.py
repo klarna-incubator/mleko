@@ -8,6 +8,7 @@ import pytest
 import vaex
 
 from mleko.dataset.convert import BaseConverter
+from mleko.dataset.data_schema import DataSchema
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.steps.convert_step import ConvertStep
 
@@ -18,7 +19,7 @@ class TestConvertStep:
     def test_init(self):
         """Should init the ConvertStep with a converter."""
         converter = MagicMock(spec=BaseConverter)
-        convert_step = ConvertStep(converter=converter, inputs=["raw_data"], outputs=["converted_data"])
+        convert_step = ConvertStep(converter=converter, inputs=["raw_data"], outputs=["data_schema", "converted_data"])
 
         assert convert_step._converter == converter
 
@@ -29,10 +30,10 @@ class TestConvertStep:
 
         converter = MagicMock(spec=BaseConverter)
         df = vaex.from_dict({"col1": [1, 2, 3], "col2": [4, 5, 6]})
-        converter.convert = MagicMock(return_value=df)
+        converter.convert = MagicMock(return_value=(DataSchema(), df))
 
         convert_step = ConvertStep(
-            converter=converter, inputs=["raw_data"], outputs=["converted_data"], cache_group=None
+            converter=converter, inputs=["raw_data"], outputs=["data_schema", "converted_data"], cache_group=None
         )
         result = convert_step.execute(data_container, force_recompute=False)
 
@@ -47,7 +48,7 @@ class TestConvertStep:
         data_container = DataContainer(data={"raw_data": file_paths})  # type: ignore
 
         converter = MagicMock(spec=BaseConverter)
-        convert_step = ConvertStep(converter=converter, inputs=["raw_data"], outputs=["converted_data"])
+        convert_step = ConvertStep(converter=converter, inputs=["raw_data"], outputs=["data_schema", "converted_data"])
 
         with pytest.raises(ValueError):
             convert_step.execute(data_container, force_recompute=False)

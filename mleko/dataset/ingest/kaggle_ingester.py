@@ -104,7 +104,7 @@ class KaggleCredentialsManager:
 
         Raises:
             FileNotFoundError: If the file does not exist or is a directory.
-            KeyError: If the username or API key is missing from the credentials JSON.
+            key_error: If the username or API key is missing from the credentials JSON.
             JSONDecodeError: If the JSON decoding fails while reading the credentials.
         """
         expanded_credentials_file_path = credentials_file_path.expanduser()
@@ -139,9 +139,9 @@ class KaggleCredentialsManager:
                 f"{e.lineno} column {e.colno} (char {e.pos})."
             )
             raise json.JSONDecodeError(e.msg, e.doc, e.pos) from e
-        except KeyError as e:
-            logger.error(f"Missing {e} from Kaggle API credentials JSON.")
-            raise e
+        except KeyError as key_error:
+            logger.error(f"Missing {key_error} from Kaggle API credentials JSON.")
+            raise key_error
 
     @staticmethod
     def _read_environment_config() -> KaggleCredentials | None:

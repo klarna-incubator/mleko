@@ -12,6 +12,14 @@ from pyarrow import csv as arrow_csv
 from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters import CSVFingerprinter
+from mleko.cache.handlers import CacheHandler
+from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
+from mleko.cache.handlers.vaex_cache_handler import (
+    VAEX_DATAFRAME_CACHE_HANDLER,
+    read_vaex_dataframe,
+    write_vaex_dataframe,
+)
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.file_helpers import clear_directory
@@ -27,6 +35,17 @@ V_CPU_COUNT = multiprocessing.cpu_count()
 """A module-level constant representing the total number of CPUs available on the current system."""
 
 
+def write_vaex_dataframe_with_cleanup(cache_file_path: Path, output: vaex.DataFrame) -> None:
+    """Writes the results of the DataFrame conversion to a file and cleans up the cache directory.
+
+    Args:
+        cache_file_path: The path of the cache file to be written.
+        output: The Vaex DataFrame to be saved in the cache file.
+    """
+    write_vaex_dataframe(cache_file_path, output)
+    clear_directory(cache_file_path.parent, pattern="df_chunk_*.arrow")
+
+
 class CSVToVaexConverter(BaseConverter):
     """A class that converts CSV to a random-access `vaex` compatible format."""
 
@@ -38,6 +57,8 @@ class CSVToVaexConverter(BaseConverter):
         forced_categorical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_boolean_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         drop_columns: list[str] | tuple[str, ...] | tuple[()] = (),
+        meta_columns: list[str] | tuple[str, ...] | tuple[()] = (),
+        drop_rows_with_na_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         na_values: list[str]
         | tuple[str, ...]
         | tuple[()] = (
@@ -74,6 +95,8 @@ class CSVToVaexConverter(BaseConverter):
             forced_categorical_columns: A sequence of column names to force as categorical type.
             forced_boolean_columns: A sequence of column names to force as boolean type.
             drop_columns: A sequence of column names to drop during conversion.
+            meta_columns: A sequence of column names to be considered as metadata (e.g. ID or target columns).
+            drop_rows_with_na_columns: A sequence of column names to drop rows with missing values.
             na_values: A sequence of strings to consider as NaN or missing values.
             true_values: A sequence of strings to consider as True values.
             false_values: A sequence of strings to consider as False values.
@@ -112,6 +135,8 @@ class CSVToVaexConverter(BaseConverter):
         self._forced_categorical_columns = tuple(forced_categorical_columns)
         self._forced_boolean_columns = tuple(forced_boolean_columns)
         self._drop_columns = tuple(drop_columns)
+        self._meta_columns = tuple(meta_columns)
+        self._drop_rows_with_na_columns = tuple(drop_rows_with_na_columns)
         self._na_values = tuple(na_values)
         self._true_values = tuple(true_values)
         self._false_values = tuple(false_values)
@@ -121,7 +146,7 @@ class CSVToVaexConverter(BaseConverter):
 
     def convert(
         self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
-    ) -> vaex.DataFrame:
+    ) -> tuple[DataSchema, vaex.DataFrame]:
         """Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
 
         The method takes care of caching, and results will be reused accordingly unless `force_recompute`
@@ -141,13 +166,15 @@ class CSVToVaexConverter(BaseConverter):
         Returns:
             The resulting dataframe with the combined converted data.
         """
-        _, df = self._cached_execute(
+        ds, df = self._cached_execute(
             lambda_func=lambda: self._convert(file_paths),
-            cache_keys=[
+            cache_key_inputs=[
                 self._forced_numerical_columns,
                 self._forced_categorical_columns,
                 self._forced_boolean_columns,
                 self._drop_columns,
+                self._meta_columns,
+                self._drop_rows_with_na_columns,
                 self._na_values,
                 self._true_values,
                 self._false_values,
@@ -156,8 +183,16 @@ class CSVToVaexConverter(BaseConverter):
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=[
+                JOBLIB_CACHE_HANDLER,
+                CacheHandler(
+                    writer=write_vaex_dataframe_with_cleanup,
+                    reader=read_vaex_dataframe,
+                    suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
+                ),
+            ],
         )
-        return df
+        return ds, df
 
     @staticmethod
     def _convert_csv_file_to_arrow(
@@ -231,7 +266,7 @@ class CSVToVaexConverter(BaseConverter):
         df_chunk.export(output_path, chunk_size=100_000, parallel=False)
         df_chunk.close()
 
-    def _convert(self, file_paths: list[Path] | list[str]) -> vaex.DataFrame:
+    def _convert(self, file_paths: list[Path] | list[str]) -> tuple[DataSchema, vaex.DataFrame]:
         """Converts a list of CSV files to Arrow format using parallel processing.
 
         Chunks of files are processed in parallel and saved in the output directory.
@@ -259,18 +294,24 @@ class CSVToVaexConverter(BaseConverter):
                 ):
                     pbar.update(1)
 
-        df = vaex.open(self._cache_directory / "df_chunk_*.arrow")
+        df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
         for column_name in df.get_column_names(dtype=pa.null()):
-            df[column_name] = df[column_name].astype("string")
+            df[column_name] = get_column(df, column_name).astype("string")
 
-        return df
+        if self._drop_rows_with_na_columns:
+            df = df.dropna(column_names=self._drop_rows_with_na_columns)
 
-    def _write_cache_file(self, cache_file_path: Path, output: vaex.DataFrame) -> None:
-        """Writes the results of the DataFrame conversion to Arrow format in a cache file with arrow suffix.
+        ds = DataSchema(
+            numerical=df.get_column_names(dtype="numeric"),
+            categorical=df.get_column_names(dtype="string"),
+            boolean=df.get_column_names(dtype="bool"),
+            datetime=df.get_column_names(dtype="datetime"),
+            timedelta=df.get_column_names(dtype="timedelta"),
+        )
+        for meta_column in self._meta_columns:
+            ds.drop_feature(meta_column)
 
-        Args:
-            cache_file_path: The path of the cache file to be written.
-            output: The Vaex DataFrame to be saved in the cache file.
-        """
-        super()._write_cache_file(cache_file_path, output)
-        clear_directory(cache_file_path.parent, pattern="df_chunk_*.arrow")
+        for column_name in df.get_column_names(dtype="bool"):
+            df[column_name] = get_column(df, column_name).astype("string")
+
+        return ds, df

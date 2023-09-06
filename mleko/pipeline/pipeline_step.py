@@ -63,9 +63,6 @@ class PipelineStep(ABC):
 
         Raises:
             NotImplementedError: Must be implemented by subclass.
-
-        Returns:
-            Processed data as a `DataContainer`.
         """
         raise NotImplementedError
 

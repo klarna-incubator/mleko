@@ -22,12 +22,6 @@ repos:
         entry: poetry run check-yaml
         language: system
         types: [yaml]
-      - id: darglint
-        name: darglint
-        entry: poetry run darglint
-        language: system
-        types: [python]
-        stages: [manual]
       - id: end-of-file-fixer
         name: Fix End of Files
         entry: poetry run end-of-file-fixer
@@ -41,7 +35,6 @@ repos:
         language: system
         types: [python]
         require_serial: true
-        args: [--darglint-ignore-regex, .*]
       - id: isort
         name: isort
         entry: poetry run isort

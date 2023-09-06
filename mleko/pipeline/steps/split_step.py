@@ -34,8 +34,10 @@ class SplitStep(PipelineStep):
 
         Args:
             splitter: The DataSplitter responsible for handling data splitting.
-            inputs: List or tuple of input keys expected by this step.
-            outputs: List or tuple of output keys produced by this step.
+            inputs: List or tuple of input keys expected by this step. Should contain a single key,
+                corresponding to the DataFrame to be split.
+            outputs: List or tuple of output keys produced by this step. Should contain two keys,
+                corresponding to the two DataFrames after splitting.
             cache_group: The cache group to use.
         """
         super().__init__(inputs, outputs, cache_group)

@@ -11,6 +11,7 @@ import vaex
 from sklearn.model_selection import train_test_split
 
 from mleko.cache.fingerprinters import VaexFingerprinter
+from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 from mleko.utils.vaex_helpers import get_column, get_filtered_df
@@ -38,7 +39,6 @@ class RandomSplitter(BaseSplitter):
         stratify: str | None = None,
         random_state: int | None = None,
         cache_size: int = 1,
-        disable_cache: bool = False,
     ):
         """Initializes the `RandomSplitter` with the given parameters.
 
@@ -62,7 +62,6 @@ class RandomSplitter(BaseSplitter):
             stratify: The name of the column to use for stratification. If None, stratification will not be performed.
             random_state: The seed to use for random number generation.
             cache_size: The maximum number of entries to keep in the cache.
-            disable_cache: Whether to disable caching.
 
         Example:
             >>> import vaex
@@ -79,7 +78,7 @@ class RandomSplitter(BaseSplitter):
                 0    2    1
                 1    4    0
         """
-        super().__init__(cache_directory, cache_size, disable_cache)
+        super().__init__(cache_directory, cache_size)
         self._idx2_size = [split / sum(data_split) for split in data_split][1]
         self._shuffle = shuffle
         self._stratify = stratify
@@ -102,9 +101,9 @@ class RandomSplitter(BaseSplitter):
         Returns:
             A tuple containing the split dataframes.
         """
-        _, dfs = self._cached_execute(
+        return self._cached_execute(
             lambda_func=lambda: self._split(dataframe),
-            cache_keys=[
+            cache_key_inputs=[
                 self._idx2_size,
                 self._shuffle,
                 self._stratify,
@@ -113,8 +112,8 @@ class RandomSplitter(BaseSplitter):
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
+            cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
         )
-        return dfs
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.
