@@ -9,7 +9,6 @@ import vaex
 
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
-from mleko.cache.handlers.pickle_cache_handler import PICKLE_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
@@ -128,7 +127,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
-            cache_handlers=[PICKLE_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
         )
         return ds, df
 
@@ -156,7 +155,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
             cache_group=cache_group,
             force_recompute=force_recompute,
-            cache_handlers=[JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
         )
         self._assign_feature_selector(feature_selector)
         return ds, feature_selector, df

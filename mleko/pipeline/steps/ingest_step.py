@@ -32,8 +32,9 @@ class IngestStep(PipelineStep):
 
         Args:
             ingester: The data source from which to fetch the data, a BaseIngester instance.
-            inputs: List or tuple of input keys expected by this step.
-            outputs: List or tuple of output keys produced by this step.
+            inputs: List or tuple of input keys expected by this step. Should be empty.
+            outputs: List or tuple of output keys produced by this step. Should contain a single key,
+                corresponding to the list of fetched file Paths.
         """
         super().__init__(inputs, outputs, None)
         self._ingester = ingester

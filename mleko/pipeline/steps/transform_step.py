@@ -39,8 +39,12 @@ class TransformStep(PipelineStep):
         Args:
             transformer: The Transformer responsible for handling feature transformation.
             action: The action to perform, one of "fit", "transform", or "fit_transform".
-            inputs: List or tuple of input keys expected by this step.
-            outputs: List or tuple of output keys produced by this step.
+            inputs: List or tuple of input keys expected by this step. Should contain a single key,
+                corresponding to the DataFrame to be transformed.
+            outputs: List or tuple of output keys produced by this step. If the action is "fit" or "transform",
+                should contain a single key, corresponding to the fitted transformer or the transformed DataFrame.
+                If the action is "fit_transform", should contain two keys, corresponding to the fitted transformer
+                and the transformed DataFrame.
             cache_group: The cache group to use.
 
         Raises:

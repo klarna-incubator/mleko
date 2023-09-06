@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters import CSVFingerprinter
 from mleko.cache.handlers import CacheHandler
-from mleko.cache.handlers.pickle_cache_handler import PICKLE_CACHE_HANDLER
+from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import (
     VAEX_DATAFRAME_CACHE_HANDLER,
     read_vaex_dataframe,
@@ -184,7 +184,7 @@ class CSVToVaexConverter(BaseConverter):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[
-                PICKLE_CACHE_HANDLER,
+                JOBLIB_CACHE_HANDLER,
                 CacheHandler(
                     writer=write_vaex_dataframe_with_cleanup,
                     reader=read_vaex_dataframe,

@@ -4,6 +4,8 @@ from __future__ import annotations
 import copy
 from typing import Literal
 
+from mleko.utils.decorators import auto_repr
+
 
 DataType = Literal["numerical", "categorical", "boolean", "datetime", "timedelta"]
 
@@ -16,6 +18,7 @@ class DataSchema:
     boolean: list[str] = []
     datetime: list[str] = []
 
+    @auto_repr
     def __init__(
         self,
         numerical: list[str] | tuple[str, ...] | tuple[()] = (),

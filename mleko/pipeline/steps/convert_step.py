@@ -34,8 +34,10 @@ class ConvertStep(PipelineStep):
 
         Args:
             converter: The DataConverter responsible for handling data format conversion.
-            inputs: List or tuple of input keys expected by this step.
-            outputs: List or tuple of output keys produced by this step.
+            inputs: List or tuple of input keys expected by this step. Should contain a single key,
+                corresponding to the list of file Paths to be converted.
+            outputs: List or tuple of output keys produced by this step. Should contain two keys,
+                corresponding to the DataSchema and DataFrame after conversion.
             cache_group: The cache group to use.
         """
         super().__init__(inputs, outputs, cache_group)

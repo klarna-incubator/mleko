@@ -8,6 +8,7 @@
     "data splitting",
     "feature selection",
     "semantic versioning",
-    "transformer"
+    "transformer",
+    "model"
   ]
 }

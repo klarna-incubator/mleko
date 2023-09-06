@@ -35,8 +35,12 @@ class FeatureSelectStep(PipelineStep):
         Args:
             feature_selector: The FeatureSelector responsible for handling feature selection.
             action: The action to perform, one of "fit", "transform", or "fit_transform".
-            inputs: List or tuple of input keys expected by this step.
-            outputs: List or tuple of output keys produced by this step.
+            inputs: List or tuple of input keys expected by this step. Should contain two keys,
+                corresponding to the DataSchema and DataFrame to be transformed.
+            outputs: List or tuple of output keys produced by this step. If the action is "fit" or "transform",
+                should contain two keys, corresponding to the DataSchema and DataFrame after transformation. If the
+                action is "fit_transform", should contain three keys, corresponding to the DataSchema, the
+                FeatureSelector, and the DataFrame after transformation.
             cache_group: The cache group to use.
 
         Raises:
