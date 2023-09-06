@@ -35,7 +35,7 @@ class BaseSplitter(LRUCacheMixin, ABC):
             cache_group: The cache group to use.
             force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
 
-        Returns:
-            A tuple containing the split dataframes.
+        Raises:
+            NotImplementedError: If the method is not implemented.
         """
         raise NotImplementedError

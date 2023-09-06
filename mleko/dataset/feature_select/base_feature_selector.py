@@ -214,9 +214,6 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
-
-        Returns:
-            Updated DataSchema and fitted feature selector.
         """
         raise NotImplementedError
 
@@ -230,9 +227,6 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
-
-        Returns:
-            Updated DataSchema and transformed DataFrame.
         """
         raise NotImplementedError
 
@@ -245,9 +239,6 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
-
-        Returns:
-            Tuple of feature names to be used by the feature selector.
         """
         raise NotImplementedError
 

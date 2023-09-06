@@ -146,9 +146,6 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented by subclasses.
-
-        Returns:
-            Fitted transformer.
         """
         raise NotImplementedError
 
@@ -161,9 +158,6 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented by subclasses.
-
-        Returns:
-            Transformed DataFrame.
         """
         raise NotImplementedError
 

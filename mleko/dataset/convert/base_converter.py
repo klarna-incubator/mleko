@@ -36,7 +36,7 @@ class BaseConverter(LRUCacheMixin, ABC):
             cache_group: The cache group to use.
             force_recompute: If set to True, forces recomputation and ignores the cache.
 
-        Returns:
-            The resulting DataFrame after conversion.
+        Raises:
+            NotImplementedError: If the method is not implemented.
         """
         raise NotImplementedError

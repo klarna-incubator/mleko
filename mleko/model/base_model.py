@@ -304,9 +304,6 @@ class BaseModel(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented by subclasses.
-
-        Returns:
-            Fitted model and the metrics dictionary.
         """
         raise NotImplementedError
 
@@ -352,8 +349,5 @@ class BaseModel(LRUCacheMixin, ABC):
 
         Raises:
             NotImplementedError: Must be implemented in the child class that inherits from `BaseModel`.
-
-        Returns:
-            Tuple of feature names to be used by the model.
         """
         raise NotImplementedError
