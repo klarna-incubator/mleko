@@ -2,6 +2,37 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2023-09-06)
+
+### Feature
+
+* **model:** ✨ Add `LGBMModel` along with base class which can be extended for all types of future models. ([`b47a241`](https://github.com/ErikBavenstrand/mleko/commit/b47a2412e8925226d5612e4b57c521f562c51636))
+* ✨ Add` DataSchema` which tracks dataset features throughout the pipeline and methods. ([`e03bd2c`](https://github.com/ErikBavenstrand/mleko/commit/e03bd2cbc9e75347eeea37f5f818d05a2548c3de))
+* **feature selection:** ✨ Update `BaseFeatureSelector` and children to use the `fit`, `transform` and `fit_transform` pattern. ([`62e4dd1`](https://github.com/ErikBavenstrand/mleko/commit/62e4dd13a37a852f239c490d2693b20665095cf6))
+* **transformer:** ✨ Add `fit`, `transform` and `fit_transform` to all `Transformers`, along with API and caching simplificatons. ([`5cc4ebc`](https://github.com/ErikBavenstrand/mleko/commit/5cc4ebc9da3b3f3aa5e8788d1237ac2c79ee4693))
+* **cache:** ✨ Add `CacheHandler` which allows customization of read/write functions for each cached return value individually. ([`609e084`](https://github.com/ErikBavenstrand/mleko/commit/609e084e7c354bed5a298b3a3a1c3b033d3db71d))
+
+### Fix
+
+* **feature selection:** 🐛 Add `DataSchema` as partial return from all `fit` methods in feature selectors. ([`ebf2484`](https://github.com/ErikBavenstrand/mleko/commit/ebf2484fbaac7bbe067ab1491964bc50f4d7d711))
+
+### Refactor
+
+* **cache:** 🚸 Replace `disable_cache` with a check if `cache_size=0` for `LRUCacheMixin`. ([`cfd7592`](https://github.com/ErikBavenstrand/mleko/commit/cfd759297d2d0e3b21f0f79827baab7c8b882784))
+
+### Chore
+
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.8.8 to 1.8.10 ([#76](https://github.com/ErikBavenstrand/mleko/issues/76)) ([`d6dc41f`](https://github.com/ErikBavenstrand/mleko/commit/d6dc41ff9f92a23dedbdc6be987cdfd00e8dc287))
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.8.8 to 1.8.10 ([`a7363ee`](https://github.com/ErikBavenstrand/mleko/commit/a7363ee91342e7f708439e89064adfd7822f39cc))
+* **deps:** Bump sphinx-autodoc-typehints from 1.23.3 to 1.24.0 in /docs ([#75](https://github.com/ErikBavenstrand/mleko/issues/75)) ([`beece1c`](https://github.com/ErikBavenstrand/mleko/commit/beece1ca454de60918e3266110b2bdba10b82141))
+* **deps:** Bump sphinx-autodoc-typehints in /docs ([`aea624c`](https://github.com/ErikBavenstrand/mleko/commit/aea624c6cc545f3cc7d7fca2087b924f378d647a))
+* **deps:** Bump pip from 23.2 to 23.2.1 in /.github/workflows ([#74](https://github.com/ErikBavenstrand/mleko/issues/74)) ([`b86840f`](https://github.com/ErikBavenstrand/mleko/commit/b86840fbe61577b6737498f7331d049a74f84353))
+* **deps:** Bump pip from 23.2 to 23.2.1 in /.github/workflows ([`35f6828`](https://github.com/ErikBavenstrand/mleko/commit/35f6828f7ac58197ac171fb1b2860ef86e98a79f))
+* **deps:** Bump pip from 22.3.1 to 23.2 in /.github/workflows ([#73](https://github.com/ErikBavenstrand/mleko/issues/73)) ([`a0083bd`](https://github.com/ErikBavenstrand/mleko/commit/a0083bd85a8a880c5f09020c1ea7505cc7e2165a))
+* **deps:** Bump pip from 22.3.1 to 23.2 in /.github/workflows ([`de871ea`](https://github.com/ErikBavenstrand/mleko/commit/de871eaab0ea261cb9b9d6318e8fb295985d00d7))
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.8.7 to 1.8.8 ([#72](https://github.com/ErikBavenstrand/mleko/issues/72)) ([`144a702`](https://github.com/ErikBavenstrand/mleko/commit/144a70228e6183b906f897454f8ac0b381132e37))
+* **deps:** Bump pypa/gh-action-pypi-publish from 1.8.7 to 1.8.8 ([`2747ead`](https://github.com/ErikBavenstrand/mleko/commit/2747ead5edd089711fa458c12608b01c8dddbc8a))
+
 ## v0.7.0 (2023-07-11)
 
 ### Feature
