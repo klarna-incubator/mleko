@@ -261,7 +261,7 @@ class CSVToVaexConverter(BaseConverter):
         ).drop(drop_columns)
 
         if drop_rows_with_na_columns:
-            df_chunk = df_chunk.dropna(column_names=drop_rows_with_na_columns)
+            pass  # df_chunk = df_chunk.dropna(column_names=drop_rows_with_na_columns)
 
         for column_name in df_chunk.get_column_names():
             if get_column(df_chunk, column_name).dtype in (pa.date32(), pa.date64()):

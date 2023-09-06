@@ -41,8 +41,8 @@ class TestCSVToVaexConverter:
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is_Best"],
-            # meta_columns=["Extra_Column"],
-            # drop_rows_with_na_columns=["Name"],
+            meta_columns=["Extra_Column"],
+            drop_rows_with_na_columns=["Name"],
             num_workers=1,
         )
 
@@ -63,8 +63,8 @@ class TestCSVToVaexConverter:
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is_Best"],
-                # meta_columns=["Extra_Column"],
-                # drop_rows_with_na_columns=["Name"],
+                meta_columns=["Extra_Column"],
+                drop_rows_with_na_columns=["Name"],
                 num_workers=1,
             )
             new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
