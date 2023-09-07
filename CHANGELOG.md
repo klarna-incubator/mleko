@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2023-09-07)
+
+### Fix
+
+* **config:** 🐛 Fix readthedocs build to only generate html. ([`13fc207`](https://github.com/ErikBavenstrand/mleko/commit/13fc207adbba82fa9cc2d4dcad91038aecafa34f))
+
+### Chore
+
+* **deps:** Bump virtualenv from 20.22.0 to 20.24.4 in /.github/workflows ([#83](https://github.com/ErikBavenstrand/mleko/issues/83)) ([`67540db`](https://github.com/ErikBavenstrand/mleko/commit/67540db6689ff184641c829eea81fd1481c8c457))
+* **deps:** Bump virtualenv in /.github/workflows ([`c56b133`](https://github.com/ErikBavenstrand/mleko/commit/c56b1334895dcb6e17641084b0abdb9e8accfc1c))
+* **deps:** Bump pip from 23.2 to 23.2.1 in /.github/workflows ([#82](https://github.com/ErikBavenstrand/mleko/issues/82)) ([`f4b6b0d`](https://github.com/ErikBavenstrand/mleko/commit/f4b6b0d1ec85c9f07171ff90ab7b22a73d10ee4f))
+* **deps:** Bump pip from 23.2 to 23.2.1 in /.github/workflows ([`96d5b3d`](https://github.com/ErikBavenstrand/mleko/commit/96d5b3db1bcacdea95032ef97f3b8f698e599156))
+
 ## v0.8.0 (2023-09-06)
 
 ### Feature
