@@ -49,33 +49,28 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set -o pipefail
+          # Get the current version
+          current_version=$(poetry version | awk '{print $2}')
           # Set git details
           git config --global user.name "Erik Båvenstrand"
           git config --global user.email "erik@bavenstrand.com"
           # Run semantic-release
           poetry run semantic-release publish -v DEBUG -D commit_author="github-actions <github-actions@github.com>"
-          output_value=$(poetry version | awk "{print $2}")
-          echo "::set-output name=version::$output_value"
+          # Get the new version
+          new_version=$(poetry version | awk '{print $2}')
+          # Check if the versions are different
+          if [ "$current_version" != "$new_version" ]; then
+            # If they're different, set an output variable to true
+            echo "::set-output name=is_updated::true"
+            echo "::set-output name=version::$new_version"
+          fi
 
       - name: Build package
         run: |
           poetry build --ansi
 
-      - name: Check if version is updated
-        id: check-version-updated
-        run: |
-          # Get the latest version on PyPI
-          latest_version=$(pip show your-package-name | grep Version: | cut -d' ' -f2)
-          # Get the new version from Semantic Release
-          new_version=${{ steps.semantic-release.outputs.version }}
-          # Check if the versions are different
-          if [ "$latest_version" != "$new_version" ]; then
-            # If they're different, set an output variable to true
-            echo "::set-output name=is_updated::true"
-          fi
-
       - name: Publish package on PyPI
-        if: steps.check-version-updated.outputs.is_updated
+        if: steps.semantic-release.outputs.is_updated
         uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
           user: __token__
