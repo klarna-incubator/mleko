@@ -61,8 +61,21 @@ jobs:
         run: |
           poetry build --ansi
 
+      - name: Check if version is updated
+        id: check-version-updated
+        run: |
+          # Get the latest version on PyPI
+          latest_version=$(pip show your-package-name | grep Version: | cut -d' ' -f2)
+          # Get the new version from Semantic Release
+          new_version=${{ steps.semantic-release.outputs.version }}
+          # Check if the versions are different
+          if [ "$latest_version" != "$new_version" ]; then
+            # If they're different, set an output variable to true
+            echo "::set-output name=is_updated::true"
+          fi
+
       - name: Publish package on PyPI
-        if: steps.semantic-release.outputs.version
+        if: steps.check-version-updated.outputs.is_updated
         uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
           user: __token__
