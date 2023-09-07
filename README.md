@@ -1,6 +1,7 @@
 # ML-Ekosystem
 
 [![PyPI](https://img.shields.io/pypi/v/mleko.svg)][pypi_]
+![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][status]
 [![Python Version](https://img.shields.io/pypi/pyversions/mleko)][python version]
 [![License](https://img.shields.io/pypi/l/mleko)][license]
