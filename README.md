@@ -1,10 +1,9 @@
 # ML-Ekosystem
 
-[![PyPI](https://img.shields.io/pypi/v/mleko.svg)][pypi_]
-![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)
+[![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][status]
-[![Python Version](https://img.shields.io/pypi/pyversions/mleko)][python version]
 [![License](https://img.shields.io/pypi/l/mleko)][license]
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
 
 [![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/ErikBavenstrand/mleko/workflows/Tests/badge.svg)][tests]
@@ -12,6 +11,7 @@
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
+
 
 [pypi_]: https://pypi.org/project/mleko/
 [status]: https://pypi.org/project/mleko/
