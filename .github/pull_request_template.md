@@ -2,7 +2,6 @@
 name: Pull Request
 about: Submit a patch to this project
 labels: pull request
-
 ---
 
 **Describe the changes made**
