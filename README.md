@@ -3,7 +3,7 @@
 [![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][status]
 [![License](https://img.shields.io/pypi/l/mleko)][license]
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi downloads]
 
 [![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/ErikBavenstrand/mleko/workflows/Tests/badge.svg)][tests]
