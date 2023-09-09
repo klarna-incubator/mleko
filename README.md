@@ -12,9 +12,9 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
-[pypi_]: https://pypi.org/project/mleko/
+[pypi]: https://pypi.org/project/mleko/
 [status]: https://pypi.org/project/mleko/
-[python version]: https://pypi.org/project/mleko
+[pypi downloads]: https://pypi.org/project/mleko/
 [read the docs]: https://mleko.readthedocs.io/
 [tests]: https://github.com/ErikBavenstrand/mleko/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/ErikBavenstrand/mleko
