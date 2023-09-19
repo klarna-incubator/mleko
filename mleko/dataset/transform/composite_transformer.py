@@ -6,6 +6,7 @@ from typing import Any, Hashable
 
 import vaex
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -52,6 +53,9 @@ class CompositeTransformer(BaseTransformer):
             ...     a=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ... )
+            >>> ds = DataSchema(
+            ...     categorical=["a", "b"],
+            ... )
             >>> transformer = CompositeTransformer(
             ...     cache_directory=".",
             ...     transformers=[
@@ -65,7 +69,7 @@ class CompositeTransformer(BaseTransformer):
             ...         ),
             ...     ],
             ... )
-            >>> _, df = transformer.fit_transform(df)
+            >>> _, _, df = transformer.fit_transform(ds, df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
@@ -75,14 +79,15 @@ class CompositeTransformer(BaseTransformer):
         self._transformers = tuple(transformers)
         self._transformer: list[Any] = []
 
-    def _fit(self, dataframe: vaex.DataFrame) -> list[Any]:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, list[Any]]:
         """Fits the transformer to the specified DataFrame.
 
         Args:
+            data_schema: Data schema of the DataFrame.
             dataframe: DataFrame to be fitted.
 
         Returns:
-            List of fitted transformers.
+            Updated data schema and list of fitted transformers.
         """
         fitted_transformers: list[Any] = []
         for i, transformer in enumerate(self._transformers):
@@ -90,28 +95,56 @@ class CompositeTransformer(BaseTransformer):
                 f"Fitting composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            fitted_transformer = transformer._fit(dataframe)
+            data_schema, fitted_transformer = transformer._fit(data_schema, dataframe)
             fitted_transformers.append(fitted_transformer)
             logger.info(f"Finished fitting composite transformation step {i+1}/{len(self._transformers)}.")
-        return fitted_transformers
+        return data_schema, fitted_transformers
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
-        """Returns the transformed DataFrame.
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
+        """Returns the updated data schema transformed DataFrame.
 
         Args:
+            data_schema: The data schema of the DataFrame.
             dataframe: The DataFrame to transform.
 
         Returns:
-            The transformed DataFrame.
+            Updated data schema and transformed DataFrame.
         """
         for i, transformer in enumerate(self._transformers):
             logger.info(
                 f"Executing composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            dataframe = transformer._transform(dataframe).extract()
+            data_schema, dataframe = transformer._transform(data_schema, dataframe)
+            dataframe = dataframe.extract()
             logger.info(f"Finished composite transformation step {i+1}/{len(self._transformers)}.")
-        return dataframe
+        return data_schema, dataframe
+
+    def _fit_transform(
+        self, data_schema: DataSchema, dataframe: vaex.DataFrame
+    ) -> tuple[DataSchema, Any, vaex.DataFrame]:
+        """Fits the transformer to the specified DataFrame and performs the transformation on the DataFrame.
+
+        Args:
+            data_schema: The data schema of the DataFrame.
+            dataframe: The DataFrame to transform.
+
+        Returns:
+            Tuple of updated data schema, fitted transformer and transformed DataFrame.
+        """
+        fitted_transformers: list[Any] = []
+        for i, transformer in enumerate(self._transformers):
+            logger.info(
+                f"Executing composite transformation step {i+1}/{len(self._transformers)}: "
+                f"{transformer.__class__.__name__}."
+            )
+            data_schema, fitted_transformer, dataframe = transformer._fit_transform(data_schema, dataframe)
+            fitted_transformers.append(fitted_transformer)
+            dataframe = dataframe.extract()
+            logger.info(
+                "Finished fitting and transforming composite transformation " f"step {i+1}/{len(self._transformers)}."
+            )
+        return data_schema, fitted_transformers, dataframe
 
     def _assign_transformer(self, transformer: Any) -> None:
         """Assigns the specified transformer to the transformer attribute.

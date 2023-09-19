@@ -25,6 +25,23 @@ class TestDataSchema:
             "'timedelta': ['timedelta1', 'timedelta2']}"
         )
 
+    def test_repr(self):
+        """Should return string representation of the `DataSchema`."""
+        data_schema = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1", "timedelta2"],
+        )
+        assert data_schema.__repr__() == (
+            "DataSchema(numerical=['numerical1', 'numerical2'], "
+            "categorical=['categorical1', 'categorical2'], "
+            "boolean=['boolean1', 'boolean2'], "
+            "datetime=['datetime1', 'datetime2'], "
+            "timedelta=['timedelta1', 'timedelta2'])"
+        )
+
     def test_features_are_sorted(self):
         """Should ensure that features are always sorted."""
         data_schema = DataSchema(
@@ -81,7 +98,7 @@ class TestDataSchema:
             datetime=["datetime1", "datetime2"],
             timedelta=["timedelta1", "timedelta2"],
         )
-        data_schema.drop_feature("numerical1")
+        data_schema.drop_features(["numerical1"])
         assert data_schema.to_dict() == {
             "numerical": ["numerical2"],
             "categorical": ["categorical1", "categorical2"],

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 import vaex
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.dataset.transform.base_transformer import BaseTransformer
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.steps.transform_step import TransformStep
@@ -18,24 +19,32 @@ class TestTransformStep:
         """Should init the TransformStep with a transformer."""
         transformer = MagicMock(spec=BaseTransformer)
         transform_step = TransformStep(
-            transformer=transformer, action="fit", inputs=["df_train"], outputs=["df_train_selected"]
+            transformer=transformer,
+            action="fit",
+            inputs=["data_schema", "df_train"],
+            outputs=["transformed_data_schema", "df_train_transformed"],
         )
 
         assert transform_step._transformer == transformer
 
     def test_execute_fit_transform(self):
         """Should execute the transformation."""
-        data_container = DataContainer(data={"df_clean": vaex.from_dict({"col1": [1, None, None], "col2": [4, 5, 6]})})
+        data_container = DataContainer(
+            data={
+                "df_clean": vaex.from_dict({"col1": [1, None, None], "col2": [4, 5, 6]}),
+                "data_schema": DataSchema(numerical=["col1", "col2"]),
+            }
+        )
 
         transformer = MagicMock(spec=BaseTransformer)
         df = vaex.from_dict({"col2": [4, 5, 6]})
-        transformer.fit_transform = MagicMock(return_value=("transformer", df))
+        transformer.fit_transform = MagicMock(return_value=("data_schema", "transformer", df))
 
         transform_step = TransformStep(
             transformer=transformer,
             action="fit_transform",
-            inputs=["df_clean"],
-            outputs=["transformer", "df_clean_selected"],
+            inputs=["data_schema", "df_clean"],
+            outputs=["transformed_data_schema", "transformer", "df_clean_selected"],
             cache_group=None,
         )
         result = transform_step.execute(data_container, force_recompute=False)
@@ -43,22 +52,29 @@ class TestTransformStep:
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
-        transformer.fit_transform.assert_called_once_with(data_container.data["df_clean"], None, False)
+        transformer.fit_transform.assert_called_once_with(
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+        )
 
     def test_execute_fit_and_transform(self):
         """Should execute the transformation."""
-        data_container = DataContainer(data={"df_clean": vaex.from_dict({"col1": [1, None, None], "col2": [4, 5, 6]})})
+        data_container = DataContainer(
+            data={
+                "df_clean": vaex.from_dict({"col1": [1, None, None], "col2": [4, 5, 6]}),
+                "data_schema": DataSchema(numerical=["col1", "col2"]),
+            }
+        )
 
         transformer = MagicMock(spec=BaseTransformer)
         df = vaex.from_dict({"col2": [4, 5, 6]})
-        transformer.fit = MagicMock(return_value="transformer")
-        transformer.transform = MagicMock(return_value=df)
+        transformer.fit = MagicMock(return_value=("data_schema", "transformer"))
+        transformer.transform = MagicMock(return_value=("data_schema", df))
 
         transform_step_fit = TransformStep(
             transformer=transformer,
             action="fit",
-            inputs=["df_clean"],
-            outputs=["transformer"],
+            inputs=["data_schema", "df_clean"],
+            outputs=["transformed_data_schema", "transformer"],
             cache_group=None,
         )
         transform_step_fit_result = transform_step_fit.execute(data_container, force_recompute=False)
@@ -68,16 +84,20 @@ class TestTransformStep:
         transform_step_transform = TransformStep(
             transformer=transformer,
             action="transform",
-            inputs=["df_clean"],
-            outputs=["df_clean_selected"],
+            inputs=["data_schema", "df_clean"],
+            outputs=["transformed_data_schema", "df_clean_selected"],
             cache_group=None,
         )
         transform_step_transform_result = transform_step_transform.execute(data_container, force_recompute=False)
         assert isinstance(transform_step_transform_result, DataContainer)
         assert transform_step_transform_result.data["df_clean_selected"] == df
 
-        transformer.fit.assert_called_once_with(data_container.data["df_clean"], None, False)
-        transformer.transform.assert_called_once_with(data_container.data["df_clean"], None, False)
+        transformer.fit.assert_called_once_with(
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+        )
+        transformer.transform.assert_called_once_with(
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+        )
 
     def test_wrong_data_type(self):
         """Should throw ValueError if not recieving a vaex dataframe."""
@@ -86,7 +106,10 @@ class TestTransformStep:
 
         transformer = MagicMock(spec=BaseTransformer)
         transformer_step = TransformStep(
-            transformer=transformer, action="fit", inputs=["df_clean"], outputs=["df_train_selected"]
+            transformer=transformer,
+            action="fit",
+            inputs=["df_clean", "df_clean"],
+            outputs=["data_schema", "df_train_selected"],
         )
 
         with pytest.raises(ValueError):

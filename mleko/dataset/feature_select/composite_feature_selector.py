@@ -134,7 +134,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             dataframe: DataFrame used for feature selection.
 
         Returns:
-            Tuple of fitted feature selector and transformed DataFrame.
+            Tuple of updated data schema, fitted feature selector and transformed DataFrame.
         """
         feature_selectors: list[Any] = []
         for i, feature_selector in enumerate(self._feature_selectors):

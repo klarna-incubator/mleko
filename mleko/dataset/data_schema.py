@@ -4,8 +4,6 @@ from __future__ import annotations
 import copy
 from typing import Literal
 
-from mleko.utils.decorators import auto_repr
-
 
 DataType = Literal["numerical", "categorical", "boolean", "datetime", "timedelta"]
 
@@ -18,7 +16,6 @@ class DataSchema:
     boolean: list[str] = []
     datetime: list[str] = []
 
-    @auto_repr
     def __init__(
         self,
         numerical: list[str] | tuple[str, ...] | tuple[()] = (),
@@ -51,6 +48,15 @@ class DataSchema:
             "datetime": sorted(list(datetime)),
             "timedelta": sorted(list(timedelta)),
         }
+
+    def __repr__(self) -> str:
+        """Get the string representation of DataSchema.
+
+        Returns:
+            String representation of DataSchema.
+        """
+        features_str = ", ".join(f"{dtype}={features}" for dtype, features in self.features.items() if features)
+        return f"DataSchema({features_str})"
 
     def __str__(self) -> str:
         """Get the string representation of DataSchema.
@@ -91,18 +97,22 @@ class DataSchema:
         for dtype, features in self.features.items():
             if feature in features:
                 return dtype
+
         raise ValueError(f"{feature} not found in the schema")
 
-    def drop_feature(self, feature: str) -> None:
+    def drop_features(self, features: set[str] | list[str] | tuple[str, ...] | tuple[()]) -> DataSchema:
         """Drop a feature from the DataSchema.
 
         Args:
-            feature: Feature name.
+            features: List of feature names to be dropped.
         """
-        dtype = self.get_type(feature)
-        self.features[dtype].remove(feature)
+        for dropped_feature in features:
+            dtype = self.get_type(dropped_feature)
+            self.features[dtype].remove(dropped_feature)
 
-    def add_feature(self, feature: str, dtype: DataType) -> None:
+        return self
+
+    def add_feature(self, feature: str, dtype: DataType) -> DataSchema:
         """Add a feature to the DataSchema.
 
         Args:
@@ -118,6 +128,26 @@ class DataSchema:
         self.features[dtype].append(feature)
         self.features[dtype].sort()
 
+        return self
+
+    def change_feature_type(self, feature: str, dtype: DataType) -> DataSchema:
+        """Change the type of a feature in the DataSchema.
+
+        Args:
+            feature: Feature name.
+            dtype: Feature data type.
+
+        Raises:
+            ValueError: If feature is not present in the schema.
+        """
+        if feature not in self.get_features():
+            raise ValueError(f"{feature} not present in the schema")
+
+        self.drop_features([feature])
+        self.add_feature(feature, dtype)
+
+        return self
+
     def to_dict(self) -> dict[str, list[str]]:
         """Return the dict representation of DataSchema.
 
@@ -126,17 +156,13 @@ class DataSchema:
         """
         return {dtype: features for dtype, features in self.features.items()}
 
-    def copy(self, drop: set[str] | list[str] | tuple[str, ...] | tuple[()] = ()) -> DataSchema:
+    def copy(self) -> DataSchema:
         """Create a copy of this DataSchema.
-
-        Args:
-            drop: List of features to drop from the copy.
 
         Returns:
             A copy of this DataSchema.
         """
         copied_features = {dtype: copy.deepcopy(features) for dtype, features in self.features.items()}
         data_schema_copy = DataSchema(**copied_features)
-        for dropped_feature in drop:
-            data_schema_copy.drop_feature(dropped_feature)
+
         return data_schema_copy
