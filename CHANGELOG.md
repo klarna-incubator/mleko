@@ -2,6 +2,28 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2023-09-20)
+
+### Feature
+
+* **transformer:** ✨ Add `DataSchema` API to transformers `fit`, `transform` and `fit_transform`. ([`e053c85`](https://github.com/ErikBavenstrand/mleko/commit/e053c854238614ef23c6e8ff7eedc004cbeedf71))
+
+### Breaking
+
+* Forcefully trigger major release. ([`b388b59`](https://github.com/ErikBavenstrand/mleko/commit/b388b59a9c8da0df56da532a0cc17b347089a146))
+
+### Documentation
+
+* 📝 Improve `README.md` with more up to date information. ([`b388b59`](https://github.com/ErikBavenstrand/mleko/commit/b388b59a9c8da0df56da532a0cc17b347089a146))
+* 📝 Add example notebook for `Titanic` dataset. ([`e651af9`](https://github.com/ErikBavenstrand/mleko/commit/e651af99d96f2d012faaf6ab5c73cc681f7a5b5b))
+
+### Chore
+
+* **deps:** Bump virtualenv from 20.24.4 to 20.24.5 in /.github/workflows ([#94](https://github.com/ErikBavenstrand/mleko/issues/94)) ([`eb7f481`](https://github.com/ErikBavenstrand/mleko/commit/eb7f4816c2c1d574816b05020da16650591ee19e))
+* **deps:** Bump crazy-max/ghaction-github-labeler from 4.1.0 to 5.0.0 ([#93](https://github.com/ErikBavenstrand/mleko/issues/93)) ([`d49f4ac`](https://github.com/ErikBavenstrand/mleko/commit/d49f4ac5e573ad85f5b98d2a13e14b63f9a2cdf7))
+* **deps:** Bump virtualenv in /.github/workflows ([`ab905be`](https://github.com/ErikBavenstrand/mleko/commit/ab905be4d75e13f10fe62b71f57ef49266ee4ebe))
+* **deps:** Bump crazy-max/ghaction-github-labeler from 4.1.0 to 5.0.0 ([`ae40b84`](https://github.com/ErikBavenstrand/mleko/commit/ae40b8454703eca380b063c6c6851796dc5bcb53))
+
 ## v0.8.1 (2023-09-07)
 
 ### Fix
