@@ -12,3 +12,5 @@ __pycache__/
 examples/data
 examples/S3\ Experiment.ipynb
 .DS_Store
+/.autodoc
+autodoc.config.json
