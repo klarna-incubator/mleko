@@ -23,24 +23,24 @@
 
 ## Features
 
-MLEKO is designed to streamline the model building process with its comprehensive set of features:
+ML-Ekosystem (`mleko`) is a comprehensive Python library designed to facilitate and streamline the entire model building process. It's built with modularity in mind, encompassing a range of functionalities divided into distinct submodules.
 
-- Data processing support for different data sources and formats, as well as feature engineering.
-- Customizable data processing pipelines with pre-built pipeline steps for various tasks.
-- Efficient caching of method call results using caching mixins and fingerprinting utilities.
-- Utility functions for logging, decorating, file management, and TQDM wrappers.
+Key features include:
 
-## Requirements
+- **Ingest:** Fetches data from a variety of sources, including `AWS S3` and `Kaggle`, ensuring seamless data integration.
 
-- Python 3.8, 3.9, or 3.10
-- boto3 >= 1.26.91
-- botocore >= 1.29.91
-- tqdm >= 4.65.0
-- vaex >= 4.16.0
+- **Convert:** Transforms data between different file formats, with a particular emphasis on `CSV` to `Vaex DataFrame` conversions.
+- **Split:** Divide DataFrames into multiple subsets, using a variety of different splitting methods.
+- **Feature Selection:** A suite of feature selection methods and algorithms.
+- **Transformation:** Includes a variety of data transformation methods, such as `Frequency Encoding` and `Standardization`.
+- **Model:** Core model functionalities, allowing for the creation and tuning of a wide array of machine learning models.
+- **Pipeline:** Combines all the above functionalities into a single, easy-to-use directed acyclic graph (DAG) pipeline suitable for reproducible model building.
+
+With `mleko`, you have all the tools you need to build robust and efficient machine learning models, all in one place.
 
 ## Installation
 
-You can install _ML-Ekosystem_ via [pip] from [PyPI]:
+You can install `mleko` via [pip] from [PyPI]:
 
 ```console
 $ pip install mleko
@@ -48,7 +48,7 @@ $ pip install mleko
 
 ## Usage
 
-- TODO
+See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/ErikBavenstrand/mleko/tree/main/examples).
 
 ## Contributing
 
@@ -58,7 +58,7 @@ To learn more, see the [Contributor Guide].
 ## License
 
 Distributed under the terms of the [MIT license][license],
-_ML-Ekosystem_ is free and open source software.
+`mleko`is free and open source software.
 
 ## Issues
 
