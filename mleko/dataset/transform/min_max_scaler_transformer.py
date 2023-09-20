@@ -7,6 +7,7 @@ from typing import Hashable
 import vaex
 import vaex.ml
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -52,10 +53,13 @@ class MinMaxScalerTransformer(BaseTransformer):
             ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             ...     b=[-1, -2, -3, -4, -5, 0, 1, 2, 3, 4]
             ... )
-            >>> _, df = MaxAbsScalerTransformer(
+            >>> ds = DataSchema(
+            ...     numerical=["a", "b"],
+            ... )
+            >>> _, _, df = MaxAbsScalerTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).fit_transform(df)
+            ... ).fit_transform(ds, df)
             >>> df["a"].tolist()
             [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
             >>> df["b"].tolist()
@@ -68,31 +72,35 @@ class MinMaxScalerTransformer(BaseTransformer):
             features=self._features, prefix="", feature_range=(self._min_value, self._max_value)
         )
 
-    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.MinMaxScaler:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.ml.MinMaxScaler]:
         """Fits the transformer on the given DataFrame.
 
         Args:
+            data_schema: The data schema of the DataFrame.
             dataframe: The DataFrame to fit the transformer on.
 
         Returns:
-            The fitted transformer.
+            Updated data schema and fitted transformer.
         """
         logger.info(f"Fitting min-max scaler transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
-        return self._transformer
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        return data_schema, self._transformer
+
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Transforms the features in the DataFrame using min-max scaling.
 
         Args:
+            data_schema: The data schema of the DataFrame.
             dataframe: The DataFrame to transform.
 
         Returns:
-            The transformed DataFrame.
+            Updated data schema and transformed DataFrame.
         """
         logger.info(f"Transforming features using min-max scaling ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
+
+        return data_schema, transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

@@ -465,8 +465,9 @@ class LGBMModel(BaseModel):
         logger.info("Transforming the dataset.")
         predictions = self._model.predict(dataset)
 
-        dataframe["prediction"] = predictions
-        return dataframe
+        df = dataframe.copy()
+        df["prediction"] = predictions
+        return df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the model.

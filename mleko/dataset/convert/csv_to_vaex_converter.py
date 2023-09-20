@@ -52,7 +52,7 @@ class CSVToVaexConverter(BaseConverter):
     @auto_repr
     def __init__(
         self,
-        output_directory: str | Path,
+        cache_directory: str | Path,
         forced_numerical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_categorical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_boolean_columns: list[str] | tuple[str, ...] | tuple[()] = (),
@@ -90,7 +90,7 @@ class CSVToVaexConverter(BaseConverter):
         """Initializes the `CSVToArrowConverter` with the necessary configurations and parameters.
 
         Args:
-            output_directory: The directory where the converted files will be saved.
+            cache_directory: The directory where the converted files will be saved.
             forced_numerical_columns: A sequence of column names to force as numerical type.
             forced_categorical_columns: A sequence of column names to force as categorical type.
             forced_boolean_columns: A sequence of column names to force as boolean type.
@@ -115,7 +115,7 @@ class CSVToVaexConverter(BaseConverter):
             >>> import vaex
             >>> from mleko.dataset.convert import CSVToArrowConverter
             >>> converter = CSVToArrowConverter(
-            ...     output_directory="cache",
+            ...     cache_directory="cache",
             ...     forced_numerical_columns=["x"],
             ...     forced_categorical_columns=["y"],
             ...     forced_boolean_columns=["z"],
@@ -130,7 +130,7 @@ class CSVToVaexConverter(BaseConverter):
             ... )
             >>> df = converter.convert(["data.csv"])
         """
-        super().__init__(output_directory, cache_size)
+        super().__init__(cache_directory, cache_size)
         self._forced_numerical_columns = tuple(forced_numerical_columns)
         self._forced_categorical_columns = tuple(forced_categorical_columns)
         self._forced_boolean_columns = tuple(forced_boolean_columns)
@@ -308,8 +308,7 @@ class CSVToVaexConverter(BaseConverter):
             datetime=df.get_column_names(dtype="datetime"),
             timedelta=df.get_column_names(dtype="timedelta"),
         )
-        for meta_column in self._meta_columns:
-            ds.drop_feature(meta_column)
+        ds.drop_features(self._meta_columns)
 
         for column_name in df.get_column_names(dtype="bool"):
             df[column_name] = get_column(df, column_name).astype("string")

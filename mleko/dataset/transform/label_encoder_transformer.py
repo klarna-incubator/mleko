@@ -7,6 +7,7 @@ from typing import Hashable
 import vaex
 import vaex.ml
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -51,11 +52,14 @@ class LabelEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> _, df = LabelEncoderTransformer(
+            >>> ds = DataSchema(
+            ...     categorical=["a", "b", "c"],
+            ... )
+            >>> _, _, df = LabelEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
             ...     allow_unseen=True,
-            ... ).fit_transform(df)
+            ... ).fit_transform(ds, df)
             >>> df["a"].tolist()
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             >>> df["b"].tolist()
@@ -65,31 +69,35 @@ class LabelEncoderTransformer(BaseTransformer):
         self._allow_unseen = allow_unseen
         self._transformer = vaex.ml.LabelEncoder(allow_unseen=self._allow_unseen, features=self._features, prefix="")
 
-    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.LabelEncoder:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.ml.LabelEncoder]:
         """Fits the transformer on the given DataFrame.
 
         Args:
+            data_schema: The data schema of the DataFrame.
             dataframe: The DataFrame to fit the transformer on.
 
         Returns:
-            The fitted transformer.
+            Updated data schema and fitted transformer.
         """
         logger.info(f"Fitting label encoder transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
-        return self._transformer
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        return data_schema, self._transformer
+
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Transforms the features of the given DataFrame using label encoding.
 
         Args:
+            data_schema: The data schema of the DataFrame.
             dataframe: The DataFrame to transform.
 
         Returns:
-            The transformed DataFrame.
+            Updated data schema and transformed DataFrame.
         """
         logger.info(f"Transforming features using label encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
+
+        return data_schema, transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.

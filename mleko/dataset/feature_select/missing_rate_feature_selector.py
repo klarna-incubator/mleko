@@ -93,7 +93,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
         self._feature_selector = {
             feature for feature in features if missing_rate[feature] >= self._missing_rate_threshold
         }
-        ds = data_schema.copy(drop=self._feature_selector)
+        ds = data_schema.copy().drop_features(self._feature_selector)
 
         return ds, self._feature_selector
 
@@ -113,7 +113,7 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             f"{dropped_features}."
         )
         selected_features = [feature for feature in dataframe.get_column_names() if feature not in dropped_features]
-        ds = data_schema.copy(drop=dropped_features)
+        ds = data_schema.copy().drop_features(dropped_features)
 
         return ds, get_columns(dataframe, selected_features)
 

@@ -7,6 +7,7 @@ from typing import Hashable, Literal
 import vaex
 import vaex.ml
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -54,10 +55,13 @@ class FrequencyEncoderTransformer(BaseTransformer):
             ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
             ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
             ... )
-            >>> _, df = FrequencyEncoderTransformer(
+            >>> ds = DataSchema(
+            ...     categorical=["a", "b", "c"],
+            ... )
+            >>> _, _, df = FrequencyEncoderTransformer(
             ...     cache_directory=".",
             ...     features=["a", "b"],
-            ... ).fit_transform(df)
+            ... ).fit_transform(ds, df)
             >>> df["a"].tolist()
             [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
             >>> df["b"].tolist()
@@ -69,31 +73,43 @@ class FrequencyEncoderTransformer(BaseTransformer):
             features=self._features, unseen_strategy=self._unseen_strategy, prefix=""
         )
 
-    def _fit(self, dataframe: vaex.DataFrame) -> vaex.ml.FrequencyEncoder:
+    def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.ml.FrequencyEncoder]:
         """Fits the transformer on the input data.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to fit the transformer on.
 
         Returns:
-            The fitted transformer.
+            Updated DataSchema and the fitted transformer.
         """
         logger.info(f"Fitting frequency encoder transformer ({len(self._features)}): {self._features}.")
         self._transformer.fit(dataframe)
-        return self._transformer
 
-    def _transform(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+        ds = data_schema.copy()
+        for feature in self._features:
+            ds = ds.change_feature_type(feature, "numerical")
+
+        return ds, self._transformer
+
+    def _transform(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, vaex.DataFrame]:
         """Transforms the features in the DataFrame using frequency encoding.
 
         Args:
+            data_schema: The DataSchema of the DataFrame.
             dataframe: The DataFrame to transform.
 
         Returns:
-            The transformed DataFrame.
+            Updated DataSchema and the transformed DataFrame.
         """
         logger.info(f"Transforming features using frequency encoding ({len(self._features)}): {self._features}.")
         transformed_df = self._transformer.transform(dataframe)
-        return transformed_df
+
+        ds = data_schema.copy()
+        for feature in self._features:
+            ds = ds.change_feature_type(feature, "numerical")
+
+        return ds, transformed_df
 
     def _fingerprint(self) -> Hashable:
         """Returns the fingerprint of the transformer.
