@@ -11,11 +11,6 @@ DataType = Literal["numerical", "categorical", "boolean", "datetime", "timedelta
 class DataSchema:
     """DataSchema class for storing type information about the dataset."""
 
-    numerical: list[str] = []
-    categorical: list[str] = []
-    boolean: list[str] = []
-    datetime: list[str] = []
-
     def __init__(
         self,
         numerical: list[str] | tuple[str, ...] | tuple[()] = (),

@@ -84,7 +84,7 @@ class BaseModel(LRUCacheMixin, ABC):
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame,
-        hyperparameters: HyperparametersType,
+        hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]]]:
@@ -122,6 +122,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
+                str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()),
             ],
@@ -163,6 +164,7 @@ class BaseModel(LRUCacheMixin, ABC):
             cache_key_inputs=[
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
+                str(data_schema),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
@@ -175,7 +177,7 @@ class BaseModel(LRUCacheMixin, ABC):
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame,
-        hyperparameters: HyperparametersType,
+        hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame]:
@@ -216,6 +218,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
+                str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()),
             ],
@@ -236,7 +239,7 @@ class BaseModel(LRUCacheMixin, ABC):
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame,
-        hyperparameters: HyperparametersType,
+        hyperparameters: HyperparametersType | None = None,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame]:
         """Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
 
@@ -292,7 +295,7 @@ class BaseModel(LRUCacheMixin, ABC):
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame,
-        hyperparameters: HyperparametersType,
+        hyperparameters: HyperparametersType | None = None,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]]]:
         """Fits the model to the specified DataFrame.
 

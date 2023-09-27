@@ -140,6 +140,7 @@ class LGBMModel(BaseModel):
         feature_contri: list[float] | tuple[float, ...] | None = None,
         path_smooth: float = 0.0,
         verbosity: int = 1,
+        log_evaluation_period: int | None = 10,
         use_quantized_grad: bool = False,
         num_grad_quant_bins: int = 4,
         quant_train_renew_leaf: bool = False,
@@ -246,6 +247,7 @@ class LGBMModel(BaseModel):
                 use gain[i] = max(0, feature_contri[i]) * gain[i] to replace the original gain of the ith feature.
             path_smooth: Controls the smoothing applied to tree nodes.
             verbosity: Controls the level of LightGBM's verbosity.
+            log_evaluation_period: The period to log the evaluation results, if `None`, results will not be logged.
             use_quantized_grad: Whether to use gradiant quantization when training.
             num_grad_quant_bins: Number of bin to quantization gradients and hessians.
             quant_train_renew_leaf: Whether to renew the leaf values with original gradients when quantized training.
@@ -313,6 +315,8 @@ class LGBMModel(BaseModel):
         super().__init__(cache_directory, features, ignore_features, cache_size)
         lgb.register_logger(logger)
 
+        self._verbosity = verbosity
+        self._log_evaluation_period = log_evaluation_period
         self._target = target
         self._num_iterations = num_iterations
         self._hyperparameters = {
@@ -401,7 +405,7 @@ class LGBMModel(BaseModel):
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame,
-        hyperparameters: HyperparametersType,
+        hyperparameters: HyperparametersType | None = None,
     ) -> tuple[lgb.Booster, dict[str, dict[str, list[Any]]]]:
         """Fits the LightGBM model to the given data with the given hyperparameters.
 
@@ -422,26 +426,35 @@ class LGBMModel(BaseModel):
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        logger.info("Loading the training dataset into memory.")
+        if self._verbosity > 0:
+            logger.info("Loading the training dataset into memory.")
         train_dataset = self._load_lgb_dataset(data_schema, train_dataframe)
-        logger.info("Loading the validation dataset into memory.")
+        if self._verbosity > 0:
+            logger.info("Loading the validation dataset into memory.")
         validation_dataset = self._load_lgb_dataset(data_schema, validation_dataframe, reference_dataset=train_dataset)
 
-        self._hyperparameters = {**self._hyperparameters, **hyperparameters}
+        if hyperparameters is None:
+            hyperparameters = {}
+        hyperparameters = {**self._hyperparameters, **hyperparameters}
         self._num_iterations = self._pop_num_iterations(self._hyperparameters)
-        logger.info(
-            f"Training the LightGBM model for {self._num_iterations} iterations "
-            f"with the following hyperparameters: {self._hyperparameters}."
-        )
+        if self._verbosity > 0:
+            logger.info(
+                f"Training the LightGBM model for {self._num_iterations} iterations "
+                f"with the following hyperparameters: {hyperparameters}."
+            )
 
         metrics = {}
+        callbacks = [lgb.record_evaluation(metrics)]
+        if self._verbosity > 0 and self._log_evaluation_period is not None:
+            callbacks.append(lgb.log_evaluation(period=self._log_evaluation_period))
+
         self._model = lgb.train(
-            params=self._hyperparameters,
+            params=hyperparameters,
             train_set=train_dataset,
             num_boost_round=self._num_iterations,
             valid_sets=[train_dataset, validation_dataset],
             valid_names=["train", "validation"],
-            callbacks=[lgb.log_evaluation(period=10), lgb.record_evaluation(metrics)],
+            callbacks=callbacks,
         )
 
         return self._model, metrics
@@ -458,11 +471,13 @@ class LGBMModel(BaseModel):
         Returns:
             The transformed dataframe.
         """
-        logger.info("Loading the dataset into memory.")
+        if self._verbosity > 0:
+            logger.info("Loading the dataset into memory.")
         feature_names = self._feature_set(data_schema)
         dataset = get_columns(dataframe, feature_names).to_pandas_df()
 
-        logger.info("Transforming the dataset.")
+        if self._verbosity > 0:
+            logger.info("Transforming the dataset.")
         predictions = self._model.predict(dataset)
 
         df = dataframe.copy()

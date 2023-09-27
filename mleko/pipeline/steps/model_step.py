@@ -109,7 +109,7 @@ class ModelStep(PipelineStep):
             if not isinstance(hyperparameters, dict):
                 raise ValueError(f"Invalid data type: {type(hyperparameters)}. Expected HyperparametersType.")
 
-        if self._action == "fit" and df_validation is not None and hyperparameters is not None:
+        if self._action == "fit" and df_validation is not None:
             model, metrics = self._model.fit(
                 data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
             )
@@ -118,7 +118,7 @@ class ModelStep(PipelineStep):
         elif self._action == "transform":
             df = self._model.transform(data_schema, dataframe, self._cache_group, force_recompute)
             data_container.data[self._outputs[0]] = df
-        elif self._action == "fit_transform" and df_validation is not None and hyperparameters is not None:
+        elif self._action == "fit_transform" and df_validation is not None:
             model, metrics, df, df_validation = self._model.fit_transform(
                 data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
             )
