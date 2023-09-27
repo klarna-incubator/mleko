@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0 (2023-09-27)
+
+### Feature
+
+* **tuning:** ✨ Add hyperparameter tuning functionality, initially including `OptunaTuner`. ([`be38c07`](https://github.com/ErikBavenstrand/mleko/commit/be38c075e269ed2e42560dfa26ac71ab08448444))
+
+### Test
+
+* **tuning:** 🧪 Add test cases for `TuneStep`. ([`d811c7d`](https://github.com/ErikBavenstrand/mleko/commit/d811c7d4f60b4440b669cf723d3b85ee962efc97))
+
 ## v1.0.0 (2023-09-20)
 
 ### Feature
