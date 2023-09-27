@@ -23,4 +23,4 @@ autoapi_options = [
     "show-module-summary",
 ]
 autoapi_python_class_content = "both"
-autoapi_member_order = "groupwise"
+autoapi_member_order = "bysource"

@@ -49,8 +49,8 @@ class TestLGBMModel:
     ):
         """Should train the model successfully."""
         lgbm_model = LGBMModel(temporary_directory, target="target", objective="binary")
-        _, metric, _, df_validate = lgbm_model._fit_transform(
-            example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
+        _, _, _, df_validate = lgbm_model._fit_transform(
+            example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate
         )
         assert df_validate["prediction"].tolist() == [0.5 for _ in range(10)]  # type: ignore
 
