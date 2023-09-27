@@ -17,9 +17,9 @@ class TestSplitStep:
     def test_init(self):
         """Should init the SplitStep with a splitter."""
         splitter = MagicMock(spec=BaseSplitter)
-        csplit_step = SplitStep(splitter=splitter, inputs=["df_clean"], outputs=["df_train", "df_test"])
+        split_step = SplitStep(splitter=splitter, inputs=["df_clean"], outputs=["df_train", "df_test"])
 
-        assert csplit_step._splitter == splitter
+        assert split_step._splitter == splitter
 
     def test_execute(self):
         """Should execute the dataframe splitting."""
