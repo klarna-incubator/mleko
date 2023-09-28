@@ -1,5 +1,3 @@
-# ML-Ekosystem
-
 [![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][status]
 [![License](https://img.shields.io/pypi/l/mleko)][license]
@@ -12,7 +10,55 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
-[pypi]: https://pypi.org/project/mleko/
+# `mleko`: Streamlining Machine Learning Pipelines in Python
+
+Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
+
+## Features
+
+`mleko` is engineered to address the end-to-end needs of machine learning pipelines, providing robust, scalable solutions for data science challenges:
+
+- Ingest: Seamlessly integrates with data sources like AWS S3 and Kaggle, offering hassle-free data ingestion and compatibility.
+- Convert: Specializes in data format transformations, prominently featuring high-performance conversions from `CSV` to `Vaex DataFrame`, to make your data pipeline-ready.
+- Split: Employs sophisticated data partitioning algorithms, allowing you to segment DataFrames into train, test, and validation sets for effective model training and evaluation.
+- Feature Selection: Equipped with a suite of feature selection techniques, `mleko` enables model performance by focusing on the most impactful variables.
+- Transformation: Facilitates data manipulations such as Frequency Encoding and Standardization, ensuring that your data conforms to the prerequisites of the machine learning algorithms.
+- Model: Provides a core set of functionalities for machine learning models, including in-built support for hyperparameter tuning, thereby streamlining the path from data to deployable model.
+- Pipeline: Unifies the entire workflow into an intuitive directed acyclic graph (`DAG`) architecture, promoting reproducibility and reducing iteration time and time-to-market for machine learning models.
+
+By integrating these features, `mleko` serves as a comprehensive toolkit for machine learning practitioners looking to build robust models efficiently.
+
+## Installation
+
+You can install `mleko` via `pip` from [PyPI]:
+
+```console
+$ pip install mleko
+```
+
+# Usage & Examples
+
+See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/ErikBavenstrand/mleko/tree/main/examples) on well-known datasets like the [Titanic Dataset](https://github.com/ErikBavenstrand/mleko/tree/main/examples/Titanic.ipynb).
+
+## Contributing
+
+We are open to, and grateful for, any contributions made by the community.
+To learn more, see the [Contributor Guide].
+
+## License
+
+Distributed under the terms of the [MIT license][license], `mleko` is free and open source software.
+
+## Issues
+
+If you encounter any problems, please [file an issue] along with a detailed description.
+
+<!-- github-only -->
+
+[pypi]: hhttps://pypi.org/project/mleko/
+[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
+[license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
+[contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
 [status]: https://pypi.org/project/mleko/
 [pypi downloads]: https://pypi.org/project/mleko/
 [read the docs]: https://mleko.readthedocs.io/
@@ -20,55 +66,3 @@
 [codecov]: https://app.codecov.io/gh/ErikBavenstrand/mleko
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
-
-## Features
-
-ML-Ekosystem (`mleko`) is a comprehensive Python library designed to facilitate and streamline the entire model building process. It's built with modularity in mind, encompassing a range of functionalities divided into distinct submodules.
-
-Key features include:
-
-- **Ingest:** Fetches data from a variety of sources, including `AWS S3` and `Kaggle`, ensuring seamless data integration.
-
-- **Convert:** Transforms data between different file formats, with a particular emphasis on `CSV` to `Vaex DataFrame` conversions.
-- **Split:** Divide DataFrames into multiple subsets, using a variety of different splitting methods.
-- **Feature Selection:** A suite of feature selection methods and algorithms.
-- **Transformation:** Includes a variety of data transformation methods, such as `Frequency Encoding` and `Standardization`.
-- **Model:** Core model functionalities, allowing for the creation and tuning of a wide array of machine learning models.
-- **Pipeline:** Combines all the above functionalities into a single, easy-to-use directed acyclic graph (DAG) pipeline suitable for reproducible model building.
-
-With `mleko`, you have all the tools you need to build robust and efficient machine learning models, all in one place.
-
-## Installation
-
-You can install `mleko` via [pip] from [PyPI]:
-
-```console
-$ pip install mleko
-```
-
-## Usage
-
-See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/ErikBavenstrand/mleko/tree/main/examples).
-
-## Contributing
-
-Contributions are very welcome.
-To learn more, see the [Contributor Guide].
-
-## License
-
-Distributed under the terms of the [MIT license][license],
-`mleko`is free and open source software.
-
-## Issues
-
-If you encounter any problems,
-please [file an issue] along with a detailed description.
-
-<!-- github-only -->
-
-[pypi]: https://pypi.org/
-[pip]: https://pip.pypa.io/
-[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
-[license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
-[contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
