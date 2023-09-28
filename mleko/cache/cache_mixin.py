@@ -205,6 +205,7 @@ class CacheMixin:
             else:
                 values_to_hash.append(key_input)
 
+        logger.debug(f"Cache key inputs: {values_to_hash}")
         data = pickle.dumps(values_to_hash)
         cache_key_prefix = get_qualified_name_of_caller(frame_depth)
         if cache_group is not None:

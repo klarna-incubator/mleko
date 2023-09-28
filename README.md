@@ -58,7 +58,7 @@ To learn more, see the [Contributor Guide].
 ## License
 
 Distributed under the terms of the [MIT license][license],
-`mleko`is free and open source software.
+`mleko` is free and open source software.
 
 ## Issues
 
