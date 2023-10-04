@@ -294,6 +294,7 @@ class CSVToVaexConverter(BaseConverter):
                 ):
                     pbar.update(1)
 
+        logger.info("Finished converting CSV files to Vaex format.")
         df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
@@ -312,5 +313,5 @@ class CSVToVaexConverter(BaseConverter):
 
         for column_name in df.get_column_names(dtype="bool"):
             df[column_name] = get_column(df, column_name).astype("string")
-
+        logger.info("Merging chunks into a single DataFrame.")
         return ds, df

@@ -31,7 +31,7 @@ def write_vaex_dataframe(cache_file_path: Path, output: vaex.DataFrame) -> None:
     """
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", "invalid value encountered in cast")
-        with tqdm(total=100, desc=f"Writing DataFrame to .{cache_file_path.suffix} file") as pbar:
+        with tqdm(total=100, desc=f"Writing DataFrame to {cache_file_path.suffix} file") as pbar:
             output.export(
                 cache_file_path,
                 progress=set_tqdm_percent_wrapper(pbar),
