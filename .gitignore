@@ -10,7 +10,8 @@ __pycache__/
 .venv/*
 .pytest_cache/
 examples/data
-examples/Titanic-Development.ipynb
+examples/dev-*.ipynb
 .DS_Store
 /.autodoc
 autodoc.config.json
+.aider*
