@@ -47,7 +47,7 @@ class TestLocalManifestHandler:
 
     def test_set_malformed(self, temporary_directory: Path):
         """Should return empty list if error."""
-        with open("malformed.json", "w") as f:
+        with open(temporary_directory / "manifest.json", "w") as f:
             f.write('{ "key": "value"')
 
         manifest_handler = LocalManifestHandler(temporary_directory / "manifest.json")
