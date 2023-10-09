@@ -4,12 +4,14 @@ In order to use this module, the user must have valid Kaggle API credentials.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
 from concurrent import futures
 from dataclasses import dataclass
 from datetime import datetime
+from fnmatch import fnmatch
 from itertools import repeat
 from pathlib import Path
 from typing import NamedTuple
@@ -20,9 +22,8 @@ from tqdm.auto import tqdm
 
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
-from mleko.utils.file_helpers import clear_directory
 
-from .base_ingester import BaseIngester
+from .base_ingester import BaseIngester, LocalFileEntry, LocalManifestHandler
 
 
 logger = CustomLogger()
@@ -157,8 +158,8 @@ class KaggleCredentialsManager:
 
 
 @dataclass
-class KaggleFileMetadata:
-    """Represents the metadata of a single Kaggle dataset file."""
+class KaggleFileManifest:
+    """Manifest entry for a single file in a Kaggle dataset."""
 
     name: str
     """Name of the file."""
@@ -187,10 +188,11 @@ class KaggleIngester(BaseIngester):
     @auto_repr
     def __init__(
         self,
-        destination_directory: str | Path,
         owner_slug: str,
         dataset_slug: str,
-        file_names: list[str] | None = None,
+        file_pattern: str | list[str] = "*",
+        dataset_id: str | None = None,
+        destination_directory: str | Path = "data/ingest-kaggle",
         dataset_version: str | int | None = None,
         kaggle_api_credentials_file: str | Path | None = None,
         num_workers: int = 64,
@@ -216,11 +218,14 @@ class KaggleIngester(BaseIngester):
             contains nested folders.
 
         Args:
-            destination_directory: The directory where the downloaded files will be stored.
             owner_slug: The owner's Kaggle username or organization name.
             dataset_slug: The dataset's unique Kaggle identifier (slug).
-            file_names: A list of file names to download. If not provided or empty, all files in
-                the dataset will be downloaded.
+            file_pattern: Pattern to match the files to download, e.g. `*.csv` or [`*.csv`, `*.json`], etc.
+                For more information, see https://docs.python.org/3/library/fnmatch.html.
+            dataset_id: Id of the dataset to be used instead of the default fingerprint (MD5 hash of the owner slug,
+                dataset version, and dataset slug). Note that this will overwrite any existing dataset with the same
+                name in the destination directory, so make sure to use a unique name.
+            destination_directory: The directory where the downloaded files will be stored.
             dataset_version: The specific dataset version number to download. If not provided,
                 the latest version will be fetched.
             kaggle_api_credentials_file: Path to a Kaggle API credentials JSON file. If not
@@ -230,20 +235,35 @@ class KaggleIngester(BaseIngester):
         Examples:
             >>> from mleko.dataset.sources import KaggleIngester
             >>> kaggle_ingester = KaggleIngester(
-            ...     destination_directory="~/data",
             ...     owner_slug="allen-institute-for-ai",
             ...     dataset_slug="covid-19-masks-dataset",
-            ...     file_names=["images.zip", "annotations.json"],
+            ...     file_pattern="file_*.zip",
+            ...     dataset_id="covid-19", # Optional, but will store the data in "./data/covid-19/" instead of
+            ...                            # "./data/<fingerprint>/".
+            ...     destination_directory="data",
             ...     dataset_version=1,
             ... )
             >>> kaggle_ingester.fetch_data()
-            [PosixPath('~/data/images.zip'), PosixPath('~/data/annotations.json')]
+            [PosixPath('~/data/covid-19/file_1.zip'), PosixPath('~/data/covid-19/file_2.zip')]
         """
-        super().__init__(destination_directory)
-        self._owner_slug, self._dataset_slug, self._dataset_version = owner_slug, dataset_slug, dataset_version
-        self._file_names: set[str] = set(file_names) if file_names is not None else set()
+        dataset_id = (
+            dataset_id
+            if dataset_id is not None
+            else hashlib.md5((owner_slug + dataset_slug + str(dataset_version)).encode()).hexdigest()
+        )
+        super().__init__(destination_directory, dataset_id)
+        self._local_manifest_handler = LocalManifestHandler(
+            self._destination_directory / f"{self._fingerprint}.manifest.json"
+        )
+        self._owner_slug = owner_slug
+        self._dataset_slug = dataset_slug
+        self._dataset_version = dataset_version
         self._kaggle_config = KaggleCredentialsManager.get_kaggle_credentials(kaggle_api_credentials_file)
         self._num_workers = num_workers
+
+        if isinstance(file_pattern, str):
+            file_pattern = [file_pattern]
+        self._file_pattern = file_pattern
 
     def fetch_data(self, force_recompute: bool = False) -> list[Path]:
         """Fetches data from the specified Kaggle dataset.
@@ -267,44 +287,52 @@ class KaggleIngester(BaseIngester):
         params: dict[str, str] = {}
         if self._dataset_version:
             params["datasetVersionNumber"] = str(self._dataset_version)
-
-        files_metadata = self._kaggle_fetch_files_metadata(params)
-
-        if len(files_metadata) == 0:
-            error_msg = f"Kaggle returned 0 files for the given dataset {dataset_path}."
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        if not force_recompute and self._is_local_dataset_fresh(files_metadata):
-            logger.info("\033[32mCache Hit\033[0m: Local dataset is up to date with Kaggle, skipping download.")
-            return self._get_local_filenames(["gz", "csv", "zip"])
-
-        file_names = "*"
-        if self._file_names:
-            file_names = f"{list(self._file_names)!r}"
+        kaggle_manifest = self._build_kaggle_manifest(params)
 
         if force_recompute:
             logger.info(
-                f"\033[33mForce Cache Refresh\033[0m: Downloading {dataset_path}/{file_names} to "
-                f"{self._destination_directory} from Kaggle."
+                f"\033[33mForce Cache Refresh\033[0m: Downloading files matching {self._file_pattern} from "
+                f"{dataset_path} to {self._destination_directory} from Kaggle."
             )
         else:
+            if self._is_local_dataset_fresh(kaggle_manifest):
+                logger.info("\033[32mCache Hit\033[0m: Local dataset is up to date with Kaggle, skipping download.")
+                local_file_names = set(self._local_manifest_handler.get_file_names())
+                kaggle_file_names: set[str] = {kaggle_file.name for kaggle_file in kaggle_manifest}
+                files_to_delete = list(local_file_names.difference(kaggle_file_names))
+
+                if len(files_to_delete) > 0:
+                    logger.info(
+                        f"Deleting {len(files_to_delete)} files from "
+                        f"{self._destination_directory} that are no longer present in Kaggle or filtered out."
+                    )
+
+                self._delete_local_files(files_to_delete)
+                self._local_manifest_handler.remove_files(files_to_delete)
+                return self._get_full_file_paths(self._local_manifest_handler.get_file_names())
+
             logger.info(
-                f"\033[31mCache Miss\033[0m: Downloading {dataset_path}/{file_names} to "
-                f"{self._destination_directory} from Kaggle."
+                f"\033[31mCache Miss\033[0m: Downloading files matching {self._file_pattern} from "
+                f"{dataset_path} to {self._destination_directory} from Kaggle."
             )
 
-        clear_directory(self._destination_directory)
-
-        kaggle_file_paths = [f"{dataset_path}/{file_metadata.name}" for file_metadata in files_metadata]
-
-        if kaggle_file_paths:
+        self._delete_local_files(self._local_manifest_handler.get_file_names())
+        kaggle_file_paths = [f"{dataset_path}/{file_metadata.name}" for file_metadata in kaggle_manifest]
+        if len(kaggle_file_paths) > 0:
             self._kaggle_fetch_files(kaggle_file_paths, params)
+            self._local_manifest_handler.set_files(
+                [
+                    LocalFileEntry(
+                        name=Path(kaggle_file_paths[0]).name,
+                        size=os.path.getsize(self._destination_directory / Path(kaggle_file_paths[0]).name),
+                    )
+                ]
+            )
             logger.info(f"Finished downloading {len(kaggle_file_paths)} files from Kaggle.")
 
-        return self._get_local_filenames(["gz", "csv", "zip"])
+        return self._get_full_file_paths(self._local_manifest_handler.get_file_names())
 
-    def _kaggle_fetch_files_metadata(self, params: dict[str, str]) -> list[KaggleFileMetadata]:
+    def _build_kaggle_manifest(self, params: dict[str, str]) -> list[KaggleFileManifest]:
         """Fetch the metadata of the files in the dataset.
 
         When fetching the metadata, the API returns a list of files in the dataset. The list contains the name of the
@@ -317,7 +345,7 @@ class KaggleIngester(BaseIngester):
             HTTPError: If there is an error in the HTTP response while requesting file list from Kaggle.
 
         Returns:
-            A list of KaggleFileMetadata objects containing the metadata of the files in the dataset.
+            A list of KaggleFileManifest objects containing the metadata of the files in the dataset.
         """
         list_files_response = requests.get(
             f"{self._KAGGLE_DATASET_URL}/list/{self._owner_slug}/{self._dataset_slug}",
@@ -332,16 +360,26 @@ class KaggleIngester(BaseIngester):
             logger.error(e)
             raise requests.HTTPError(e) from e
 
-        files_metadata: list[KaggleFileMetadata] = [
-            KaggleFileMetadata(
-                file_metadata["name"],
-                datetime.strptime(file_metadata["creationDate"].split(".")[0], "%Y-%m-%dT%H:%M:%S").timestamp(),
-                int(file_metadata["totalBytes"]),
+        kaggle_manifest: list[KaggleFileManifest] = [
+            KaggleFileManifest(
+                file["name"],
+                datetime.strptime(file["creationDate"].split(".")[0], "%Y-%m-%dT%H:%M:%S").timestamp(),
+                int(file["totalBytes"]),
             )
-            for file_metadata in json.loads(list_files_response.content)["datasetFiles"]
-            if file_metadata["name"] in self._file_names or len(self._file_names) == 0
+            for file in json.loads(list_files_response.content)["datasetFiles"]
+            if any(fnmatch(file["name"], pattern) for pattern in self._file_pattern)
         ]
-        return files_metadata
+
+        if len(kaggle_manifest) == 0:
+            error_msg = (
+                f"No files matching {self._file_pattern} found in Kaggle dataset "
+                f"{self._owner_slug}/{self._dataset_slug}."
+            )
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        logger.info(f"Found {len(kaggle_manifest)} file(s) matching any of {self._file_pattern} in Kaggle dataset.")
+
+        return kaggle_manifest
 
     def _kaggle_fetch_file(self, kaggle_file_path: str, params: dict[str, str]) -> None:
         """Downloads a single Kaggle dataset file and saves it in the destination directory.
@@ -397,7 +435,7 @@ class KaggleIngester(BaseIngester):
                 ):
                     pbar.update(1)
 
-    def _is_local_dataset_fresh(self, files_metadata: list[KaggleFileMetadata]) -> bool:
+    def _is_local_dataset_fresh(self, files_metadata: list[KaggleFileManifest]) -> bool:
         """Checks if the local dataset files are up to date with the Kaggle dataset files.
 
         Comparing file size and modification timestamp, this method determines if the local files are up to date and

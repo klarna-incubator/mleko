@@ -7,6 +7,7 @@ CustomFormatter enables colored log level names and custom formatting of log rec
 from __future__ import annotations
 
 import logging
+import re
 import sys
 
 
@@ -72,50 +73,50 @@ class CustomLogger(logging.Logger):
         for instance in CustomLogger._instances:
             instance.set_level(log_level)
 
-    def debug(self, msg: object, *args: object) -> None:  # type: ignore
+    def debug(self, message: object, *args: object) -> None:
         """Log a debug message.
 
         Args:
-            msg: The message to be logged.
+            message: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
         """
-        self.log(logging.DEBUG, msg, stacklevel=2, *args)
+        self._route_message(message, logging.DEBUG, *args)
 
-    def info(self, message: object, *args: object) -> None:  # type: ignore
+    def info(self, message: object, *args: object) -> None:
         """Log an info message.
 
         Args:
             message: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
         """
-        self.log(logging.INFO, message, stacklevel=2, *args)
+        self._route_message(message, logging.INFO, *args)
 
-    def warning(self, message: object, *args: object) -> None:  # type: ignore
+    def warning(self, message: object, *args: object) -> None:
         """Log a warning message.
 
         Args:
             message: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
         """
-        self.log(logging.WARNING, message, stacklevel=2, *args)
+        self._route_message(message, logging.WARNING, *args)
 
-    def error(self, message: object, *args: object) -> None:  # type: ignore
+    def error(self, message: object, *args: object) -> None:
         """Log an error message.
 
         Args:
             message: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
         """
-        self.log(logging.ERROR, message, stacklevel=2, *args)
+        self._route_message(message, logging.ERROR, *args)
 
-    def critical(self, message: object, *args: object) -> None:  # type: ignore
+    def critical(self, message: object, *args: object) -> None:
         """Log a critical message.
 
         Args:
             message: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
         """
-        self.log(logging.CRITICAL, message, stacklevel=2, *args)
+        self._route_message(message, logging.CRITICAL, *args)
 
     def set_level(self, log_level: int) -> None:
         """Set the minimum log level for this CustomLogger instance.
@@ -124,3 +125,26 @@ class CustomLogger(logging.Logger):
             log_level: The minimum logging level to output.
         """
         super().setLevel(log_level)
+
+    def _route_message(self, message: object, log_level: int, *args: object, stacklevel: int = 2) -> None:
+        """Route and clean the log message based on its content.
+
+        Args:
+            message: The log message to be routed.
+            log_level: The original log level at which the message was sent.
+            args: Additional arguments propagated to the built-in `logging` module.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+        """
+        if not isinstance(message, str):
+            self.log(log_level, message, *args, stacklevel=stacklevel + 1)
+            return
+
+        match = re.search(r"\[(Debug|Info|Warning|Error|Critical)\]", message, re.IGNORECASE)
+
+        if match:
+            level_str = match.group(1).upper()
+            routed_level = getattr(logging, level_str)
+            cleaned_msg = re.sub(rf"\[{level_str}\]\s?", "", message, flags=re.IGNORECASE, count=1)
+            self.log(routed_level, cleaned_msg, *args, stacklevel=stacklevel + 1)
+        else:
+            self.log(log_level, message, *args, stacklevel=stacklevel + 1)

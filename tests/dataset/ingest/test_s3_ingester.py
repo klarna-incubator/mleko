@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -18,7 +17,7 @@ from mleko.dataset.ingest import S3Ingester
 class TestS3Ingester:
     """Test suite for `dataset.ingest.s3_ingester.S3Ingester`."""
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     def s3_bucket(self):
         """Mock S3 Bucket."""
         with moto.mock_s3():
@@ -28,7 +27,6 @@ class TestS3Ingester:
 
     def test_download(self, s3_bucket, temporary_directory: Path):
         """Should download data to temp dir."""
-        s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
 
         test_data = S3Ingester(
@@ -43,7 +41,7 @@ class TestS3Ingester:
             force_recompute=True,
         )
 
-        assert (temporary_directory / "test-file.csv").read_text() == "test-file-data"
+        assert (test_data._destination_directory / "test-file.csv").read_text() == "test-file-data"
 
     def test_different_timestamps(self, s3_bucket, temporary_directory: Path):
         """Should throw exception due to different timestamps of files."""
@@ -68,16 +66,8 @@ class TestS3Ingester:
 
     def test_is_cached(self, s3_bucket, temporary_directory: Path):
         """Should use cached files if manifest matches with local files in temp dir."""
-        s3_bucket.Object("test-prefix/manifest").put(
-            Body=json.dumps(
-                {
-                    "entries": [
-                        {"url": f"{temporary_directory}/test-prefix/test-file.csv", "meta": {"content_length": 5}}
-                    ]
-                }
-            )
-        )
-        s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO")
+        s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO1")
         test_data = S3Ingester(
             destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
@@ -96,6 +86,7 @@ class TestS3Ingester:
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
+                file_pattern="test-file1.csv",
                 num_workers=1,
                 check_s3_timestamps=False,
             )
@@ -104,18 +95,26 @@ class TestS3Ingester:
             )
             mocked_s3_fetch_all.assert_not_called()
 
+    def test_no_matching_files(self, s3_bucket, temporary_directory: Path):
+        """Should raise `FileNotFoundError` if no files match the pattern."""
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO1")
+        s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO2")
+        test_data = S3Ingester(
+            destination_directory=temporary_directory,
+            s3_bucket_name="test-bucket",
+            s3_key_prefix="test-prefix",
+            aws_region_name="us-east-1",
+            file_pattern="test-file3.csv",
+            num_workers=1,
+            check_s3_timestamps=True,
+        )
+
+        with pytest.raises(FileNotFoundError):
+            test_data.fetch_data()
+
     def test_is_outdated_cache(self, s3_bucket, temporary_directory: Path):
         """Should not use cached files if manifest does not matche with local files in temp dir."""
-        s3_bucket.Object("test-prefix/manifest").put(
-            Body=json.dumps(
-                {
-                    "entries": [
-                        {"url": f"{temporary_directory}/test-prefix/test-file.csv", "meta": {"content_length": 5}}
-                    ]
-                }
-            )
-        )
-        s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO")
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO1")
         test_data = S3Ingester(
             destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
@@ -128,17 +127,8 @@ class TestS3Ingester:
             force_recompute=True,
         )
 
-        s3_bucket.Object("test-prefix/manifest").put(
-            Body=json.dumps(
-                {
-                    "entries": [
-                        {"url": f"{temporary_directory}/test-prefix/test-file.csv", "meta": {"content_length": 9}}
-                    ]
-                }
-            )
-        )
-        s3_bucket.Object("test-prefix/test-file.csv").put(Body="MLEKO_NEW")
-        with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO_NEW")
+        with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all, patch("os.path.getsize", return_value=3):
             test_data = S3Ingester(
                 destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",

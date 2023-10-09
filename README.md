@@ -10,6 +10,18 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
+[pypi]: hhttps://pypi.org/project/mleko/
+[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
+[license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
+[contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
+[status]: https://pypi.org/project/mleko/
+[pypi downloads]: https://pypi.org/project/mleko/
+[read the docs]: https://mleko.readthedocs.io/
+[tests]: https://github.com/ErikBavenstrand/mleko/actions?workflow=Tests
+[codecov]: https://app.codecov.io/gh/ErikBavenstrand/mleko
+[pre-commit]: https://github.com/pre-commit/pre-commit
+[black]: https://github.com/psf/black
+
 # `mleko`: Streamlining Machine Learning Pipelines in Python
 
 Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
@@ -47,22 +59,9 @@ To learn more, see the [Contributor Guide].
 
 ## License
 
-Distributed under the terms of the [MIT license][license], `mleko` is free and open source software.
+Distributed under the terms of the [MIT license][license],
+`mleko` is free and open source software.
 
 ## Issues
 
 If you encounter any problems, please [file an issue] along with a detailed description.
-
-<!-- github-only -->
-
-[pypi]: hhttps://pypi.org/project/mleko/
-[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
-[license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
-[contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
-[status]: https://pypi.org/project/mleko/
-[pypi downloads]: https://pypi.org/project/mleko/
-[read the docs]: https://mleko.readthedocs.io/
-[tests]: https://github.com/ErikBavenstrand/mleko/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/ErikBavenstrand/mleko
-[pre-commit]: https://github.com/pre-commit/pre-commit
-[black]: https://github.com/psf/black
