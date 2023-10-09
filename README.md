@@ -10,7 +10,6 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
-
 [pypi]: hhttps://pypi.org/project/mleko/
 [file an issue]: https://github.com/ErikBavenstrand/mleko/issues
 [license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
@@ -62,7 +61,6 @@ To learn more, see the [Contributor Guide].
 
 Distributed under the terms of the [MIT license][license],
 `mleko` is free and open source software.
-
 
 ## Issues
 
