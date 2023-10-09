@@ -72,7 +72,7 @@ Copyright © 2023 Klarna Bank AB
 
 For license details, see the [LICENSE](LICENSE) file in the root of this project.
 
-[klarna-image]: https://img.shields.io/badge/%20-Developed%20at%20Klarna-black?style=flat-square&labelColor=ffb3c7&logo=klarna&logoColor=black
+[klarna-image]: https://img.shields.io/badge/%20-Developed%20at%20Klarna-black?style=round-square&labelColor=ffb3c7&logo=klarna&logoColor=black
 [klarna-url]: https://klarna.github.io
 [license]: https://github.com/klarna-incubator/mleko/blob/main/LICENSE
 [pypi]: hhttps://pypi.org/project/mleko/
