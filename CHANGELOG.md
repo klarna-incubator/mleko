@@ -2,6 +2,31 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.0 (2023-10-09)
+
+### Feature
+
+* **data source:** ✨ Add support for pattern matching in `*Ingester` and add `LocalManifest` to index fetched files. ([`75974a4`](https://github.com/klarna-incubator/mleko/commit/75974a40aa1af5e21a4dedc7e0d05be2153ec7aa))
+
+### Fix
+
+* **logging:** 🐛 Fix LGBM logging routing to correct log level. ([`0e5fa77`](https://github.com/klarna-incubator/mleko/commit/0e5fa77ae14ccd27eb9b435ec8a73815fe764350))
+
+### Style
+
+* Remove unnecessary blank lines ([`a06edf2`](https://github.com/klarna-incubator/mleko/commit/a06edf23e865e6bfb95f9f3d13611a24de12b4ba))
+* ✏️ Improve logging of `CSVToVaexConverter` and fix typo in `write_vaex_dataframe`. ([`197e56a`](https://github.com/klarna-incubator/mleko/commit/197e56ad4af59da2a08762c70b8e7ae5c5e350e2))
+
+### Build
+
+* 🔒️ Bump `gitpython` to resolve CVE-2023-41040 and CVE-2023-40590. ([`79627bd`](https://github.com/klarna-incubator/mleko/commit/79627bda5228d0470b2a3ca4613ae7636d79f4b6))
+
+### Chore
+
+* Update ignored files, add pattern for dev notebooks and .aider files ([`fff4afb`](https://github.com/klarna-incubator/mleko/commit/fff4afb8b279534b6ee7c5dfc1fb1d6608606a74))
+* **deps:** Bump sphinx-autoapi from 2.1.1 to 3.0.0 in /docs ([#96](https://github.com/klarna-incubator/mleko/issues/96)) ([`f2f9194`](https://github.com/klarna-incubator/mleko/commit/f2f91947f5300d5cb5511ede607e586fdae80abe))
+* **deps:** Bump sphinx-autoapi from 2.1.1 to 3.0.0 in /docs ([`d0e5237`](https://github.com/klarna-incubator/mleko/commit/d0e5237698c05eba13ba9b203ee133e9491bc4fe))
+
 ## v1.1.0 (2023-09-27)
 
 ### Feature
