@@ -1,7 +1,7 @@
 """Sphinx configuration."""
-project = "ML-Ekosystem"
+project = "mleko"
 author = "Erik Båvenstrand"
-copyright = "2023, Erik Båvenstrand"
+copyright = "2023, Klarna Bank AB"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",

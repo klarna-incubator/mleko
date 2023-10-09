@@ -52,8 +52,8 @@ jobs:
           # Get the current version
           current_version=$(poetry version | awk '{print $2}')
           # Set git details
-          git config --global user.name "Erik Båvenstrand"
-          git config --global user.email "erik@bavenstrand.com"
+          git config --global user.name "Klarna Bot"
+          git config --global user.email "developers@klarna.com"
           # Run semantic-release
           poetry run semantic-release publish -v DEBUG -D commit_author="github-actions <github-actions@github.com>"
           # Get the new version

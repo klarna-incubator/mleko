@@ -1,30 +1,21 @@
-[![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
-[![Status](https://img.shields.io/pypi/status/mleko.svg)][status]
-[![License](https://img.shields.io/pypi/l/mleko)][license]
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi downloads]
-
-[![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
-[![Tests](https://github.com/ErikBavenstrand/mleko/workflows/Tests/badge.svg)][tests]
-[![Codecov](https://codecov.io/gh/ErikBavenstrand/mleko/branch/main/graph/badge.svg)][codecov]
-
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
-[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
-
-[pypi]: hhttps://pypi.org/project/mleko/
-[file an issue]: https://github.com/ErikBavenstrand/mleko/issues
-[license]: https://github.com/ErikBavenstrand/mleko/blob/main/LICENSE
-[contributor guide]: https://github.com/ErikBavenstrand/mleko/blob/main/CONTRIBUTING.md
-[status]: https://pypi.org/project/mleko/
-[pypi downloads]: https://pypi.org/project/mleko/
-[read the docs]: https://mleko.readthedocs.io/
-[tests]: https://github.com/ErikBavenstrand/mleko/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/ErikBavenstrand/mleko
-[pre-commit]: https://github.com/pre-commit/pre-commit
-[black]: https://github.com/psf/black
-
 # `mleko`: Streamlining Machine Learning Pipelines in Python
 
 Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
+
+[![Developed at Klarna][klarna-image]][klarna-url]
+[![License](https://img.shields.io/pypi/l/mleko)][license]
+
+[![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
+[![Status](https://img.shields.io/pypi/status/mleko.svg)][pypi]
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
+
+[![Tests](https://github.com/klarna-incubator/mleko/workflows/Tests/badge.svg)][tests]
+[![Codecov](https://codecov.io/gh/klarna-incubator/mleko/branch/main/graph/badge.svg)][codecov]
+
+[![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
 ## Features
 
@@ -48,20 +39,47 @@ You can install `mleko` via `pip` from [PyPI]:
 $ pip install mleko
 ```
 
-# Usage & Examples
+## Usage & Examples
 
-See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/ErikBavenstrand/mleko/tree/main/examples) on well-known datasets like the [Titanic Dataset](https://github.com/ErikBavenstrand/mleko/tree/main/examples/Titanic.ipynb).
+See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/klarna-incubator/mleko/tree/main/examples) on well-known datasets like the [Titanic Dataset](https://github.com/klarna-incubator/mleko/tree/main/examples/Titanic.ipynb).
+
+## Issues
+
+If you encounter any problems, please [file an issue] along with a detailed description.
 
 ## Contributing
 
 We are open to, and grateful for, any contributions made by the community.
 To learn more, see the [Contributor Guide].
 
+## Release History
+
+See our [changelog](CHANGELOG.md).
+
+## Acknowledgements
+
+The development of `mleko` was significantly influenced by existing work of the following individuals:
+
+- **Felipe Breve Siola** ([fsiola](https://github.com/fsiola))
+- **Sai Ma** ([metanouvelle](https://github.com/metanouvelle))
+- **Ahmet Anil Pala** ([aanilpala](https://github.com/aanilpala))
+
+Their insights and contributions provided a solid foundation for this library. We appreciate their effort and recognize their contributions that led to the creation of `mleko`.
+
 ## License
 
-Distributed under the terms of the [MIT license][license],
-`mleko` is free and open source software.
+Copyright © 2023 Klarna Bank AB
 
-## Issues
+For license details, see the [LICENSE](LICENSE) file in the root of this project.
 
-If you encounter any problems, please [file an issue] along with a detailed description.
+[klarna-image]: https://img.shields.io/badge/%20-Developed%20at%20Klarna-black?style=flat-square&labelColor=ffb3c7&logo=klarna&logoColor=black
+[klarna-url]: https://klarna.github.io
+[license]: https://github.com/klarna-incubator/mleko/blob/main/LICENSE
+[pypi]: hhttps://pypi.org/project/mleko/
+[tests]: https://github.com/klarna-incubator/mleko/actions?workflow=Tests
+[codecov]: https://app.codecov.io/gh/klarna-incubator/mleko
+[read the docs]: https://mleko.readthedocs.io/
+[pre-commit]: https://github.com/pre-commit/pre-commit
+[black]: https://github.com/psf/black
+[contributor guide]: https://github.com/klarna-incubator/mleko/blob/main/CONTRIBUTING.md
+[file an issue]: https://github.com/klarna-incubator/mleko/issues

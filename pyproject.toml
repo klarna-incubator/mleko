@@ -3,17 +3,17 @@ name = "mleko"
 version = "1.2.0"
 description = "ML-Ekosystem"
 authors = ["Erik Båvenstrand <erik@bavenstrand.se>"]
-license = "MIT"
+license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/ErikBavenstrand/mleko"
-repository = "https://github.com/ErikBavenstrand/mleko"
+homepage = "https://github.com/klarna-incubator/mleko"
+repository = "https://github.com/klarna-incubator/mleko"
 documentation = "https://mleko.readthedocs.io"
 classifiers = [
     "Development Status :: 4 - Beta",
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/ErikBavenstrand/mleko/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/klarna-incubator/mleko/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<3.11.dev0"

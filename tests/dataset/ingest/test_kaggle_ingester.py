@@ -133,11 +133,16 @@ class TestKaggleIngester:
         return KaggleFileManifest("file.csv", 1609459200.0, 12345)
 
     @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
-    def test_init(self, mock_get_credentials: MagicMock, sample_kaggle_credentials: KaggleCredentials):
+    def test_init(
+        self,
+        mock_get_credentials: MagicMock,
+        sample_kaggle_credentials: KaggleCredentials,
+        temporary_directory: Path,
+    ):
         """Should successfullt initialize."""
         mock_get_credentials.return_value = sample_kaggle_credentials
         ingester = KaggleIngester(
-            destination_directory=".",
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
         )

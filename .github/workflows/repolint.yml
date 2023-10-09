@@ -1,0 +1,11 @@
+name: Klarna repolint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    uses: klarna-incubator/meta/.github/workflows/repolint.yml@master

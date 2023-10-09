@@ -18,5 +18,5 @@ autoapi/index
 usage
 contributing
 License <license>
-Changelog <https://github.com/ErikBavenstrand/mleko/releases>
+Changelog <https://github.com/klarna-incubator/mleko/releases>
 ```
