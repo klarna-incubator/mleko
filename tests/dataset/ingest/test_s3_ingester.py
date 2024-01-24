@@ -47,19 +47,19 @@ class TestS3Ingester:
         """Should throw exception due to different timestamps of files."""
         s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
-        s3_backends["123456789012"]["global"].buckets["test-bucket"].keys[
+        s3_backends["123456789012"]["global"].buckets["test-bucket"].keys[  # type: ignore
             "test-prefix/test-file.csv"
         ].last_modified = datetime.datetime(2000, 1, 1)
 
+        test_data = S3Ingester(
+            destination_directory=temporary_directory,
+            s3_bucket_name="test-bucket",
+            s3_key_prefix="test-prefix",
+            aws_region_name="us-east-1",
+            num_workers=1,
+            check_s3_timestamps=True,
+        )
         with pytest.raises(Exception, match="Files in S3"):
-            test_data = S3Ingester(
-                destination_directory=temporary_directory,
-                s3_bucket_name="test-bucket",
-                s3_key_prefix="test-prefix",
-                aws_region_name="us-east-1",
-                num_workers=1,
-                check_s3_timestamps=True,
-            )
             test_data.fetch_data(
                 force_recompute=True,
             )

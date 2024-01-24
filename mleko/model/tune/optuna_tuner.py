@@ -233,7 +233,7 @@ class OptunaTuner(BaseTuner):
                 BruteForceSampler,
             ),
         ):
-            sampler._rng.seed(self._random_state)
+            sampler._rng.rng.seed(self._random_state)
 
         if isinstance(
             sampler,
@@ -246,7 +246,7 @@ class OptunaTuner(BaseTuner):
             self._reset_sampler_rng(sampler._random_sampler)
 
         if isinstance(sampler, CmaEsSampler):
-            sampler._cma_rng.seed(self._random_state)
+            sampler._cma_rng.rng.seed(self._random_state)
 
         if isinstance(sampler, (CmaEsSampler, QMCSampler)):
             self._reset_sampler_rng(sampler._independent_sampler)
@@ -257,7 +257,7 @@ class OptunaTuner(BaseTuner):
         if isinstance(sampler, (NSGAIISampler, NSGAIIISampler)) and isinstance(
             sampler._child_generation_strategy, NSGAIIChildGenerationStrategy
         ):
-            sampler._child_generation_strategy._rng.seed(self._random_state)
+            sampler._child_generation_strategy._rng.rng.seed(self._random_state)
 
         if isinstance(sampler, QMCSampler) and self._random_state is not None:
             sampler._seed = self._random_state

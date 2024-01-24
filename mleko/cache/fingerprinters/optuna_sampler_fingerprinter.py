@@ -6,8 +6,9 @@ import inspect
 import json
 from typing import Any, Callable
 
-import numpy as np
 import optuna
+from optuna.samplers._lazy_random_state import LazyRandomState
+from optuna.samplers._nsgaiii._elite_population_selection_strategy import NSGAIIIElitePopulationSelectionStrategy
 from optuna.samplers.nsgaii._after_trial_strategy import NSGAIIAfterTrialStrategy
 from optuna.samplers.nsgaii._child_generation_strategy import NSGAIIChildGenerationStrategy
 from optuna.samplers.nsgaii._crossovers._blxalpha import BLXAlphaCrossover
@@ -30,21 +31,21 @@ logger = CustomLogger()
 class OptunaSamplerFingerprinter(BaseFingerprinter):
     """Class to generate unique fingerprints for different types of Optuna samplers."""
 
-    def fingerprint(self, sampler: optuna.samplers.BaseSampler) -> str:
+    def fingerprint(self, data: optuna.samplers.BaseSampler) -> str:
         """Generate a fingerprint string for a given Optuna sampler.
 
         Args:
-            sampler: The sampler to fingerprint.
+            data: The sampler to fingerprint.
 
         Returns:
             A fingerprint string that uniquely identifies the sampler's configuration.
         """
-        class_name = sampler.__class__.__name__.lower()
+        class_name = data.__class__.__name__.lower()
         method_name = f"_fingerprint_{class_name}"
 
         if hasattr(self, method_name):
             fingerprint_method = getattr(self, method_name)
-            return fingerprint_method(sampler)
+            return fingerprint_method(data)
         else:
             logger.warning(
                 f"Cannot fingerprint sampler of type {class_name}, ensure you invalidate the cache manually."
@@ -187,8 +188,15 @@ class OptunaSamplerFingerprinter(BaseFingerprinter):
         fingerprint += self.fingerprint(sampler._random_sampler)
         fingerprint += self._get_rng_state(sampler._rng)
         fingerprint += self._get_inspect_source(sampler._constraints_func)
-        fingerprint += str(sampler._reference_points)
-        fingerprint += str(sampler._dividing_parameter)
+
+        if isinstance(sampler._elite_population_selection_strategy, NSGAIIIElitePopulationSelectionStrategy):
+            fingerprint += str(sampler._elite_population_selection_strategy._population_size)
+            fingerprint += str(sampler._elite_population_selection_strategy._reference_points)
+            fingerprint += str(sampler._elite_population_selection_strategy._dividing_parameter)
+            fingerprint += self._get_rng_state(sampler._elite_population_selection_strategy._rng)
+            fingerprint += self._get_inspect_source(sampler._elite_population_selection_strategy._constraints_func)
+        else:
+            fingerprint += self._get_inspect_source(sampler._elite_population_selection_strategy)
         if isinstance(sampler._child_generation_strategy, NSGAIIChildGenerationStrategy):
             fingerprint += self._get_nsgaiichildgenerationstrategy(sampler._child_generation_strategy)
         else:
@@ -302,7 +310,7 @@ class OptunaSamplerFingerprinter(BaseFingerprinter):
         sorted_data = deep_sort(data)
         return json.dumps(sorted_data, sort_keys=True) if data is not None else ""
 
-    def _get_rng_state(self, rng: np.random.RandomState) -> str:
+    def _get_rng_state(self, rng: LazyRandomState) -> str:
         """Get the state of a RandomState.
 
         Args:
@@ -311,4 +319,4 @@ class OptunaSamplerFingerprinter(BaseFingerprinter):
         Returns:
             The state of the RandomState.
         """
-        return str(rng.get_state())
+        return str(rng.rng.get_state())

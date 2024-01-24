@@ -11,7 +11,7 @@ from .base_fingerprinter import BaseFingerprinter
 class VaexFingerprinter(BaseFingerprinter):
     """A fingerprinter for Vaex DataFrames."""
 
-    def fingerprint(self, dataframe: vaex.DataFrame) -> str:
+    def fingerprint(self, data: vaex.DataFrame) -> str:
         """Generate a fingerprint for a Vaex DataFrame.
 
         Note:
@@ -21,7 +21,7 @@ class VaexFingerprinter(BaseFingerprinter):
             of the `vaex` DataFrame for more information).
 
         Args:
-            dataframe: The Vaex DataFrame to be fingerprinted.
+            data: The Vaex DataFrame to be fingerprinted.
 
         Returns:
             The fingerprint as a hexadecimal string.
@@ -31,5 +31,5 @@ class VaexFingerprinter(BaseFingerprinter):
             >>> fingerprinter.fingerprint(vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6]))
             "fingerprint"
         """
-        fingerprint = hashlib.md5(str(dataframe.fingerprint()).encode()).hexdigest()
+        fingerprint = hashlib.md5(str(data.fingerprint()).encode()).hexdigest()
         return fingerprint

@@ -17,21 +17,21 @@ logger = CustomLogger()
 class OptunaPrunerFingerprinter(BaseFingerprinter):
     """Class to generate unique fingerprints for different types of Optuna pruners."""
 
-    def fingerprint(self, pruner: optuna.pruners.BasePruner) -> str:
+    def fingerprint(self, data: optuna.pruners.BasePruner) -> str:
         """Generate a fingerprint string for a given Optuna pruner.
 
         Args:
-            pruner: The pruner to fingerprint.
+            data: The pruner to fingerprint.
 
         Returns:
             A fingerprint string that uniquely identifies the pruner's configuration.
         """
-        class_name = pruner.__class__.__name__.lower()
+        class_name = data.__class__.__name__.lower()
         method_name = f"_fingerprint_{class_name}"
 
         if hasattr(self, method_name):
             fingerprint_method = getattr(self, method_name)
-            return fingerprint_method(pruner)
+            return fingerprint_method(data)
         else:
             logger.warning(f"Cannot fingerprint pruner of type {class_name}, ensure you invalidate the cache manually.")
             return class_name
