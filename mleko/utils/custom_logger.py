@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import re
 import sys
+from typing import Any, Mapping
 
 
 class CustomFormatter(logging.Formatter):
@@ -73,50 +74,150 @@ class CustomLogger(logging.Logger):
         for instance in CustomLogger._instances:
             instance.set_level(log_level)
 
-    def debug(self, message: object, *args: object) -> None:
+    def debug(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Any = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
         """Log a debug message.
 
         Args:
-            message: The message to be logged.
+            msg: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
-        self._route_message(message, logging.DEBUG, *args)
+        self._route_message(
+            msg,
+            logging.DEBUG,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
+        )
 
-    def info(self, message: object, *args: object) -> None:
+    def info(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Any = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
         """Log an info message.
 
         Args:
-            message: The message to be logged.
+            msg: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
-        self._route_message(message, logging.INFO, *args)
+        self._route_message(
+            msg,
+            logging.INFO,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
+        )
 
-    def warning(self, message: object, *args: object) -> None:
+    def warning(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Any = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
         """Log a warning message.
 
         Args:
-            message: The message to be logged.
+            msg: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
-        self._route_message(message, logging.WARNING, *args)
+        self._route_message(
+            msg,
+            logging.WARNING,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
+        )
 
-    def error(self, message: object, *args: object) -> None:
+    def error(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Any = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
         """Log an error message.
 
         Args:
-            message: The message to be logged.
+            msg: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
-        self._route_message(message, logging.ERROR, *args)
+        self._route_message(
+            msg,
+            logging.ERROR,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
+        )
 
-    def critical(self, message: object, *args: object) -> None:
+    def critical(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Any = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
         """Log a critical message.
 
         Args:
-            message: The message to be logged.
+            msg: The message to be logged.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
+            stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
-        self._route_message(message, logging.CRITICAL, *args)
+        self._route_message(
+            msg,
+            logging.CRITICAL,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
+        )
 
     def set_level(self, log_level: int) -> None:
         """Set the minimum log level for this CustomLogger instance.
@@ -126,17 +227,38 @@ class CustomLogger(logging.Logger):
         """
         super().setLevel(log_level)
 
-    def _route_message(self, message: object, log_level: int, *args: object, stacklevel: int = 2) -> None:
+    def _route_message(
+        self,
+        message: object,
+        log_level: int,
+        *args: object,
+        exc_info: Any,
+        stack_info: bool,
+        stacklevel: int,
+        extra: Mapping[str, object] | None,
+    ) -> None:
         """Route and clean the log message based on its content.
 
         Args:
             message: The log message to be routed.
             log_level: The original log level at which the message was sent.
             args: Additional arguments propagated to the built-in `logging` module.
+            exc_info: Exception information to log.
+            stack_info: Whether to add stack information to the log message.
             stacklevel: Level in the stack frame to log the origin of this log record.
+            extra: Additional information to log.
         """
+        target_stacklevel = stacklevel + 1
         if not isinstance(message, str):
-            self.log(log_level, message, *args, stacklevel=stacklevel + 1)
+            self.log(
+                log_level,
+                message,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=target_stacklevel,
+                extra=extra,
+            )
             return
 
         match = re.search(r"\[(Debug|Info|Warning|Error|Critical)\]", message, re.IGNORECASE)
@@ -145,6 +267,22 @@ class CustomLogger(logging.Logger):
             level_str = match.group(1).upper()
             routed_level = getattr(logging, level_str)
             cleaned_msg = re.sub(rf"\[{level_str}\]\s?", "", message, flags=re.IGNORECASE, count=1)
-            self.log(routed_level, cleaned_msg, *args, stacklevel=stacklevel + 1)
+            self.log(
+                routed_level,
+                cleaned_msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=target_stacklevel,
+                extra=extra,
+            )
         else:
-            self.log(log_level, message, *args, stacklevel=stacklevel + 1)
+            self.log(
+                log_level,
+                message,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=target_stacklevel,
+                extra=extra,
+            )

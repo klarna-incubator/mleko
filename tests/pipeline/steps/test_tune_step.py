@@ -83,16 +83,20 @@ class TestTuneStep:
         )
 
         tuner = MagicMock(spec=BaseTuner)
+        tune_step = TuneStep(
+            tuner=tuner,
+            inputs=["file_paths", "dataframe"],
+            outputs=["hyperparameters", "best_score", "metadata"],
+        )
         with pytest.raises(ValueError):
-            tune_step = TuneStep(
-                tuner=tuner, inputs=["file_paths", "dataframe"], outputs=["hyperparameters", "best_score", "metadata"]
-            )
             tune_step.execute(data_container, force_recompute=False)
 
+        tune_step = TuneStep(
+            tuner=tuner,
+            inputs=["data_schema", "file_paths"],
+            outputs=["hyperparameters", "best_score", "metadata"],
+        )
         with pytest.raises(ValueError):
-            tune_step = TuneStep(
-                tuner=tuner, inputs=["data_schema", "file_paths"], outputs=["hyperparameters", "best_score", "metadata"]
-            )
             tune_step.execute(data_container, force_recompute=False)
 
     def test_wrong_number_inputs_outputs(self):

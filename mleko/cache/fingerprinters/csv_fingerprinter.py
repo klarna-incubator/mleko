@@ -31,18 +31,18 @@ class CSVFingerprinter(BaseFingerprinter):
         """
         self._n_rows = n_rows
 
-    def fingerprint(self, file_paths: list[str] | list[Path]) -> str:
+    def fingerprint(self, data: list[str] | list[Path]) -> str:
         """Generate a fingerprint for the given list of CSV files.
 
         The currently supported file types are `.csv`, `.gz`, and `.csv.gz`.
 
         Args:
-            file_paths: A list of file paths to CSV files.
+            data: A list of file paths to CSV files.
 
         Returns:
             The fingerprint as a hexadecimal string.
         """
-        file_posix_paths: list[Path] = [Path(file_path) for file_path in file_paths]
+        file_posix_paths: list[Path] = [Path(file_path) for file_path in data]
         with futures.ThreadPoolExecutor(max_workers=None) as executor:
             file_fingerprints = list(executor.map(self._fingerprint_csv_file, file_posix_paths))
 

@@ -252,6 +252,9 @@ class TestOptunaSamplerFingerprinter:
         def after_trial_strategy(_study, _trial, _state, _population):
             return None
 
+        def elite_population_selection_strategy(_study, _trials):
+            return []
+
         sampler1 = NSGAIIISampler(
             child_generation_strategy=child_generation_strategy,
             after_trial_strategy=after_trial_strategy,
@@ -286,17 +289,26 @@ class TestOptunaSamplerFingerprinter:
             dividing_parameter=dividing_param2,
             seed=seed,
         )
+        sampler6 = NSGAIIISampler(
+            population_size=population_size1,
+            reference_points=reference_points1,
+            dividing_parameter=dividing_param2,
+            elite_population_selection_strategy=elite_population_selection_strategy,
+            seed=seed,
+        )
 
         fingerprint1 = fingerprinter.fingerprint(sampler1)
         fingerprint2 = fingerprinter.fingerprint(sampler2)
         fingerprint3 = fingerprinter.fingerprint(sampler3)
         fingerprint4 = fingerprinter.fingerprint(sampler4)
         fingerprint5 = fingerprinter.fingerprint(sampler5)
+        fingerprint6 = fingerprinter.fingerprint(sampler6)
 
         assert fingerprint1 == fingerprint2
         assert fingerprint1 != fingerprint3
         assert fingerprint1 != fingerprint4
         assert fingerprint1 != fingerprint5
+        assert fingerprint1 != fingerprint6
 
     @pytest.mark.parametrize(
         "qmc_type1, qmc_type2, scramble1, scramble2, seed1, seed2",

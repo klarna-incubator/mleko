@@ -27,6 +27,9 @@ pandas = "^2.0.3"
 lightgbm = "^4.0.0"
 optuna = "^3.3.0"
 
+# workaround for: https://github.com/python-poetry/poetry-plugin-export/issues/183
+urllib3 = ">=1.25.4,<1.27"
+
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
 black = ">=21.10b0"
@@ -53,8 +56,8 @@ typeguard = ">=2.13.3,<=4.0.0"
 myst-parser = ">=0.16.1"
 ipykernel = "^6.21.3"
 sphinx-autodoc-typehints = "^1.23.0"
-sphinx-autoapi = "^2.1.0"
-python-semantic-release = "^7.33.3"
+sphinx-autoapi = "^3.0.0"
+python-semantic-release = "^8.7.0"
 pyright = "^1.1.316"
 
 [tool.coverage.paths]

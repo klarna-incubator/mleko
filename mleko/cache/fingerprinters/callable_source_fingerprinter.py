@@ -11,7 +11,7 @@ from .base_fingerprinter import BaseFingerprinter
 class CallableSourceFingerprinter(BaseFingerprinter):
     """A fingerprinter for Callables."""
 
-    def fingerprint(self, func: Callable) -> str:
+    def fingerprint(self, data: Callable) -> str:
         """Generate a fingerprint for a Python Callable.
 
         Note:
@@ -21,10 +21,10 @@ class CallableSourceFingerprinter(BaseFingerprinter):
             Callable's scope will not affect the fingerprint.
 
         Args:
-            func: The Callable to be fingerprinted.
+            data: The Callable to be fingerprinted.
 
         Returns:
             The fingerprint as a hexadecimal string.
         """
-        fingerprint = hashlib.md5(inspect.getsource(func).encode()).hexdigest()
+        fingerprint = hashlib.md5(inspect.getsource(data).encode()).hexdigest()
         return fingerprint
