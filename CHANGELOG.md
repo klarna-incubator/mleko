@@ -2,7 +2,26 @@
 
 
 
+## v1.2.3 (2024-01-25)
+
+### Chore
+
+* chore: Update project config ([`2965e61`](https://github.com/klarna-incubator/mleko/commit/2965e618d0b994db56b0716093a8ea9aaa65bac1))
+
+### Fix
+
+* fix: Remove coverage from workflow ([`09eb09d`](https://github.com/klarna-incubator/mleko/commit/09eb09da4fae09716c1fa37ebbc91dc532d7ed67))
+
+### Unknown
+
+* revert: Test new release ([`ffc0123`](https://github.com/klarna-incubator/mleko/commit/ffc01239d3568646d4d092d977f56aeb7fa18878))
+
+
 ## v1.2.2 (2024-01-25)
+
+### Chore
+
+* chore(release): release 1.2.2 ([`df69010`](https://github.com/klarna-incubator/mleko/commit/df69010061c2547dc5546f56c9ef6d8c1331769c))
 
 ### Fix
 
