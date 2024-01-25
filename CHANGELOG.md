@@ -2,6 +2,13 @@
 
 
 
+## v1.2.2 (2024-01-25)
+
+### Fix
+
+* fix: Switch to trusted publishing ([`e84712d`](https://github.com/klarna-incubator/mleko/commit/e84712deb1775c4689a8d89b5bb54f0461494145))
+
+
 ## v1.2.1 (2024-01-25)
 
 ### Build
@@ -11,6 +18,8 @@
 * build: 🚧 Fix failing builds ([`79f7d95`](https://github.com/klarna-incubator/mleko/commit/79f7d959691924a1a8b2e68d462aa448969058da))
 
 ### Chore
+
+* chore(release): release 1.2.1 ([`f3e66c9`](https://github.com/klarna-incubator/mleko/commit/f3e66c9e2a467a96f4c1f92f660b9e32311a38e4))
 
 * chore: 🧱 Update `python-semantic-release` config ([`3eafcc4`](https://github.com/klarna-incubator/mleko/commit/3eafcc47d86f104c54e643b39eaab8b5f04648f4))
 
