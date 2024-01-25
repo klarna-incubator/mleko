@@ -9,6 +9,10 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !(contains(github.event.head_commit.message, 'chore(release):') || contains(github.event.head_commit.message, 'chore(deps):'))
     steps:
       - name: Check out the repository
@@ -36,6 +40,23 @@ jobs:
       - name: Install development dependencies
         run: |
           poetry install --only dev
+
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # NOTE: DO NOT wrap the conditional in ${{ }} as it will always evaluate to true.
+        # See https://github.com/actions/runner/issues/1173
+        if: steps.release.outputs.released == 'true'
+
+      - name: Publish package distributions to GitHub Releases
+        uses: python-semantic-release/upload-to-gh-release@main
+        if: steps.release.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
 
       - name: Check if there is a parent commit
         id: check-parent-commit
