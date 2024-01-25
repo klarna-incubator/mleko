@@ -13,7 +13,4 @@
     "tuning",
     "logging"
   ],
-  "files.associations": {
-    "*.yaml": "home-assistant"
-  }
 }
