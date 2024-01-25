@@ -46,53 +46,19 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
 
+      - name: Build package
+        run: |
+          poetry build --ansi
+
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # NOTE: DO NOT wrap the conditional in ${{ }} as it will always evaluate to true.
-        # See https://github.com/actions/runner/issues/1173
         if: steps.release.outputs.released == 'true'
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
 
       - name: Publish package distributions to GitHub Releases
         uses: python-semantic-release/upload-to-gh-release@main
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-
-      - name: Check if there is a parent commit
-        id: check-parent-commit
-        run: |
-          echo "::set-output name=sha::$(git rev-parse --verify --quiet HEAD^)"
-
-      - name: Python Semantic Release
-        id: semantic-release
-        if: steps.check-parent-commit.outputs.sha
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          set -o pipefail
-          # Get the current version
-          current_version=$(poetry version | awk '{print $2}')
-          # Set git details
-          git config --global user.name "Klarna Bot"
-          git config --global user.email "developers@klarna.com"
-          # Run semantic-release
-          poetry run semantic-release publish -v DEBUG -D commit_author="github-actions <github-actions@github.com>"
-          # Get the new version
-          new_version=$(poetry version | awk '{print $2}')
-          # Check if the versions are different
-          if [ "$current_version" != "$new_version" ]; then
-            # If they're different, set an output variable to true
-            echo "::set-output name=is_updated::true"
-            echo "::set-output name=version::$new_version"
-          fi
-
-      - name: Build package
-        run: |
-          poetry build --ansi
-
-      - name: Publish package on PyPI
-        if: steps.semantic-release.outputs.is_updated
-        uses: pypa/gh-action-pypi-publish@v1.8.10
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
