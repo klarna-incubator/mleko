@@ -99,6 +99,3 @@ version_variables = [
 ]
 version_toml = ["pyproject.toml:tool.poetry.version"]
 commit_message = "chore(release): release {version}"
-
-[semantic_release.changelog]
-template_dir = "_templates"
