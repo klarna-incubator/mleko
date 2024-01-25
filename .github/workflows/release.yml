@@ -13,7 +13,7 @@ jobs:
       id-token: write
       contents: write
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !(contains(github.event.head_commit.message, 'chore(release):') || contains(github.event.head_commit.message, 'chore(deps):'))
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !(contains(github.event.head_commit.message, 'chore(release):') || contains(github.event.head_commit.message, 'chore(deps'))
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -45,10 +45,6 @@ jobs:
         uses: python-semantic-release/python-semantic-release@master
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-
-      - name: Build package
-        run: |
-          poetry build --ansi
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

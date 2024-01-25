@@ -93,10 +93,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
+build_command = "poetry build --ansi"
 version_variables = [
     "mleko/__init__.py:__version__",
     "docs/conf.py:version",
 ]
 version_toml = ["pyproject.toml:tool.poetry.version"]
 commit_message = "chore(release): release {version}"
-changelog_sections = "feature,fix,breaking,performance,documentation,refactor,style,test,build,ci"
+
+[semantic_release.changelog]
+template_dir = "_templates"
