@@ -10,7 +10,6 @@ Simplify and accelerate your machine learning development with `mleko`. Designed
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
 
 [![Tests](https://github.com/klarna-incubator/mleko/workflows/Tests/badge.svg)][tests]
-[![Codecov](https://codecov.io/gh/klarna-incubator/mleko/branch/main/graph/badge.svg)][codecov]
 
 [![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
 
