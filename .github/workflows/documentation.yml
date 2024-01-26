@@ -11,17 +11,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
       - name: Install dependencies
         run: |
           pip install -r ./docs/requirements.txt
       - name: Sphinx build
         run: |
-          sphinx-build docs docs/_build -W -a
+          sphinx-build docs _build -W -a
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/
+          publish_dir: _build/
           force_orphan: true

@@ -3,11 +3,12 @@
 Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
 
 [![Developed at Klarna][klarna-image]][klarna-url]
-[![License](https://img.shields.io/pypi/l/mleko)][https://github.com/klarna-incubator/mleko/blob/main/LICENSE]
+[![License](https://img.shields.io/pypi/l/mleko)][licence]
 
 [![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][pypi]
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
+[![Python Version](https://img.shields.io/pypi/pyversions/mleko)][pypi]
 
 [![Tests](https://github.com/klarna-incubator/mleko/workflows/Tests/badge.svg)][tests]
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
@@ -71,6 +72,7 @@ For license details, see the [LICENSE](https://github.com/klarna-incubator/mleko
 [klarna-image]: https://img.shields.io/badge/%20-Developed%20at%20Klarna-black?style=round-square&labelColor=ffb3c7&logo=klarna&logoColor=black
 [klarna-url]: https://klarna.github.io
 [pypi]: https://pypi.org/project/mleko/
+[licence]: https://github.com/klarna-incubator/mleko/blob/main/LICENSE
 [tests]: https://github.com/klarna-incubator/mleko/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/klarna-incubator/mleko
 [read the docs]: https://mleko.readthedocs.io/
