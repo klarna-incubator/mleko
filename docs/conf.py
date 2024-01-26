@@ -11,7 +11,7 @@ extensions = [
 ]
 autodoc_typehints = "both"
 html_theme = "furo"
-autoapi_template_dir = "../_templates/autoapi"
+autoapi_template_dir = "../templates/autoapi"
 autoapi_dirs = ["../mleko"]
 autoapi_type = "python"
 autoapi_options = [
