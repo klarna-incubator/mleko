@@ -1,9 +1,10 @@
-# `mleko`: Streamlining Machine Learning Pipelines in Python
+# mleko: Streamlining Machine Learning Pipelines in Python
 
 Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
 
 [![Developed at Klarna][klarna-image]][klarna-url]
 [![License](https://img.shields.io/pypi/l/mleko)][licence]
+[![Static Badge](https://img.shields.io/badge/docs-pages-blue)][pages]
 
 [![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][pypi]
@@ -38,7 +39,7 @@ $ pip install mleko
 
 ## Usage & Examples
 
-See the [documentation][read the docs] for more information or check out the usage [examples](https://github.com/klarna-incubator/mleko/tree/main/examples) on well-known datasets like the [Titanic Dataset](https://github.com/klarna-incubator/mleko/tree/main/examples/Titanic.ipynb).
+See the [documentation][pages] for more information or check out the usage [examples](https://github.com/klarna-incubator/mleko/tree/main/examples) on well-known datasets like the [Titanic Dataset](https://github.com/klarna-incubator/mleko/tree/main/examples/Titanic.ipynb).
 
 ## Issues
 
@@ -74,8 +75,7 @@ For license details, see the [LICENSE](https://github.com/klarna-incubator/mleko
 [pypi]: https://pypi.org/project/mleko/
 [licence]: https://github.com/klarna-incubator/mleko/blob/main/LICENSE
 [tests]: https://github.com/klarna-incubator/mleko/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/klarna-incubator/mleko
-[read the docs]: https://mleko.readthedocs.io/
+[pages]: https://klarna-incubator.github.io/mleko/
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 [contributor guide]: https://github.com/klarna-incubator/mleko/blob/main/CONTRIBUTING.md

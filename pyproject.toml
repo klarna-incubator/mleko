@@ -10,6 +10,9 @@ repository = "https://github.com/klarna-incubator/mleko"
 documentation = "https://mleko.readthedocs.io"
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 
 [tool.poetry.urls]
