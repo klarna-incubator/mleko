@@ -3,16 +3,13 @@
 Simplify and accelerate your machine learning development with `mleko`. Designed with modularity and customization in mind, it seamlessly integrates into your existing workflows. Its robust caching system optimizes performance, taking you from data ingestion to finalized models with unparalleled efficiency.
 
 [![Developed at Klarna][klarna-image]][klarna-url]
-[![License](https://img.shields.io/pypi/l/mleko)][license]
+[![License](https://img.shields.io/pypi/l/mleko)][https://github.com/klarna-incubator/mleko/blob/main/LICENSE]
 
 [![Latest](https://img.shields.io/pypi/v/mleko.svg)][pypi]
 [![Status](https://img.shields.io/pypi/status/mleko.svg)][pypi]
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/mleko)][pypi]
 
 [![Tests](https://github.com/klarna-incubator/mleko/workflows/Tests/badge.svg)][tests]
-
-[![Read the documentation at https://mleko.readthedocs.io/](https://img.shields.io/readthedocs/mleko/latest.svg?label=Read%20the%20Docs)][read the docs]
-
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
@@ -53,11 +50,11 @@ To learn more, see the [Contributor Guide].
 
 ## Release History
 
-See our [changelog](CHANGELOG.md).
+See our [changelog](https://github.com/klarna-incubator/mleko/tree/main/CHANGELOG.md).
 
 ## Acknowledgements
 
-The development of `mleko` was significantly influenced by existing work of the following individuals:
+The development of `mleko` was influenced by existing work of the following individuals:
 
 - **Felipe Breve Siola** ([fsiola](https://github.com/fsiola))
 - **Sai Ma** ([metanouvelle](https://github.com/metanouvelle))
@@ -69,12 +66,11 @@ Their insights and contributions provided a solid foundation for this library. W
 
 Copyright © 2023 Klarna Bank AB
 
-For license details, see the [LICENSE](LICENSE) file in the root of this project.
+For license details, see the [LICENSE](https://github.com/klarna-incubator/mleko/blob/main/LICENSE) file in the root of this project.
 
 [klarna-image]: https://img.shields.io/badge/%20-Developed%20at%20Klarna-black?style=round-square&labelColor=ffb3c7&logo=klarna&logoColor=black
 [klarna-url]: https://klarna.github.io
-[license]: https://github.com/klarna-incubator/mleko/blob/main/LICENSE
-[pypi]: hhttps://pypi.org/project/mleko/
+[pypi]: https://pypi.org/project/mleko/
 [tests]: https://github.com/klarna-incubator/mleko/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/klarna-incubator/mleko
 [read the docs]: https://mleko.readthedocs.io/

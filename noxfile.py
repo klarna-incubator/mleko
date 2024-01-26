@@ -206,7 +206,7 @@ def docs_build(session: Session) -> None:
     Args:
         session: The Session object.
     """
-    args = session.posargs or ["docs", "docs/_build"]
+    args = session.posargs or ["docs", "docs/_build", "-W", "-a"]
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
@@ -227,7 +227,7 @@ def docs(session: Session) -> None:
     Args:
         session: The Session object.
     """
-    args = session.posargs or ["--open-browser", "docs", "docs/_build"]
+    args = session.posargs or ["--open-browser", "docs", "docs/_build", "-W", "-a"]
     session.install(".")
     session.install("sphinx", "sphinx-autobuild", "furo", "myst-parser", "sphinx-autodoc-typehints", "sphinx-autoapi")
 

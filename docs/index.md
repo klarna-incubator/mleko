@@ -1,12 +1,11 @@
 ```{include} ../README.md
----
-end-before: <!-- github-only -->
----
+
 ```
 
+[usage]: usage
+[contributing]: contributing
+[changelog]: changelog
 [license]: license
-[contributor guide]: contributing
-[command-line reference]: usage
 
 ```{toctree}
 ---
@@ -17,6 +16,6 @@ maxdepth: 3
 autoapi/index
 usage
 contributing
-License <license>
-Changelog <https://github.com/klarna-incubator/mleko/releases>
+changelog
+license
 ```
