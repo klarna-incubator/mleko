@@ -1,9 +1,14 @@
 """Test suite for `model.lgbm_model`."""
+from __future__ import annotations
+
 from pathlib import Path
 from unittest.mock import patch
 
+import lightgbm as lgb
+import numpy as np
 import pytest
 import vaex
+from sklearn.metrics import f1_score
 
 from mleko.dataset.data_schema import DataSchema
 from mleko.model.lgbm_model import LGBMModel
@@ -112,6 +117,38 @@ class TestLGBMModel:
         )
 
         assert metrics == {"train": {"auc": [0.5, 0.5, 0.5]}, "validation": {"auc": [0.5, 0.5, 0.5]}}
+
+    def test_custom_eval_metric(
+        self,
+        temporary_directory: Path,
+        example_data_schema: DataSchema,
+        example_vaex_dataframe_train: vaex.DataFrame,
+        example_vaex_dataframe_validate: vaex.DataFrame,
+    ):
+        """Should train the model successfully and track custom evaluation function."""
+
+        def f1_score_callback(preds: np.ndarray, eval_data: lgb.Dataset) -> tuple[str, float, bool]:
+            y_true = eval_data.get_label()
+            y_pred = np.round(preds)
+            f1: float = f1_score(y_true, y_pred, average="micro")  # type: ignore
+            return ("f1_score", f1, True)
+
+        lgbm_model = LGBMModel(
+            temporary_directory,
+            target="target",
+            objective="binary",
+            num_iterations=3,
+            metric="auc",
+            feval=f1_score_callback,
+        )
+        _, metrics = lgbm_model.fit(
+            example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
+        )
+
+        assert metrics == {
+            "train": {"auc": [0.5, 0.5, 0.5], "f1_score": [0.5, 0.5, 0.5]},
+            "validation": {"auc": [0.5, 0.5, 0.5], "f1_score": [0.5, 0.5, 0.5]},
+        }
 
     def test_error_target_in_features(
         self,

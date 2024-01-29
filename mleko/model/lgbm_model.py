@@ -6,6 +6,7 @@ from typing import Any, Hashable, Literal
 
 import lightgbm as lgb
 import vaex
+from lightgbm.engine import _LGBM_CustomMetricFunction
 
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -91,6 +92,10 @@ class LGBMModel(BaseModel):
         self,
         cache_directory: str | Path,
         target: str,
+        feval: _LGBM_CustomMetricFunction
+        | list[_LGBM_CustomMetricFunction]
+        | tuple[_LGBM_CustomMetricFunction, ...]
+        | None = None,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         objective: LGBMObjectiveType = "regression",
@@ -186,6 +191,8 @@ class LGBMModel(BaseModel):
         Args:
             cache_directory: The target directory where the model will be saved.
             target: The name of the target feature.
+            feval: Custom evaluation function(s). Should return a tuple (eval_name, eval_result, is_higher_better).
+                Refer to https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html#lightgbm.train.
             features: The names of the features to be used as input for the model.
             ignore_features: The names of the features to be ignored.
             objective: The objective function to be used.
@@ -317,6 +324,7 @@ class LGBMModel(BaseModel):
 
         self._verbosity = verbosity
         self._log_evaluation_period = log_evaluation_period
+        self._feval = list(feval) if isinstance(feval, (list, tuple)) else [feval] if feval is not None else None
         self._target = target
         self._num_iterations = num_iterations
         self._hyperparameters = {
@@ -455,6 +463,7 @@ class LGBMModel(BaseModel):
             valid_sets=[train_dataset, validation_dataset],
             valid_names=["train", "validation"],
             callbacks=callbacks,
+            feval=self._feval,
         )
 
         return self._model, metrics
