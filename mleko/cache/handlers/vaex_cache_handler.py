@@ -40,5 +40,7 @@ def write_vaex_dataframe(cache_file_path: Path, output: vaex.DataFrame) -> None:
             )
 
 
-VAEX_DATAFRAME_CACHE_HANDLER = CacheHandler(writer=write_vaex_dataframe, reader=read_vaex_dataframe, suffix="hdf5")
+VAEX_DATAFRAME_CACHE_HANDLER = CacheHandler(
+    writer=write_vaex_dataframe, reader=read_vaex_dataframe, suffix="hdf5", can_handle_none=False
+)
 """A CacheHandler for `vaex` DataFrames."""

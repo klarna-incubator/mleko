@@ -14,3 +14,6 @@ class CacheHandler(NamedTuple):
 
     suffix: str
     """The suffix of the cache files."""
+
+    can_handle_none: bool
+    """Whether the cache handler can handle None values."""

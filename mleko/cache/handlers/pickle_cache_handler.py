@@ -30,5 +30,5 @@ def read_pickle(cache_file_path: Path) -> Any:
         return pickle.load(cache_file)
 
 
-PICKLE_CACHE_HANDLER = CacheHandler(write_pickle, read_pickle, "pkl")
+PICKLE_CACHE_HANDLER = CacheHandler(write_pickle, read_pickle, "pkl", can_handle_none=True)
 """A CacheHandler for pickling Python objects."""

@@ -247,17 +247,22 @@ class CacheMixin:
             {f".{cache_handler.suffix}" for cache_handler in cache_handlers}
             if isinstance(cache_handlers, list)
             else {f".{cache_handlers.suffix}"}
-        )
+        ).union({f".{PICKLE_CACHE_HANDLER.suffix}"})
+
         cache_file_paths = [
             f
             for f in sorted(list(self._cache_directory.glob(f"{cache_key}*.*")), key=extract_number)
             if f.suffix in cache_handler_suffixes
         ]
+
         if cache_file_paths:
             output_data = []
             for i, cache_file_path in enumerate(cache_file_paths):
-                reader = cache_handlers[i].reader if isinstance(cache_handlers, list) else cache_handlers.reader
-                output_data.append(reader(cache_file_path))
+                handler = self._get_handler(cache_handlers, i)
+                if cache_file_path.suffix != f".{handler.suffix}":
+                    handler = PICKLE_CACHE_HANDLER
+
+                output_data.append(handler.reader(cache_file_path))
             return tuple(output_data) if len(output_data) > 1 else output_data[0]
         return None
 
@@ -296,13 +301,40 @@ class CacheMixin:
         """
         if isinstance(output, Sequence):
             for i, output_item in enumerate(output):
-                handler = self._get_handler(cache_handlers, i)
-                cache_file_path = self._cache_directory / f"{cache_key}_{i}.{handler.suffix}"
-                handler.writer(cache_file_path, output_item)
+                self._write_to_cache_file(cache_key, output_item, i, cache_handlers, is_sequence_output=True)
         else:
-            handler = self._get_handler(cache_handlers)
-            cache_file_path = self._cache_directory / f"{cache_key}.{handler.suffix}"
-            handler.writer(cache_file_path, output)
+            self._write_to_cache_file(cache_key, output, 0, cache_handlers, is_sequence_output=False)
+
+    def _write_to_cache_file(
+        self,
+        cache_key: str,
+        output_item: Any,
+        index: int,
+        cache_handlers: CacheHandler | list[CacheHandler],
+        is_sequence_output: bool,
+    ) -> None:
+        """Writes the given data to the cache file using the provided cache key.
+
+        If the output is None and the cache handler cannot handle None, the output will be saved using the pickle
+        cache handler. Otherwise, the output will be saved to a cache file using the provided cache handler.
+
+        Args:
+            cache_key: A string representing the cache key.
+            output_item: The data to be saved to the cache.
+            index: The index of the cache handler to use.
+            cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+            is_sequence_output: Whether the output is a sequence or not. If True, the cache file will be saved with the
+                index appended to the cache key.
+        """
+        handler = self._get_handler(cache_handlers, index)
+
+        file_suffix = f"_{index}" if is_sequence_output else ""
+        if output_item is None and not handler.can_handle_none:
+            cache_file_path = self._cache_directory / f"{cache_key}{file_suffix}.{PICKLE_CACHE_HANDLER.suffix}"
+            PICKLE_CACHE_HANDLER.writer(cache_file_path, output_item)
+        else:
+            cache_file_path = self._cache_directory / f"{cache_key}{file_suffix}.{handler.suffix}"
+            handler.writer(cache_file_path, output_item)
 
     def _find_cache_type_name(self, cls: type) -> str | None:
         """Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.

@@ -95,11 +95,13 @@ class TestCacheMixin:
                         writer=lambda cache_file_path, output: pickle.dump(output, open(cache_file_path, "wb")),
                         reader=lambda cache_file_path: pickle.load(open(cache_file_path, "rb")),
                         suffix="pkl",
+                        can_handle_none=True,
                     ),
                     CacheHandler(
                         writer=lambda cache_file_path, output: joblib.dump(output, open(cache_file_path, "wb")),
                         reader=lambda cache_file_path: joblib.load(open(cache_file_path, "rb")),
                         suffix="joblib",
+                        can_handle_none=True,
                     ),
                 ],
             )[1]

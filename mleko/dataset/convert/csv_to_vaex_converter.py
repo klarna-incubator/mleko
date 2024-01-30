@@ -189,6 +189,7 @@ class CSVToVaexConverter(BaseConverter):
                     writer=write_vaex_dataframe_with_cleanup,
                     reader=read_vaex_dataframe,
                     suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
+                    can_handle_none=False,
                 ),
             ],
         )
