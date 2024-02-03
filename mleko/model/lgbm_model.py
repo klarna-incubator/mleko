@@ -412,7 +412,7 @@ class LGBMModel(BaseModel):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
     ) -> tuple[lgb.Booster, dict[str, dict[str, list[Any]]]]:
         """Fits the LightGBM model to the given data with the given hyperparameters.
@@ -420,7 +420,7 @@ class LGBMModel(BaseModel):
         Args:
             data_schema: The data schema of the dataframes.
             train_dataframe: The training dataframe.
-            validation_dataframe: The validation dataframe.
+            validation_dataframe: The validation dataframe, optional but required for early stopping.
             hyperparameters: The hyperparameters to use for training.
 
         Raises:
@@ -434,12 +434,19 @@ class LGBMModel(BaseModel):
             logger.error(error_msg)
             raise ValueError(error_msg)
 
+        validation_datasets: list[tuple[str, lgb.Dataset]] = []
         if self._verbosity > 0:
             logger.info("Loading the training dataset into memory.")
         train_dataset = self._load_lgb_dataset(data_schema, train_dataframe)
-        if self._verbosity > 0:
-            logger.info("Loading the validation dataset into memory.")
-        validation_dataset = self._load_lgb_dataset(data_schema, validation_dataframe, reference_dataset=train_dataset)
+        validation_datasets.append(("train", train_dataset))
+
+        if validation_dataframe is not None:
+            if self._verbosity > 0:
+                logger.info("Loading the validation dataset into memory.")
+            validation_dataset = self._load_lgb_dataset(
+                data_schema, validation_dataframe, reference_dataset=train_dataset
+            )
+            validation_datasets.append(("validation", validation_dataset))
 
         if hyperparameters is None:
             hyperparameters = {}
@@ -460,8 +467,8 @@ class LGBMModel(BaseModel):
             params=hyperparameters,
             train_set=train_dataset,
             num_boost_round=self._num_iterations,
-            valid_sets=[train_dataset, validation_dataset],
-            valid_names=["train", "validation"],
+            valid_sets=[dataset for _, dataset in validation_datasets],
+            valid_names=[name for name, _ in validation_datasets],
             callbacks=callbacks,
             feval=self._feval,
         )

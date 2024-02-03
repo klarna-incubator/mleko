@@ -83,7 +83,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
@@ -124,7 +124,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 json.dumps(hyperparameters, sort_keys=True),
                 str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
-                (validation_dataframe, VaexFingerprinter()),
+                (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
@@ -176,7 +176,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
@@ -220,7 +220,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 json.dumps(hyperparameters, sort_keys=True),
                 str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
-                (validation_dataframe, VaexFingerprinter()),
+                (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
@@ -238,9 +238,9 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
-    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame]:
+    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]:
         """Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
 
         Args:
@@ -258,7 +258,7 @@ class BaseModel(LRUCacheMixin, ABC):
             model,
             metrics,
             self._transform(data_schema, train_dataframe),
-            self._transform(data_schema, validation_dataframe),
+            self._transform(data_schema, validation_dataframe) if validation_dataframe is not None else None,
         )
 
     def _assign_model(self, model: Any) -> None:
@@ -294,7 +294,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]]]:
         """Fits the model to the specified DataFrame.

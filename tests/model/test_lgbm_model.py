@@ -77,6 +77,25 @@ class TestLGBMModel:
             )
             mocked_fit_transform.assert_not_called()
 
+    def test_cache_fit_transform_no_validation(
+        self,
+        temporary_directory: Path,
+        example_data_schema: DataSchema,
+        example_vaex_dataframe_train: vaex.DataFrame,
+    ):
+        """Should train the model using fit_transform and use the cache once called again with no validation data."""
+        _, _, _, validation_df = LGBMModel(temporary_directory, target="target", objective="binary").fit_transform(
+            example_data_schema, example_vaex_dataframe_train.copy(), None, {}
+        )
+
+        assert validation_df is None
+
+        with patch.object(LGBMModel, "_fit_transform") as mocked_fit_transform:
+            LGBMModel(temporary_directory, target="target", objective="binary").fit_transform(
+                example_data_schema, example_vaex_dataframe_train, None, {}
+            )
+            mocked_fit_transform.assert_not_called()
+
     def test_cache_fit_and_transform(
         self,
         temporary_directory: Path,
