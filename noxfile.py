@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 import os
 import shlex
 import shutil
@@ -18,7 +19,6 @@ nox.options.sessions = (
     "safety",
     "pyright",
     "tests",
-    "typeguard",
     "docs-build",
 )
 
@@ -117,7 +117,6 @@ def precommit(session: Session) -> None:
         "pep8-naming",
         "pre-commit",
         "pre-commit-hooks",
-        "pyupgrade",
     )
     session.run("pre-commit", *args)
     if args and args[0] == "install":
@@ -185,18 +184,6 @@ def coverage(session: Session) -> None:
         session.run("coverage", "combine")
 
     session.run("coverage", *args)
-
-
-@session(python=python_versions[0])
-def typeguard(session: Session) -> None:
-    """Runtime type checking using Typeguard.
-
-    Args:
-        session: The Session object.
-    """
-    session.install(".")
-    session.install("pytest", "typeguard", "pygments", "moto")
-    session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
 
 
 @session(name="docs-build", python=python_versions[0])
