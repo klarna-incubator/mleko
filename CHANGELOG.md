@@ -1,5 +1,27 @@
 # Changelog
 
+## [v2.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.0.0) (2024-02-07)
+
+### ⛔️ BREAKING CHANGES
+
+- **pipeline:** Refactor `PipelineStep` to use `TypedDict` for both inputs and outputs. ([`2eb623c`](https://github.com/klarna-incubator/mleko/commit/2eb623c593deab9fc87d3accdc7dcc8f5f600f97))
+
+### 🐛 Bug Fixes
+
+- **data cleaning:** Rename empty column name to `_empty` to prevent `vaex` crashes. ([`da72b75`](https://github.com/klarna-incubator/mleko/commit/da72b757f8395112bd0a17644af09547d5c72c0a))
+- **data cleaning:** Cast boolean columns to `int8` during cleaning to reduce label encoding needs. ([`d94f7c9`](https://github.com/klarna-incubator/mleko/commit/d94f7c9f1c8f50a5b482668f85bb7382845092f0))
+- Added reserved keyword column name replacement to prevent evaluation errors from `vaex`. ([`3969ffd`](https://github.com/klarna-incubator/mleko/commit/3969ffd4974854ee24d5dd1fce10f5169ff0e36e))
+
+### 🛠️ Code Refactoring
+
+- Improve error logging messages, and update codebase to new `black` format. ([`a29ad45`](https://github.com/klarna-incubator/mleko/commit/a29ad45156cad00e9cd01b09d677390187fc24d9))
+- **cache:** Break out cache handler retrieval method. ([`aba9e41`](https://github.com/klarna-incubator/mleko/commit/aba9e4158bc76b9fa8b2444ae26fd6889ec832e3))
+
+### 🤖 Continous Integration
+
+- Remove TypeGuard and PyUpgrade from build and pre-commit. ([`d374406`](https://github.com/klarna-incubator/mleko/commit/d374406f4f595dd4b2fadd2d95bd7b9543f17d48))
+- Add custom template for release notes to follow changelog structure. ([`30518c0`](https://github.com/klarna-incubator/mleko/commit/30518c066cbe1c8c8eabb3918531512dc4e37069))
+
 ## [v1.2.6](https://github.com/klarna-incubator/mleko/releases/tag/v1.2.6) (2024-01-25)
 
 ### 🐛 Bug Fixes
