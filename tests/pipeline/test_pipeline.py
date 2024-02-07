@@ -1,7 +1,10 @@
 """Test suite for the `pipeline.pipeline` module."""
+
 from __future__ import annotations
 
 from pathlib import Path
+
+from typing_extensions import TypedDict
 
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline import Pipeline
@@ -14,18 +17,38 @@ class TestPipeline:
     class InputStep(PipelineStep):
         """Initial step."""
 
-        _num_inputs = 0
-        _num_outputs = 1
+        class InputType(TypedDict):
+            """The input type of the ConvertStep."""
+
+            pass
+
+        class OutputType(TypedDict):
+            """The output type of the ConvertStep."""
+
+            raw_data: str
 
         def execute(self, _data_container: DataContainer, _force_recompute: bool) -> DataContainer:
             """Execute the step."""
             return DataContainer(data={"raw_data": [Path()]})
 
+        def _get_input_model(self) -> type[TypedDict]:
+            return self.InputType
+
+        def _get_output_model(self) -> type[TypedDict]:
+            return self.OutputType
+
     class AppendStep(PipelineStep):
         """Append data with another Path step."""
 
-        _num_inputs = 1
-        _num_outputs = 1
+        class InputType(TypedDict):
+            """The input type of the ConvertStep."""
+
+            raw_data: str
+
+        class OutputType(TypedDict):
+            """The output type of the ConvertStep."""
+
+            appended_data: str
 
         def execute(self, data_container: DataContainer, _force_recompute: bool) -> DataContainer:
             """Execute the step."""
@@ -35,6 +58,12 @@ class TestPipeline:
             data_container.data["appended_data"] = file_paths + [Path()]
             return data_container
 
+        def _get_input_model(self) -> type[TypedDict]:
+            return self.InputType
+
+        def _get_output_model(self) -> type[TypedDict]:
+            return self.OutputType
+
     def test_init(self):
         """Should successfully initialize the pipeline."""
         pipeline = Pipeline()
@@ -42,8 +71,10 @@ class TestPipeline:
 
     def test_init_with_steps(self):
         """Should successfully initialize the pipeline with one or more PipelineStep instances."""
-        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
+        step1 = self.InputStep(inputs={}, outputs={"raw_data": "raw_data"}, cache_group=None)
+        step2 = self.AppendStep(
+            inputs={"raw_data": "raw_data"}, outputs={"appended_data": "appended_data"}, cache_group=None
+        )
         pipeline = Pipeline(steps=[step1, step2])
 
         assert len(pipeline._steps) == 2
@@ -52,8 +83,10 @@ class TestPipeline:
 
     def test_repr(self):
         """Should represent Pipeline using representation of steps."""
-        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
+        step1 = self.InputStep(inputs={}, outputs={"raw_data": "raw_data"}, cache_group=None)
+        step2 = self.AppendStep(
+            inputs={"raw_data": "raw_data"}, outputs={"appended_data": "appended_data"}, cache_group=None
+        )
         pipeline = Pipeline(steps=[step1, step2])
 
         expected = f"Pipeline:\n  1. {step1!r}\n  2. {step2!r}"
@@ -61,8 +94,10 @@ class TestPipeline:
 
     def test_add_step(self):
         """Should successfully add new PipelineStep."""
-        step1 = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
-        step2 = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
+        step1 = self.InputStep(inputs={}, outputs={"raw_data": "raw_data"}, cache_group=None)
+        step2 = self.AppendStep(
+            inputs={"raw_data": "raw_data"}, outputs={"appended_data": "appended_data"}, cache_group=None
+        )
         pipeline = Pipeline(steps=[step1])
         pipeline.add_step(step2)
 
@@ -71,8 +106,10 @@ class TestPipeline:
 
     def test_run(self):
         """Should run multiple PipelineSteps."""
-        input_step = self.InputStep(inputs=[], outputs=["raw_data"], cache_group=None)
-        increment_step = self.AppendStep(inputs=["raw_data"], outputs=["appended_data"], cache_group=None)
+        input_step = self.InputStep(inputs={}, outputs={"raw_data": "raw_data"}, cache_group=None)
+        increment_step = self.AppendStep(
+            inputs={"raw_data": "raw_data"}, outputs={"appended_data": "appended_data"}, cache_group=None
+        )
         pipeline = Pipeline(steps=[input_step, increment_step])
 
         result = pipeline.run()

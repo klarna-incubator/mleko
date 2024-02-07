@@ -1,4 +1,5 @@
 """Test suite for the `pipeline.steps.tune_step` module."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -37,7 +38,9 @@ class TestTuneStep:
         """Should init the TuneStep with a tuner."""
         tuner = MagicMock(spec=BaseTuner)
         tune_step = TuneStep(
-            tuner=tuner, inputs=["data_schema", "dataframe"], outputs=["hyperparameters", "best_score", "metadata"]
+            tuner=tuner,
+            inputs={"data_schema": "data_schema", "dataframe": "dataframe"},
+            outputs={"hyperparameters": "hyperparameters", "score": "best_score", "metadata": "metadata"},
         )
 
         assert tune_step._tuner == tuner
@@ -56,8 +59,8 @@ class TestTuneStep:
 
         tune_step = TuneStep(
             tuner=tuner,
-            inputs=["data_schema", "dataframe"],
-            outputs=["hyperparameters", "best_score", "metadata"],
+            inputs={"data_schema": "data_schema", "dataframe": "dataframe"},
+            outputs={"hyperparameters": "hyperparameters", "score": "best_score", "metadata": "metadata"},
             cache_group=None,
         )
         result = tune_step.execute(data_container, force_recompute=False)
@@ -71,39 +74,21 @@ class TestTuneStep:
             data_container.data["data_schema"], data_container.data["dataframe"], None, False
         )
 
-    def test_wrong_data_type(self, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame):
+    def test_wrong_data_type(self):
         """Should throw ValueError if not recieving a data schema or vaex DataFrame."""
-        file_paths = [str]
-        data_container = DataContainer(
-            data={
-                "file_paths": file_paths,
-                "data_schema": example_data_schema,
-                "dataframe": example_vaex_dataframe,
-            }
-        )
-
         tuner = MagicMock(spec=BaseTuner)
-        tune_step = TuneStep(
-            tuner=tuner,
-            inputs=["file_paths", "dataframe"],
-            outputs=["hyperparameters", "best_score", "metadata"],
-        )
         with pytest.raises(ValueError):
-            tune_step.execute(data_container, force_recompute=False)
-
-        tune_step = TuneStep(
-            tuner=tuner,
-            inputs=["data_schema", "file_paths"],
-            outputs=["hyperparameters", "best_score", "metadata"],
-        )
-        with pytest.raises(ValueError):
-            tune_step.execute(data_container, force_recompute=False)
+            TuneStep(
+                tuner=tuner,
+                inputs={"file_paths": "file_paths", "dataframe": "dataframe"},  # type: ignore
+                outputs={"hyperparameters": "hyperparameters", "score": "best_score", "metadata": "metadata"},
+            )
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""
         tuner = MagicMock(spec=BaseTuner)
         with pytest.raises(ValueError):
-            TuneStep(tuner=tuner, inputs=[], outputs=["converted_data"])
+            TuneStep(tuner=tuner, inputs={}, outputs={"hyperparameters": "hyperparameters"})  # type: ignore
 
         with pytest.raises(ValueError):
-            TuneStep(tuner=tuner, inputs=["raw_data"], outputs=[])
+            TuneStep(tuner=tuner, inputs={"dataframe": "df_clean"}, outputs={})  # type: ignore

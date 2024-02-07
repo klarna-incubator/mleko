@@ -1,4 +1,5 @@
 """Test suite for the `pipeline.steps.model_step` module."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -37,7 +38,15 @@ class TestModelStep:
         """Should init the ModelStep with a model."""
         model = MagicMock(spec=BaseModel)
         model_step = ModelStep(
-            model=model, action="fit", inputs=["data_schema", "df_train", "df_validate"], outputs=["model", "metrics"]
+            model=model,
+            action="fit",
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_train",
+                "validation_dataframe": "df_validate",
+                "hyperparameters": None,
+            },
+            outputs={"model": "model", "metrics": "metrics"},
         )
 
         assert model_step._model == model
@@ -58,8 +67,18 @@ class TestModelStep:
         model_step = ModelStep(
             model=model,
             action="fit_transform",
-            inputs=["data_schema", "df_train", "df_validate"],
-            outputs=["model", "metrics", "df_train_out", "df_validate_out"],
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_train",
+                "validation_dataframe": "df_validate",
+                "hyperparameters": None,
+            },
+            outputs={
+                "model": "model",
+                "metrics": "metrics",
+                "dataframe": "df_train_out",
+                "validation_dataframe": "df_validate_out",
+            },
             cache_group=None,
         )
         result = model_step.execute(data_container, force_recompute=False)
@@ -71,7 +90,7 @@ class TestModelStep:
             data_container.data["data_schema"],
             data_container.data["df_train"],
             data_container.data["df_validate"],
-            {},
+            None,
             None,
             False,
         )
@@ -94,8 +113,13 @@ class TestModelStep:
         model_step_fit = ModelStep(
             model=model,
             action="fit",
-            inputs=["data_schema", "df_train", "df_validate", "hyperparameters"],
-            outputs=["model", "metrics"],
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_train",
+                "validation_dataframe": "df_validate",
+                "hyperparameters": "hyperparameters",
+            },
+            outputs={"model": "model", "metrics": "metrics"},
             cache_group=None,
         )
         model_step_fit_result = model_step_fit.execute(data_container, force_recompute=False)
@@ -105,8 +129,11 @@ class TestModelStep:
         model_step_transform = ModelStep(
             model=model,
             action="transform",
-            inputs=["data_schema", "df_train"],
-            outputs=["df"],
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_train",
+            },
+            outputs={"dataframe": "df"},
             cache_group=None,
         )
         model_step_transform_result = model_step_transform.execute(data_container, force_recompute=False)
@@ -134,8 +161,54 @@ class TestModelStep:
         model_step = ModelStep(
             model=model,
             action="fit",
-            inputs=["data_schema", "data_schema", "data_schema", "data_schema"],
-            outputs=["out_1", "out_2"],
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "data_schema",
+                "validation_dataframe": "data_schema",
+                "hyperparameters": "data_schema",
+            },
+            outputs={"model": "model", "metrics": "metrics"},
+        )
+
+        with pytest.raises(ValueError):
+            model_step.execute(data_container, force_recompute=False)
+
+    def test_none_on_required_input(self, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame):
+        """Should throw ValueError if not recieving correct inputs."""
+        data_container = DataContainer(
+            data={
+                "data_schema": example_data_schema,
+                "df_train": example_vaex_dataframe,
+                "df_validate": example_vaex_dataframe,
+                "hyperparameters": {"param1": "value1"},
+            }
+        )
+        model = MagicMock(spec=BaseModel)
+        model_step = ModelStep(
+            model=model,
+            action="fit",
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_train_wrong_name",
+                "validation_dataframe": "df_validate",
+                "hyperparameters": "hyperparameters",
+            },
+            outputs={"model": "model", "metrics": "metrics"},
+        )
+
+        with pytest.raises(ValueError):
+            model_step.execute(data_container, force_recompute=False)
+
+        model_step = ModelStep(
+            model=model,
+            action="fit",
+            inputs={
+                "data_schema": "data_schema",
+                "dataframe": None,  # type: ignore
+                "validation_dataframe": "df_validate",
+                "hyperparameters": "hyperparameters",
+            },
+            outputs={"model": "model", "metrics": "metrics"},
         )
 
         with pytest.raises(ValueError):
@@ -145,13 +218,17 @@ class TestModelStep:
         """Should throw ValueError inputs or outputs number is incorrect."""
         model = MagicMock(spec=BaseModel)
         with pytest.raises(ValueError):
-            ModelStep(model=model, action="fit", inputs=[], outputs=["converted_data"])
+            ModelStep(model=model, action="fit", inputs={}, outputs={"dataframe": "df"})  # type: ignore
 
         with pytest.raises(ValueError):
-            ModelStep(model=model, action="fit", inputs=["raw_data"], outputs=["transformer", "converted_data"])
-
-        with pytest.raises(ValueError):
-            ModelStep(model=model, action="fit_transform", inputs=["raw_data"], outputs=["converted_data"])
-
-        with pytest.raises(ValueError):
-            ModelStep(model=model, action="fit", inputs=["raw_data"], outputs=[])
+            ModelStep(
+                model=model,
+                action="fit_transform",
+                inputs={  # type: ignore
+                    "data_schema": "data_schema",
+                    "dataframe": "data_schema",
+                    "validation_dataframe": "data_schema",
+                    "hyperparameters": 5,
+                },
+                outputs={"dataframe": "df"},
+            )
