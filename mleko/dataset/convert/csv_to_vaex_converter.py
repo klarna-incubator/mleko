@@ -35,6 +35,45 @@ logger = CustomLogger()
 V_CPU_COUNT = multiprocessing.cpu_count()
 """A module-level constant representing the total number of CPUs available on the current system."""
 
+RESERVED_KEYWORDS = {
+    "False",
+    "class",
+    "from",
+    "or",
+    "None",
+    "continue",
+    "global",
+    "pass",
+    "True",
+    "def",
+    "if",
+    "raise",
+    "and",
+    "del",
+    "import",
+    "return",
+    "as",
+    "elif",
+    "in",
+    "try",
+    "assert",
+    "else",
+    "is",
+    "while",
+    "async",
+    "except",
+    "lambda",
+    "with",
+    "await",
+    "finally",
+    "nonlocal",
+    "yield",
+    "break",
+    "for",
+    "not",
+}
+"""A module-level constant representing the reserved keywords in Python."""
+
 
 def write_vaex_dataframe_with_cleanup(cache_file_path: Path, output: vaex.DataFrame) -> None:
     """Writes the results of the DataFrame conversion to a file and cleans up the cache directory.
@@ -296,6 +335,12 @@ class CSVToVaexConverter(BaseConverter):
 
         logger.info("Finished converting CSV files to Vaex format.")
         df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
+        logger.info("Renaming columns with reserved keywords.")
+        for column_name in df.get_column_names():
+            if column_name in RESERVED_KEYWORDS:
+                logger.warning(f"Renaming column {column_name!r} to '_{column_name}'")
+                df.rename(column_name, f"_{column_name}")
+
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
 
