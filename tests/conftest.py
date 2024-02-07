@@ -42,11 +42,11 @@ def generate_csv_files(directory_path: Path, n_files: int, gzipped: bool = False
         file_path = directory_path / f"{uuid.uuid4()}.csv"
         with open(file_path, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "class"])
-            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 3, "Linux", False, None, "A"])
-            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 5.4, "Windows", None, None, "B"])
-            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", -1, "-9999", True, None, "C"])
-            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 2, "MacOS", True, None, "D"])
+            writer.writerow(["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "class", ""])
+            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 3, "Linux", False, None, "A", "ID_0"])
+            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 5.4, "Windows", None, None, "B", "ID_1"])
+            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", -1, "-9999", True, None, "C", "ID_2"])
+            writer.writerow(["2023-01-01 20:00:00", "2023-01-01", 2, "MacOS", True, None, "D", "ID_3"])
 
         if gzipped:
             with open(file_path, "rb") as f_in, gzip.open(file_path.with_suffix(".gz"), "wb") as f_out:

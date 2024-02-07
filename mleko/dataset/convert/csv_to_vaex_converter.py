@@ -335,11 +335,15 @@ class CSVToVaexConverter(BaseConverter):
 
         logger.info("Finished converting CSV files to Vaex format.")
         df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
-        logger.info("Renaming columns with reserved keywords.")
+        logger.info("Renaming columns with non-compatible names or reserved keywords.")
         for column_name in df.get_column_names():
             if column_name in RESERVED_KEYWORDS:
                 logger.warning(f"Renaming column {column_name!r} to '_{column_name}'")
                 df.rename(column_name, f"_{column_name}")
+
+            if column_name == "":
+                logger.warning(f"Renaming column {column_name!r} to '_empty'")
+                df.rename(column_name, "_empty")
 
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
