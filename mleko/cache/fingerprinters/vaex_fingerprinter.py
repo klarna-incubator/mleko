@@ -1,4 +1,5 @@
 """The module containing the VaexFingerprinter class."""
+
 from __future__ import annotations
 
 import hashlib

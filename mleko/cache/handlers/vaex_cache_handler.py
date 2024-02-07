@@ -1,4 +1,5 @@
 """This module contains the CacheHandler for reading a writing `vaex` DataFrames to disk."""
+
 import warnings
 from pathlib import Path
 

@@ -3,6 +3,7 @@
 This subpackage contains utility functions and classes that are used throughout the project. These include a custom
 logger, decorators, and helper functions for working with `vaex` DataFrames and `tqdm` progress bars.
 """
+
 from __future__ import annotations
 
 from .custom_logger import CustomLogger

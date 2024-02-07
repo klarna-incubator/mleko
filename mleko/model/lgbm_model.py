@@ -1,4 +1,5 @@
 """Module for the LightGBM model."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -92,10 +93,12 @@ class LGBMModel(BaseModel):
         self,
         cache_directory: str | Path,
         target: str,
-        feval: _LGBM_CustomMetricFunction
-        | list[_LGBM_CustomMetricFunction]
-        | tuple[_LGBM_CustomMetricFunction, ...]
-        | None = None,
+        feval: (
+            _LGBM_CustomMetricFunction
+            | list[_LGBM_CustomMetricFunction]
+            | tuple[_LGBM_CustomMetricFunction, ...]
+            | None
+        ) = None,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         objective: LGBMObjectiveType = "regression",
@@ -430,9 +433,9 @@ class LGBMModel(BaseModel):
             The trained LightGBM model.
         """
         if self._target in self._feature_set(data_schema):
-            error_msg = f"Target feature {self._target} is in the feature set."
-            logger.error(error_msg)
-            raise ValueError(error_msg)
+            msg = f"Target feature {self._target} is in the feature set."
+            logger.error(msg)
+            raise ValueError(msg)
 
         validation_datasets: list[tuple[str, lgb.Dataset]] = []
         if self._verbosity > 0:

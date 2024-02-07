@@ -1,4 +1,5 @@
 """The module provides `ExpressionSplitter` class for splitting Vaex DataFrames based on a given expression."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,4 +1,5 @@
 """Test suite for the `cache.fingerprinters.csv_fingerprinter`."""
+
 from __future__ import annotations
 
 from pathlib import Path

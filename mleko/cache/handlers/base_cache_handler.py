@@ -1,4 +1,5 @@
 """This module contains the `CacheHandler` class."""
+
 from pathlib import Path
 from typing import Any, Callable, NamedTuple
 

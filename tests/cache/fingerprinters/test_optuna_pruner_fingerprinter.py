@@ -1,4 +1,5 @@
 """Test suite for the `cache.fingerprinters.optuna_pruner_fingerprinter`."""
+
 from __future__ import annotations
 
 import pytest

@@ -52,6 +52,23 @@ class TestDataSchema:
         data_schema.add_feature("new_numerical", "numerical")
         assert data_schema.features["numerical"] == ["new_numerical", "numerical1", "numerical2"]
 
+    def test_change_feature_type(self):
+        """Should change the type of a given feature."""
+        data_schema = DataSchema(
+            numerical=["numerical1", "numerical2"],
+        )
+        data_schema.change_feature_type("numerical1", "categorical")
+        assert data_schema.features["numerical"] == ["numerical2"]
+        assert data_schema.features["categorical"] == ["numerical1"]
+
+    def test_change_non_existent_feature_type(self):
+        """Should raise error if feature is not present in the schema."""
+        data_schema = DataSchema(
+            numerical=["numerical1", "numerical2"],
+        )
+        with pytest.raises(ValueError):
+            data_schema.change_feature_type("non_existent_feature", "categorical")
+
     def test_raises_error_on_duplicate_feature(self):
         """Should raise error if feature is already present in the schema."""
         with pytest.raises(ValueError):

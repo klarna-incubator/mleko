@@ -1,4 +1,5 @@
 """Test suite for the `cache.cache_mixin` module."""
+
 from __future__ import annotations
 
 import hashlib

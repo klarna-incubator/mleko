@@ -1,4 +1,5 @@
 """Test suite for `dataset.transform.max_abs_scaler_transformer`."""
+
 from pathlib import Path
 from unittest.mock import patch
 

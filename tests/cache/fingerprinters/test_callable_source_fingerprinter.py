@@ -1,4 +1,5 @@
 """Test suite for the `cache.fingerprinters.callable_source_fingerprinter`."""
+
 from __future__ import annotations
 
 from mleko.cache.fingerprinters.callable_source_fingerprinter import CallableSourceFingerprinter

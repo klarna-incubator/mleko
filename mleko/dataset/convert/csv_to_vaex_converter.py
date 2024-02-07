@@ -1,4 +1,5 @@
 """The module contains the `CSVToVaexConverter`, which converts CSV to a random-access `vaex` compatible format."""
+
 from __future__ import annotations
 
 import multiprocessing
@@ -59,9 +60,7 @@ class CSVToVaexConverter(BaseConverter):
         drop_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         meta_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         drop_rows_with_na_columns: list[str] | tuple[str, ...] | tuple[()] = (),
-        na_values: list[str]
-        | tuple[str, ...]
-        | tuple[()] = (
+        na_values: list[str] | tuple[str, ...] | tuple[()] = (
             "-9998",
             "-9998.0",
             "-9999",

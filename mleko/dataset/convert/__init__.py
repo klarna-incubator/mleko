@@ -4,6 +4,7 @@ The subpackage contains the following converter classes:
     - `BaseConverter`: The abstract base class for all converters.
     - `CSVToVaexConverter`: A converter for converting CSV files to Vaex DataFrames.
 """
+
 from __future__ import annotations
 
 from .base_converter import BaseConverter

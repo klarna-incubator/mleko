@@ -4,6 +4,7 @@ This module defines CustomLogger and CustomFormatter classes that extend the fun
 logging module. CustomLogger provides colored output, configurable log levels, and improved stack trace information.
 CustomFormatter enables colored log level names and custom formatting of log records.
 """
+
 from __future__ import annotations
 
 import logging

@@ -7,6 +7,7 @@ The following caching mixins are provided by the subpackage:
     - `CacheMixin`: The core caching mixin.
     - `LRUCacheMixin`: A mixin that adds LRU eviction to the cache.
 """
+
 from __future__ import annotations
 
 from .cache_mixin import CacheMixin

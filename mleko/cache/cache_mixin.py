@@ -6,6 +6,7 @@ functionality for caching the results of method calls based on user-defined cach
 Combining this class with the format mixins can be used to add support for caching different data
 formats, such as Vaex DataFrames in Arrow format.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -213,12 +214,14 @@ class CacheMixin:
 
         cache_key = f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
         if len(cache_key) > 235:
-            raise ValueError(
+            msg = (
                 f"The computed cache key is too long ({len(cache_key)} chars)."
                 "The maximum length of a cache key is 235 chars, and given the current class, the maximum "
                 f"length of the provided cache_group is {235 - len(cache_key)} chars. "
                 "Please reduce the length of the cache_group."
             )
+            logger.error(msg)
+            raise ValueError(msg)
 
         return f"{cache_key_prefix}.{hashlib.md5(data).hexdigest()}"
 

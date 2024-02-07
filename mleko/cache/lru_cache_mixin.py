@@ -6,6 +6,7 @@ The LRU cache mechanism ensures that the most frequently accessed cache entries 
 rarely accessed and have not been accessed recently are evicted first as the cache fills up. The cache entries
 are stored in the cache directory, and the cache is trimmed if needed when cold starting the cache.
 """
+
 from __future__ import annotations
 
 import inspect

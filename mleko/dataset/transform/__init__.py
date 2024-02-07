@@ -13,6 +13,7 @@ The following feature transformers are provided by the subpackage:
     - `MaxAbsScalerTransformer`: A feature transformer for scaling features using maximum absolute scaling.
     - `MinMaxScalerTransformer`: A feature transformer for scaling features using min-max scaling.
 """
+
 from .base_transformer import BaseTransformer
 from .composite_transformer import CompositeTransformer
 from .frequency_encoder_transformer import FrequencyEncoderTransformer

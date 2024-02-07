@@ -1,4 +1,5 @@
 """The module containing the base class for data converter."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

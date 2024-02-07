@@ -1,4 +1,5 @@
 """This module contains the CacheHandler for serializing and deserializing data using joblib."""
+
 from pathlib import Path
 from typing import Any
 

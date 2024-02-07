@@ -1,4 +1,5 @@
 """This module contains the CacheHandler for serializing and deserializing data using pickle."""
+
 import pickle
 from pathlib import Path
 from typing import Any

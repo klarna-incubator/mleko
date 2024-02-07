@@ -1,4 +1,5 @@
 """Module for the frequency encoder transformer."""
+
 from __future__ import annotations
 
 from pathlib import Path

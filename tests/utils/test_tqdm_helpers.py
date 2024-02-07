@@ -1,4 +1,5 @@
 """Test suite for the `utils.tqdm_helpers` module."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock

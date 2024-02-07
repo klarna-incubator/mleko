@@ -1,4 +1,5 @@
 """Test suite for the `utils.decorators` module."""
+
 from __future__ import annotations
 
 import inspect

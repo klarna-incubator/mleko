@@ -12,6 +12,7 @@ The following ingester classes are provided by the subpackage:
     - `S3Ingester`: An ingester for fetching data from AWS S3.
     - `KaggleIngester`: An ingester for fetching data from Kaggle.
 """
+
 from __future__ import annotations
 
 from .base_ingester import BaseIngester, LocalFileEntry, LocalManifest, LocalManifestHandler

@@ -1,11 +1,18 @@
 """Module for DataSchema class, used for storing type information about the dataset."""
+
 from __future__ import annotations
 
 import copy
 from typing import Literal
 
+from mleko.utils.custom_logger import CustomLogger
+
+
+logger = CustomLogger()
+"""The logger for the module."""
 
 DataType = Literal["numerical", "categorical", "boolean", "datetime", "timedelta"]
+"""Type alias for the data types."""
 
 
 class DataSchema:
@@ -34,7 +41,9 @@ class DataSchema:
         if len(set(numerical) | set(categorical) | set(boolean) | set(datetime) | set(timedelta)) != sum(
             map(len, (numerical, categorical, boolean, datetime, timedelta))
         ):
-            raise ValueError("Feature names must be unique across all types")
+            msg = "Feature names must be unique across all types."
+            logger.error(msg)
+            raise ValueError(msg)
 
         self.features: dict[DataType, list[str]] = {
             "numerical": sorted(list(numerical)),
@@ -93,7 +102,9 @@ class DataSchema:
             if feature in features:
                 return dtype
 
-        raise ValueError(f"{feature} not found in the schema")
+        msg = f"{feature} not found in the schema."
+        logger.error(msg)
+        raise ValueError(msg)
 
     def drop_features(self, features: set[str] | list[str] | tuple[str, ...] | tuple[()]) -> DataSchema:
         """Drop a feature from the DataSchema.
@@ -118,7 +129,9 @@ class DataSchema:
             ValueError: If feature is already present in the schema.
         """
         if feature in self.get_features():
-            raise ValueError(f"{feature} already present in the schema")
+            msg = f"{feature} already present in the schema."
+            logger.error(msg)
+            raise ValueError(msg)
 
         self.features[dtype].append(feature)
         self.features[dtype].sort()
@@ -136,7 +149,9 @@ class DataSchema:
             ValueError: If feature is not present in the schema.
         """
         if feature not in self.get_features():
-            raise ValueError(f"{feature} not present in the schema")
+            msg = f"{feature} not present in the schema."
+            logger.error(msg)
+            raise ValueError(msg)
 
         self.drop_features([feature])
         self.add_feature(feature, dtype)

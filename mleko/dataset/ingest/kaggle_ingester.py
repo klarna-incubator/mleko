@@ -2,6 +2,7 @@
 
 In order to use this module, the user must have valid Kaggle API credentials.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -110,14 +111,14 @@ class KaggleCredentialsManager:
         """
         expanded_credentials_file_path = credentials_file_path.expanduser()
         if not expanded_credentials_file_path.exists():
-            error_msg = f"{credentials_file_path} does not exist."
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            msg = f"{credentials_file_path} does not exist."
+            logger.error(msg)
+            raise FileNotFoundError(msg)
 
         if not expanded_credentials_file_path.is_file():
-            error_msg = f"{credentials_file_path} is a directory."
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            msg = f"{credentials_file_path} is a directory."
+            logger.error(msg)
+            raise FileNotFoundError(msg)
 
         permissions = expanded_credentials_file_path.stat().st_mode
         if (permissions & 4) or (permissions & 32):
@@ -278,9 +279,6 @@ class KaggleIngester(BaseIngester):
 
         Returns:
             A list of local file paths pointing to the downloaded files.
-
-        Raises:
-            ValueError: If Kaggle returns 0 files for the given dataset. This could occur if the API is broken.
         """
         dataset_path = f"{self._owner_slug}/{self._dataset_slug}"
 
@@ -371,12 +369,12 @@ class KaggleIngester(BaseIngester):
         ]
 
         if len(kaggle_manifest) == 0:
-            error_msg = (
+            msg = (
                 f"No files matching {self._file_pattern} found in Kaggle dataset "
                 f"{self._owner_slug}/{self._dataset_slug}."
             )
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            logger.error(msg)
+            raise FileNotFoundError(msg)
         logger.info(f"Found {len(kaggle_manifest)} file(s) matching any of {self._file_pattern} in Kaggle dataset.")
 
         return kaggle_manifest

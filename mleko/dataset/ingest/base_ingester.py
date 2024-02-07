@@ -1,4 +1,5 @@
 """Abstract base class module for data source implementations to fetch and store data from various sources."""
+
 from __future__ import annotations
 
 import dataclasses

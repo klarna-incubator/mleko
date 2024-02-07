@@ -1,4 +1,5 @@
 """Test suite for `cache.fingerprinters.vaex_fingerprinter`."""
+
 from __future__ import annotations
 
 import pytest

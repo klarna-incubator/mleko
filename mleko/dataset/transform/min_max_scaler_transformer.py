@@ -1,4 +1,5 @@
 """Module for the min-max scaler transformer."""
+
 from __future__ import annotations
 
 from pathlib import Path

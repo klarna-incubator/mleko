@@ -1,4 +1,5 @@
 """Module for the missing rate feature selector."""
+
 from __future__ import annotations
 
 from pathlib import Path

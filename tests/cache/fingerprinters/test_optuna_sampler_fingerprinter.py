@@ -1,4 +1,5 @@
 """Test suite for the `cache.fingerprinters.optuna_sampler_fingerprinter`."""
+
 import pytest
 from optuna.samplers import (
     BaseSampler,
