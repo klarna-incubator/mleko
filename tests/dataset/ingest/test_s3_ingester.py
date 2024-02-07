@@ -1,4 +1,5 @@
 """Test suite for the `dataset.ingest.s3_ingester` module."""
+
 from __future__ import annotations
 
 import datetime
@@ -188,3 +189,31 @@ class TestS3Ingester:
             assert len(actual_total_args) == len(expected_total_args)
             assert actual_total_args == expected_total_args
             assert actual_total_args == expected_total_args
+
+    def test_missing_credentials(self, temporary_directory: Path):
+        """Should init with custom aws_profile_name and aws_region_name."""
+        with patch("boto3.Session.__init__") as mocked_session_init, patch(
+            "boto3.Session.get_credentials"
+        ) as mocked_get_credentials:
+            # Return None for the default region_name and profile_name
+            def side_effect(*args, **kwargs):
+                if kwargs.get("region_name") == "us-west-2" and kwargs.get("profile_name") == "custom-profile-name":
+                    kwargs["session"] = MagicMock()
+                    return None
+                raise ProfileNotFound(profile=kwargs.get("profile_name"))  # type: ignore
+
+            mocked_session_init.side_effect = side_effect
+            mocked_get_credentials.return_value = None
+
+            with pytest.raises(ValueError):
+                S3Ingester(
+                    destination_directory=temporary_directory,
+                    s3_bucket_name="test-bucket",
+                    s3_key_prefix="test-prefix",
+                    aws_profile_name="custom-profile-name",
+                    aws_region_name="us-west-2",
+                    num_workers=1,
+                    check_s3_timestamps=True,
+                )
+
+            mocked_get_credentials.assert_called_once()

@@ -4,6 +4,7 @@ The fingerprinter is used to generate a unique identifier for the given data, wh
 to detect changes in the data. The fingerprinter is used by the cache to determine whether
 the data has changed since the last time it was cached.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

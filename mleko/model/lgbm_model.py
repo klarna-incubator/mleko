@@ -1,4 +1,5 @@
 """Module for the LightGBM model."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,6 +7,7 @@ from typing import Any, Hashable, Literal
 
 import lightgbm as lgb
 import vaex
+from lightgbm.engine import _LGBM_CustomMetricFunction
 
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -91,6 +93,12 @@ class LGBMModel(BaseModel):
         self,
         cache_directory: str | Path,
         target: str,
+        feval: (
+            _LGBM_CustomMetricFunction
+            | list[_LGBM_CustomMetricFunction]
+            | tuple[_LGBM_CustomMetricFunction, ...]
+            | None
+        ) = None,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
         objective: LGBMObjectiveType = "regression",
@@ -186,6 +194,8 @@ class LGBMModel(BaseModel):
         Args:
             cache_directory: The target directory where the model will be saved.
             target: The name of the target feature.
+            feval: Custom evaluation function(s). Should return a tuple (eval_name, eval_result, is_higher_better).
+                Refer to https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html#lightgbm.train.
             features: The names of the features to be used as input for the model.
             ignore_features: The names of the features to be ignored.
             objective: The objective function to be used.
@@ -317,6 +327,7 @@ class LGBMModel(BaseModel):
 
         self._verbosity = verbosity
         self._log_evaluation_period = log_evaluation_period
+        self._feval = list(feval) if isinstance(feval, (list, tuple)) else [feval] if feval is not None else None
         self._target = target
         self._num_iterations = num_iterations
         self._hyperparameters = {
@@ -404,7 +415,7 @@ class LGBMModel(BaseModel):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
     ) -> tuple[lgb.Booster, dict[str, dict[str, list[Any]]]]:
         """Fits the LightGBM model to the given data with the given hyperparameters.
@@ -412,7 +423,7 @@ class LGBMModel(BaseModel):
         Args:
             data_schema: The data schema of the dataframes.
             train_dataframe: The training dataframe.
-            validation_dataframe: The validation dataframe.
+            validation_dataframe: The validation dataframe, optional but required for early stopping.
             hyperparameters: The hyperparameters to use for training.
 
         Raises:
@@ -422,16 +433,23 @@ class LGBMModel(BaseModel):
             The trained LightGBM model.
         """
         if self._target in self._feature_set(data_schema):
-            error_msg = f"Target feature {self._target} is in the feature set."
-            logger.error(error_msg)
-            raise ValueError(error_msg)
+            msg = f"Target feature {self._target} is in the feature set."
+            logger.error(msg)
+            raise ValueError(msg)
 
+        validation_datasets: list[tuple[str, lgb.Dataset]] = []
         if self._verbosity > 0:
             logger.info("Loading the training dataset into memory.")
         train_dataset = self._load_lgb_dataset(data_schema, train_dataframe)
-        if self._verbosity > 0:
-            logger.info("Loading the validation dataset into memory.")
-        validation_dataset = self._load_lgb_dataset(data_schema, validation_dataframe, reference_dataset=train_dataset)
+        validation_datasets.append(("train", train_dataset))
+
+        if validation_dataframe is not None:
+            if self._verbosity > 0:
+                logger.info("Loading the validation dataset into memory.")
+            validation_dataset = self._load_lgb_dataset(
+                data_schema, validation_dataframe, reference_dataset=train_dataset
+            )
+            validation_datasets.append(("validation", validation_dataset))
 
         if hyperparameters is None:
             hyperparameters = {}
@@ -452,9 +470,10 @@ class LGBMModel(BaseModel):
             params=hyperparameters,
             train_set=train_dataset,
             num_boost_round=self._num_iterations,
-            valid_sets=[train_dataset, validation_dataset],
-            valid_names=["train", "validation"],
+            valid_sets=[dataset for _, dataset in validation_datasets],
+            valid_names=[name for name, _ in validation_datasets],
             callbacks=callbacks,
+            feval=self._feval,
         )
 
         return self._model, metrics

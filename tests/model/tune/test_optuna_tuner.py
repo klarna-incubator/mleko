@@ -1,4 +1,5 @@
 """Test suite for `model.tune.optuna_tuner`."""
+
 from __future__ import annotations
 
 from pathlib import Path

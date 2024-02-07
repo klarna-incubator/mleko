@@ -1,4 +1,5 @@
 """Test suite for the `pipeline.steps.feature_select_step` module."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -21,8 +22,12 @@ class TestFeatureSelectStep:
         feature_select_step = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit_transform",
-            inputs=["data_schema", "df_train"],
-            outputs=["feature_selector", "data_schema", "df_train_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_train"},
+            outputs={
+                "data_schema": "data_schema",
+                "feature_selector": "feature_selector",
+                "dataframe": "df_train_selected",
+            },
         )
 
         assert feature_select_step._feature_selector == feature_selector
@@ -39,13 +44,17 @@ class TestFeatureSelectStep:
 
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         df = vaex.from_dict({"col2": [4, 5, 6]})
-        feature_selector.fit_transform = MagicMock(return_value=("feature_selector", ds, df))
+        feature_selector.fit_transform = MagicMock(return_value=(ds, "feature_selector", df))
 
         feature_select_step = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit_transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["feature_selector", "data_schema", "df_clean_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "data_schema",
+                "feature_selector": "feature_selector",
+                "dataframe": "df_clean_selected",
+            },
             cache_group=None,
         )
         result = feature_select_step.execute(data_container, force_recompute=False)
@@ -75,8 +84,11 @@ class TestFeatureSelectStep:
         feature_select_step_fit = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit",
-            inputs=["data_schema", "df_clean"],
-            outputs=["data_schema", "feature_selector"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "data_schema",
+                "feature_selector": "feature_selector",
+            },
             cache_group=None,
         )
         feature_select_step_fit_result = feature_select_step_fit.execute(data_container, force_recompute=False)
@@ -86,8 +98,11 @@ class TestFeatureSelectStep:
         feature_select_step_transform = FeatureSelectStep(
             feature_selector=feature_selector,
             action="transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["data_schema", "df_clean_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "data_schema",
+                "dataframe": "df_clean_selected",
+            },
             cache_group=None,
         )
         feature_select_step_transform_result = feature_select_step_transform.execute(
@@ -114,8 +129,12 @@ class TestFeatureSelectStep:
         feature_select_step = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit_transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["feature_selector", "data_schema", "df_train_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "data_schema",
+                "feature_selector": "feature_selector",
+                "dataframe": "df_clean_selected",
+            },
         )
 
         with pytest.raises(ValueError):
@@ -131,8 +150,12 @@ class TestFeatureSelectStep:
         feature_select_step = FeatureSelectStep(
             feature_selector=feature_selector,
             action="fit_transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["feature_selector", "data_schema", "df_train_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "data_schema",
+                "feature_selector": "feature_selector",
+                "dataframe": "df_clean_selected",
+            },
         )
 
         with pytest.raises(ValueError):
@@ -143,10 +166,16 @@ class TestFeatureSelectStep:
         feature_selector = MagicMock(spec=BaseFeatureSelector)
         with pytest.raises(ValueError):
             FeatureSelectStep(
-                feature_selector=feature_selector, action="fit_transform", inputs=[], outputs=["converted_data"]
+                feature_selector=feature_selector,
+                action="fit_transform",
+                inputs={},  # type: ignore
+                outputs={"dataframe": "df_clean"},  # type: ignore
             )
 
         with pytest.raises(ValueError):
             FeatureSelectStep(
-                feature_selector=feature_selector, action="fit_transform", inputs=["raw_data"], outputs=[]
+                feature_selector=feature_selector,
+                action="fit_transform",
+                inputs={"dataframe": "df_clean"},  # type: ignore
+                outputs={},  # type: ignore
             )

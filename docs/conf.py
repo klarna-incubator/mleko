@@ -1,4 +1,5 @@
 """Sphinx configuration."""
+
 project = "mleko"
 author = "Erik Båvenstrand"
 copyright = "2023, Klarna Bank AB"

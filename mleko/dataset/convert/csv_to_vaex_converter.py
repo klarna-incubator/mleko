@@ -1,4 +1,5 @@
 """The module contains the `CSVToVaexConverter`, which converts CSV to a random-access `vaex` compatible format."""
+
 from __future__ import annotations
 
 import multiprocessing
@@ -34,6 +35,45 @@ logger = CustomLogger()
 V_CPU_COUNT = multiprocessing.cpu_count()
 """A module-level constant representing the total number of CPUs available on the current system."""
 
+RESERVED_KEYWORDS = {
+    "False",
+    "class",
+    "from",
+    "or",
+    "None",
+    "continue",
+    "global",
+    "pass",
+    "True",
+    "def",
+    "if",
+    "raise",
+    "and",
+    "del",
+    "import",
+    "return",
+    "as",
+    "elif",
+    "in",
+    "try",
+    "assert",
+    "else",
+    "is",
+    "while",
+    "async",
+    "except",
+    "lambda",
+    "with",
+    "await",
+    "finally",
+    "nonlocal",
+    "yield",
+    "break",
+    "for",
+    "not",
+}
+"""A module-level constant representing the reserved keywords in Python."""
+
 
 def write_vaex_dataframe_with_cleanup(cache_file_path: Path, output: vaex.DataFrame) -> None:
     """Writes the results of the DataFrame conversion to a file and cleans up the cache directory.
@@ -59,9 +99,7 @@ class CSVToVaexConverter(BaseConverter):
         drop_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         meta_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         drop_rows_with_na_columns: list[str] | tuple[str, ...] | tuple[()] = (),
-        na_values: list[str]
-        | tuple[str, ...]
-        | tuple[()] = (
+        na_values: list[str] | tuple[str, ...] | tuple[()] = (
             "-9998",
             "-9998.0",
             "-9999",
@@ -189,6 +227,7 @@ class CSVToVaexConverter(BaseConverter):
                     writer=write_vaex_dataframe_with_cleanup,
                     reader=read_vaex_dataframe,
                     suffix=VAEX_DATAFRAME_CACHE_HANDLER.suffix,
+                    can_handle_none=False,
                 ),
             ],
         )
@@ -296,6 +335,16 @@ class CSVToVaexConverter(BaseConverter):
 
         logger.info("Finished converting CSV files to Vaex format.")
         df: vaex.DataFrame = vaex.open(self._cache_directory / "df_chunk_*.arrow")
+        logger.info("Renaming columns with non-compatible names or reserved keywords.")
+        for column_name in df.get_column_names():
+            if column_name in RESERVED_KEYWORDS:
+                logger.warning(f"Renaming column {column_name!r} to '_{column_name}'")
+                df.rename(column_name, f"_{column_name}")
+
+            if column_name == "":
+                logger.warning(f"Renaming column {column_name!r} to '_empty'")
+                df.rename(column_name, "_empty")
+
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
 
@@ -312,6 +361,6 @@ class CSVToVaexConverter(BaseConverter):
         ds.drop_features(self._meta_columns)
 
         for column_name in df.get_column_names(dtype="bool"):
-            df[column_name] = get_column(df, column_name).astype("string")
+            df[column_name] = get_column(df, column_name).astype("int8")
         logger.info("Merging chunks into a single DataFrame.")
         return ds, df

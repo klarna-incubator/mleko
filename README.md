@@ -56,7 +56,7 @@ See our [changelog](https://github.com/klarna-incubator/mleko/tree/main/CHANGELO
 
 ## Acknowledgements
 
-The development of `mleko` was influenced by existing work of the following individuals:
+The development of `mleko` was significantly influenced by existing work of the following individuals:
 
 - **Felipe Breve Siola** ([fsiola](https://github.com/fsiola))
 - **Sai Ma** ([metanouvelle](https://github.com/metanouvelle))

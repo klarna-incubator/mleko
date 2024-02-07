@@ -1,4 +1,5 @@
 """This module provides utility decorators for classes and functions."""
+
 from __future__ import annotations
 
 import inspect

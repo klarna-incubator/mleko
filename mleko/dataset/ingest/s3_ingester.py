@@ -1,4 +1,5 @@
 """Module for fetching data from AWS S3 and storing it locally using the `S3Ingester` class."""
+
 from __future__ import annotations
 
 import hashlib
@@ -218,12 +219,12 @@ class S3Ingester(BaseIngester):
         ]
 
         if len(s3_manifest) == 0:
-            error_msg = (
+            msg = (
                 f"No files matching {self._file_pattern} found in S3 bucket "
                 f"{self._s3_bucket_name}/{self._s3_key_prefix}."
             )
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            logger.error(msg)
+            raise FileNotFoundError(msg)
         logger.info(f"Found {len(s3_manifest)} file(s) matching any of {self._file_pattern} in S3 bucket.")
 
         return s3_manifest
@@ -246,6 +247,12 @@ class S3Ingester(BaseIngester):
             region_name=aws_region_name,
             profile_name=aws_profile_name,
         ).get_credentials()
+
+        if credentials is None:
+            msg = "AWS credentials not found. Please ensure that your AWS credentials are correctly set up."
+            logger.error(msg)
+            raise ValueError(msg)
+
         client_config = BotoConfig(max_pool_connections=100)
         return boto3.client(
             "s3",  # type: ignore

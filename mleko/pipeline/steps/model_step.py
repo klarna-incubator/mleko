@@ -1,33 +1,87 @@
 """Module containing the ModelStep class."""
+
 from __future__ import annotations
 
-from typing import Literal
+from typing import Optional, Union, cast
 
+from typing_extensions import TypedDict
 from vaex import DataFrame
 
 from mleko.dataset.data_schema import DataSchema
-from mleko.model.base_model import BaseModel
+from mleko.model.base_model import BaseModel, HyperparametersType
 from mleko.pipeline.data_container import DataContainer
-from mleko.pipeline.pipeline_step import PipelineStep
+from mleko.pipeline.pipeline_step import FitTransformAction, FitTransformPipelineStep
+from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
 
-class ModelStep(PipelineStep):
+logger = CustomLogger()
+"""The logger for the module."""
+
+
+class ModelStepInputFitType(TypedDict):
+    """The input type of the ModelStep when action is 'fit'."""
+
+    data_schema: Union[str, DataSchema]
+    """DataSchema or the key for the DataSchema to be used for training."""
+
+    dataframe: Union[str, DataFrame]
+    """DataFrame or the key for the DataFrame to be used for training."""
+
+    validation_dataframe: Optional[Union[str, DataFrame]]
+    """DataFrame or the key for the validation DataFrame to be used for training."""
+
+    hyperparameters: Optional[Union[str, HyperparametersType]]
+    """Hyperparameters or the key for the hyperparameters to be used for training."""
+
+
+class ModelStepInputTransformType(TypedDict):
+    """The input type of the ModelStep when action is 'transform'."""
+
+    data_schema: Union[str, DataSchema]
+    """DataSchema or the key for the DataSchema to be used for prediction."""
+
+    dataframe: Union[str, DataFrame]
+    """DataFrame or the key for the DataFrame to be used for prediction."""
+
+
+class ModelStepOutputFitType(TypedDict):
+    """The output type of the ModelStep when action is 'fit'."""
+
+    model: str
+    """The key for the fitted model after training."""
+
+    metrics: str
+    """The key for the metrics dictionary after training."""
+
+
+class ModelStepOutputTransformType(TypedDict):
+    """The output type of the ModelStep when action is 'transform'."""
+
+    dataframe: str
+    """The key for the transformed DataFrame after prediction."""
+
+
+class ModelStepOutputFitTransformType(ModelStepOutputFitType, ModelStepOutputTransformType):
+    """The output type of the ModelStep when action is 'fit_transform'."""
+
+    validation_dataframe: Optional[str]
+    """The key for the transformed validation DataFrame after prediction."""
+
+
+class ModelStep(FitTransformPipelineStep):
     """Pipeline step for model training and prediction."""
 
-    _num_inputs = 4
-    """Number of inputs expected by the ModelStep."""
-
-    _num_outputs = 1
-    """Number of outputs expected by the ModelStep."""
+    _inputs: ModelStepInputFitType | ModelStepInputTransformType
+    _outputs: ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType
 
     @auto_repr
     def __init__(
         self,
         model: BaseModel,
-        action: Literal["fit", "transform", "fit_transform"],
-        inputs: list[str] | tuple[str, ...] | tuple[()] = (),
-        outputs: list[str] | tuple[str, ...] | tuple[()] = (),
+        action: FitTransformAction,
+        inputs: ModelStepInputFitType | ModelStepInputTransformType,
+        outputs: ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType,
         cache_group: str | None = None,
     ) -> None:
         """Initialize the ModelStep with the specified model.
@@ -44,36 +98,14 @@ class ModelStep(PipelineStep):
         Args:
             model: The model used for training and prediction.
             action: The action to perform, one of "fit", "transform", or "fit_transform".
-            inputs: List or tuple of input keys expected by this step. If the action is "fit" or "fit_transform",
-                should contain four keys, corresponding to the DataSchema, the training DataFrame to be fitted,
-                the validation DataFrame to be used for validation, and the hyperparameters to be used for training.
-                If the action is "transform", should contain two keys, corresponding to the DataSchema, and the
-                DataFrame to be transformed.
-            outputs: List or tuple of output keys produced by this step. If the action is "fit", should contain two
-                keys, corresponding to the fitted model and the metrics dictionary. If the action is "transform",
-                should contain a single key, corresponding to the transformed DataFrame. If the action is
-                "fit_transform", should contain four keys, corresponding to the fitted model, the metrics
-                dictionary, the transformed training DataFrame, and the transformed validation DataFrame.
+            inputs: A dictionary of input keys following the `ModelStepInputFitType` or `ModelStepInputTransformType`
+                schema, depending on the action.
+            outputs: A list of output keys following the `ModelStepOutputFitType`, `ModelStepOutputTransformType`, or
+                `ModelStepOutputFitTransformType` schema, depending on the action.
             cache_group: The cache group to use.
-
-        Raises:
-            ValueError: If action is not one of "fit", "transform", or "fit_transform".
         """
-        if action not in ("fit", "transform", "fit_transform"):
-            raise ValueError(
-                f"Invalid action: {action}. Expected one of 'fit', 'transform', or 'fit_transform'."
-            )  # pragma: no cover
-
-        if action == "fit":
-            self._num_outputs = 2
-        if action == "transform":
-            self._num_inputs = 2
-        if action == "fit_transform":
-            self._num_outputs = 4
-
-        super().__init__(inputs, outputs, cache_group)
+        super().__init__(action, inputs, outputs, cache_group)
         self._model = model
-        self._action = action
 
     def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
         """Perform actions using the configured model.
@@ -82,57 +114,66 @@ class ModelStep(PipelineStep):
             data_container: Contains the input.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
 
-        Raises:
-            ValueError: If data container contains invalid data - not a vaex DataFrame.
-
         Returns:
             A DataContainer containing the output of the action performed by the step, either the fitted model,
             the predictions on the DataFrame, or both.
         """
-        data_schema = data_container.data[self._inputs[0]]
-        if not isinstance(data_schema, DataSchema):
-            raise ValueError(f"Invalid data type: {type(data_schema)}. Expected DataSchema.")
-
-        dataframe = data_container.data[self._inputs[1]]
-        if not isinstance(dataframe, DataFrame):
-            raise ValueError(f"Invalid data type: {type(dataframe)}. Expected vaex DataFrame.")
+        data_schema = self._validate_and_get_input(self._inputs["data_schema"], DataSchema, data_container)
+        dataframe = self._validate_and_get_input(self._inputs["dataframe"], DataFrame, data_container)
 
         df_validation = hyperparameters = None
         if self._action != "transform":
-            df_validation = data_container.data[self._inputs[2]]
-            if not isinstance(df_validation, DataFrame):
-                raise ValueError(f"Invalid data type: {type(df_validation)}. Expected vaex DataFrame.")
+            self._inputs = cast(ModelStepInputFitType, self._inputs)
+            df_validation = self._validate_and_get_input(
+                self._inputs["validation_dataframe"], DataFrame, data_container, is_optional=True
+            )
+            hyperparameters: HyperparametersType | None = self._validate_and_get_input(
+                self._inputs["hyperparameters"], dict, data_container, is_optional=True
+            )
 
-            hyperparameters = {}
-            if len(self._inputs) == 4:
-                hyperparameters = data_container.data.get(self._inputs[3])
-            if not isinstance(hyperparameters, dict):
-                raise ValueError(f"Invalid data type: {type(hyperparameters)}. Expected HyperparametersType.")
-
-        if self._action == "fit" and df_validation is not None:
+        if self._action == "fit":
+            self._outputs = cast(ModelStepOutputFitType, self._outputs)
             model, metrics = self._model.fit(
                 data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
             )
-            data_container.data[self._outputs[0]] = model
-            data_container.data[self._outputs[1]] = metrics
+            data_container.data[self._outputs["model"]] = model
+            data_container.data[self._outputs["metrics"]] = metrics
         elif self._action == "transform":
+            self._outputs = cast(ModelStepOutputTransformType, self._outputs)
             df = self._model.transform(data_schema, dataframe, self._cache_group, force_recompute)
-            data_container.data[self._outputs[0]] = df
-        elif self._action == "fit_transform" and df_validation is not None:
+            data_container.data[self._outputs["dataframe"]] = df
+        elif self._action == "fit_transform":
+            self._outputs = cast(ModelStepOutputFitTransformType, self._outputs)
             model, metrics, df, df_validation = self._model.fit_transform(
                 data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
             )
-            data_container.data[self._outputs[0]] = model
-            data_container.data[self._outputs[1]] = metrics
-            data_container.data[self._outputs[2]] = df
-            data_container.data[self._outputs[3]] = df_validation
+            data_container.data[self._outputs["model"]] = model
+            data_container.data[self._outputs["metrics"]] = metrics
+            data_container.data[self._outputs["dataframe"]] = df
+            if self._outputs["validation_dataframe"] is not None:
+                data_container.data[self._outputs["validation_dataframe"]] = df_validation
         return data_container
 
-    def _validate_inputs(self) -> None:
-        """Check the input keys for compliance with this step's requirements.
+    def _get_input_model(self) -> type[ModelStepInputFitType | ModelStepInputTransformType]:
+        """Get the input type for the TransformStep.
 
-        Raises:
-            ValueError: If the PipelineStep has an invalid number of inputs.
+        Returns:
+            Input type for the TransformStep.
         """
-        if len(self._inputs) != self._num_inputs and len(self._inputs) != self._num_inputs - 1:
-            raise ValueError(f"{self.__class__.__name__} must have exactly {self._num_inputs} input(s).")
+        if self._action == "fit" or self._action == "fit_transform":
+            return ModelStepInputFitType
+        return ModelStepInputTransformType
+
+    def _get_output_model(
+        self,
+    ) -> type[ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType]:
+        """Get the output type for the TransformStep.
+
+        Returns:
+            Output type for the TransformStep.
+        """
+        if self._action == "fit":
+            return ModelStepOutputFitType
+        if self._action == "transform":
+            return ModelStepOutputTransformType
+        return ModelStepOutputFitTransformType

@@ -5,6 +5,7 @@ The subpackage contains the following splitter classes:
     - `RandomSplitter`: A splitter for splitting `vaex` DataFrames into two random parts.
     - `ExpressionSplitter`: A splitter for splitting `vaex` DataFrames into two parts based on a specified expression.
 """
+
 from __future__ import annotations
 
 from .base_splitter import BaseSplitter

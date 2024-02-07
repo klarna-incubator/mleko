@@ -1,4 +1,5 @@
 """Test suite for `dataset.split.random_splitter`."""
+
 from __future__ import annotations
 
 from pathlib import Path

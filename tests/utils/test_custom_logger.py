@@ -1,4 +1,5 @@
 """Test suite for the `utils.custom_logger` module."""
+
 from __future__ import annotations
 
 import logging

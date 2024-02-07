@@ -42,13 +42,6 @@ repos:
         language: system
         types_or: [cython, pyi, python]
         args: ["--filter-files"]
-      - id: pyupgrade
-        name: pyupgrade
-        description: Automatically upgrade syntax for newer versions.
-        entry: poetry run pyupgrade
-        language: system
-        types: [python]
-        args: [--py37-plus]
       - id: trailing-whitespace
         name: Trim Trailing Whitespace
         entry: poetry run trailing-whitespace-fixer

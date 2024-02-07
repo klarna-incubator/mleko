@@ -9,6 +9,7 @@ The following submodules are provided:
     - `split`: The submodule provides functionality for splitting data into multiple parts.
     - `feature_select`: The submodule provides functionality for selecting features from data.
 """
+
 from __future__ import annotations
 
 from .data_schema import DataSchema

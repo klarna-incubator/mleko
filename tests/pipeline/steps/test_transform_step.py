@@ -1,4 +1,5 @@
 """Test suite for the `pipeline.steps.transform_step` module."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -21,8 +22,8 @@ class TestTransformStep:
         transform_step = TransformStep(
             transformer=transformer,
             action="fit",
-            inputs=["data_schema", "df_train"],
-            outputs=["transformed_data_schema", "df_train_transformed"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_train"},
+            outputs={"data_schema": "transformed_data_schema", "transformer": "transformer"},
         )
 
         assert transform_step._transformer == transformer
@@ -43,8 +44,12 @@ class TestTransformStep:
         transform_step = TransformStep(
             transformer=transformer,
             action="fit_transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["transformed_data_schema", "transformer", "df_clean_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={
+                "data_schema": "transformed_data_schema",
+                "transformer": "transformer",
+                "dataframe": "df_clean_selected",
+            },
             cache_group=None,
         )
         result = transform_step.execute(data_container, force_recompute=False)
@@ -73,8 +78,8 @@ class TestTransformStep:
         transform_step_fit = TransformStep(
             transformer=transformer,
             action="fit",
-            inputs=["data_schema", "df_clean"],
-            outputs=["transformed_data_schema", "transformer"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={"data_schema": "transformed_data_schema", "transformer": "transformer"},
             cache_group=None,
         )
         transform_step_fit_result = transform_step_fit.execute(data_container, force_recompute=False)
@@ -84,8 +89,8 @@ class TestTransformStep:
         transform_step_transform = TransformStep(
             transformer=transformer,
             action="transform",
-            inputs=["data_schema", "df_clean"],
-            outputs=["transformed_data_schema", "df_clean_selected"],
+            inputs={"data_schema": "data_schema", "dataframe": "df_clean"},
+            outputs={"data_schema": "transformed_data_schema", "dataframe": "df_clean_selected"},
             cache_group=None,
         )
         transform_step_transform_result = transform_step_transform.execute(data_container, force_recompute=False)
@@ -108,8 +113,8 @@ class TestTransformStep:
         transformer_step = TransformStep(
             transformer=transformer,
             action="fit",
-            inputs=["df_clean", "df_clean"],
-            outputs=["data_schema", "df_train_selected"],
+            inputs={"data_schema": "df_clean", "dataframe": "df_clean"},
+            outputs={"data_schema": "transformed_data_schema", "transformer": "transformer"},
         )
 
         with pytest.raises(ValueError):
@@ -119,17 +124,22 @@ class TestTransformStep:
         """Should throw ValueError inputs or outputs number is incorrect."""
         transformer = MagicMock(spec=BaseTransformer)
         with pytest.raises(ValueError):
-            TransformStep(transformer=transformer, action="fit", inputs=[], outputs=["converted_data"])
-
-        with pytest.raises(ValueError):
             TransformStep(
-                transformer=transformer, action="fit", inputs=["raw_data"], outputs=["transformer", "converted_data"]
+                transformer=transformer,
+                action="fit",
+                inputs={},  # type: ignore
+                outputs={"dataframe": "df_clean"},  # type: ignore
             )
 
         with pytest.raises(ValueError):
             TransformStep(
-                transformer=transformer, action="fit_transform", inputs=["raw_data"], outputs=["converted_data"]
+                transformer=transformer,
+                action="transform",
+                inputs={"data_schema": "data_schema"},  # type: ignore
+                outputs={  # type: ignore
+                    "data_schema": "data_schema",
+                    "dataframe": "dataframe",
+                    "transformer": "transformer",
+                    "test": "new",
+                },
             )
-
-        with pytest.raises(ValueError):
-            TransformStep(transformer=transformer, action="fit", inputs=["raw_data"], outputs=[])

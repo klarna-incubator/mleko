@@ -1,4 +1,5 @@
 """Test suite for `dataset.feature_select.variance_feature_selector`."""
+
 from pathlib import Path
 from unittest.mock import patch
 

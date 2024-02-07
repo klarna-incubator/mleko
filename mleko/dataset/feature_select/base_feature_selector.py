@@ -1,4 +1,5 @@
 """Module for the base feature selector class."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -60,11 +61,9 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         """
         super().__init__(cache_directory, cache_size)
         if features is not None and ignore_features is not None:
-            error_msg = (
-                "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
-            )
-            logger.error(error_msg)
-            raise ValueError(error_msg)
+            msg = "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
+            logger.error(msg)
+            raise ValueError(msg)
 
         self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
@@ -120,7 +119,9 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             Updated DataSchema and transformed DataFrame.
         """
         if self._feature_selector is None:
-            raise RuntimeError("Feature selector must be fitted before it can be used to extract selected features.")
+            msg = "Feature selector must be fitted before it can be used to extract selected features."
+            logger.error(msg)
+            raise RuntimeError(msg)
 
         ds, df = self._cached_execute(
             lambda_func=lambda: self._transform(data_schema, dataframe),

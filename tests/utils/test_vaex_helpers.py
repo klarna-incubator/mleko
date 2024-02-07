@@ -1,4 +1,5 @@
 """Test suite for the `utils.vaex_helpers` module."""
+
 from __future__ import annotations
 
 import pytest

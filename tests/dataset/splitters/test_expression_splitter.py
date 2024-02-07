@@ -1,4 +1,5 @@
 """Test suite for the `dataset.split.expression_splitter` module."""
+
 from __future__ import annotations
 
 from pathlib import Path

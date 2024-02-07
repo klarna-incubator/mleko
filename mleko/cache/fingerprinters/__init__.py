@@ -13,6 +13,7 @@ The following fingerprinting utilities are provided:
     - `OptunaSamplerFingerprinter`: A fingerprinter for Optuna samplers.
     - `OptunaPrunerFingerprinter`: A fingerprinter for Optuna pruners.
 """
+
 from __future__ import annotations
 
 from .base_fingerprinter import BaseFingerprinter

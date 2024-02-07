@@ -1,4 +1,5 @@
 """The module containing the CallableSourceFingerprinter class."""
+
 from __future__ import annotations
 
 import hashlib

@@ -12,6 +12,7 @@ The following feature selectors are provided by the subpackage:
     - `PearsonCorrelationFeatureSelector`: A feature selector for removing features with a high Pearson correlation.
     - `InvarianceFeatureSelector`: A feature selector for removing invariant features.
 """
+
 from .base_feature_selector import BaseFeatureSelector
 from .composite_feature_selector import CompositeFeatureSelector
 from .invariance_feature_selector import InvarianceFeatureSelector

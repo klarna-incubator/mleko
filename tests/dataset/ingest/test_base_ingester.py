@@ -1,4 +1,5 @@
 """Test suite for the `dataset.ingest.base_ingester` module."""
+
 from __future__ import annotations
 
 import dataclasses

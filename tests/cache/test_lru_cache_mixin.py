@@ -1,4 +1,5 @@
 """Test suite for the `cache.test_lru_cache_mixin` module."""
+
 from __future__ import annotations
 
 import os

@@ -1,4 +1,5 @@
 """Module for the base hyperparameter tuning class."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

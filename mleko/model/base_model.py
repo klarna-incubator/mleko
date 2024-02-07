@@ -1,4 +1,5 @@
 """Module for the base model class."""
+
 from __future__ import annotations
 
 import json
@@ -68,11 +69,9 @@ class BaseModel(LRUCacheMixin, ABC):
         """
         super().__init__(cache_directory, cache_size)
         if features is not None and ignore_features is not None:
-            error_msg = (
-                "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
-            )
-            logger.error(error_msg)
-            raise ValueError(error_msg)
+            msg = "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
+            logger.error(msg)
+            raise ValueError(msg)
 
         self._model = None
         self._hyperparameters: HyperparametersType = {}
@@ -83,7 +82,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
@@ -124,7 +123,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 json.dumps(hyperparameters, sort_keys=True),
                 str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
-                (validation_dataframe, VaexFingerprinter()),
+                (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
@@ -155,9 +154,9 @@ class BaseModel(LRUCacheMixin, ABC):
             Transformed DataFrame.
         """
         if self._model is None:
-            error_msg = "Model must be fitted before it can be used to transform the DataFrame."
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
+            msg = "Model must be fitted before it can be used to transform the DataFrame."
+            logger.error(msg)
+            raise RuntimeError(msg)
 
         return self._cached_execute(
             lambda_func=lambda: self._transform(data_schema, dataframe),
@@ -176,11 +175,11 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
-    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame]:
+    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]:
         """Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
 
         The validation DataFrame is used to validate the model during fitting.
@@ -220,7 +219,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 json.dumps(hyperparameters, sort_keys=True),
                 str(data_schema),
                 (train_dataframe, VaexFingerprinter()),
-                (validation_dataframe, VaexFingerprinter()),
+                (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
@@ -238,9 +237,9 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
-    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame]:
+    ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]:
         """Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
 
         Args:
@@ -258,7 +257,7 @@ class BaseModel(LRUCacheMixin, ABC):
             model,
             metrics,
             self._transform(data_schema, train_dataframe),
-            self._transform(data_schema, validation_dataframe),
+            self._transform(data_schema, validation_dataframe) if validation_dataframe is not None else None,
         )
 
     def _assign_model(self, model: Any) -> None:
@@ -294,7 +293,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         data_schema: DataSchema,
         train_dataframe: vaex.DataFrame,
-        validation_dataframe: vaex.DataFrame,
+        validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]]]:
         """Fits the model to the specified DataFrame.

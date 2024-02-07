@@ -1,4 +1,5 @@
 """Test suite for `dataset.convert.csv_to_vaex_converter`."""
+
 from __future__ import annotations
 
 import glob
@@ -28,9 +29,9 @@ class TestCSVToVaexConverter:
         dfs = [vaex.open(f) for f in arrow_files]
 
         for df in dfs:
-            assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, null]"
-            assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column"]
-            assert df.shape == (3, 6)
+            assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, null, string, string]"
+            assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "class", ""]
+            assert df.shape == (4, 8)
             assert df.Name.countna() == 1
             df.close()
 
@@ -50,10 +51,11 @@ class TestCSVToVaexConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         _, df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, string, string]"
-        assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column"]
-        assert df.shape == (n_files * 2, 6)
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, int8, string, string, string]"
+        assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class", "_empty"]
+        assert df.shape == (n_files * 3, 8)
         assert df.Name.countna() == 0
+        assert df.Is_Best.tolist() == [0, None, 1]
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 1
 

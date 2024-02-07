@@ -1,4 +1,5 @@
 """This module contains helper functions for working with `vaex` DataFrames."""
+
 from __future__ import annotations
 
 import vaex

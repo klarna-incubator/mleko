@@ -1,4 +1,5 @@
 """Test suite for `dataset.transform.label_encoder_transformer`."""
+
 from pathlib import Path
 from unittest.mock import patch
 

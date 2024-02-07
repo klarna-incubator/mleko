@@ -1,4 +1,5 @@
 """This module provides helper functions for `tqdm` progress bars."""
+
 from __future__ import annotations
 
 from typing import Callable

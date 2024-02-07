@@ -3,6 +3,7 @@
 The splitter can be used to split a `vaex` DataFrame into two parts, with the split being performed randomly. The split
 can be stratified by specifying a column name to use for stratification.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

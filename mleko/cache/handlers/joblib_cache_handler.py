@@ -1,4 +1,5 @@
 """This module contains the CacheHandler for serializing and deserializing data using joblib."""
+
 from pathlib import Path
 from typing import Any
 
@@ -29,5 +30,5 @@ def read_joblib(cache_file_path: Path) -> Any:
     return joblib.load(cache_file_path)
 
 
-JOBLIB_CACHE_HANDLER = CacheHandler(write_joblib, read_joblib, "joblib")
+JOBLIB_CACHE_HANDLER = CacheHandler(write_joblib, read_joblib, "joblib", can_handle_none=True)
 """A CacheHandler for Python objects using joblib."""

@@ -1,4 +1,5 @@
 """A feature selector that combines multiple feature selectors."""
+
 from __future__ import annotations
 
 from pathlib import Path

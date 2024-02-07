@@ -1,4 +1,5 @@
 """Test suite for `dataset.feature_select.base_feature_selector`."""
+
 from __future__ import annotations
 
 from pathlib import Path

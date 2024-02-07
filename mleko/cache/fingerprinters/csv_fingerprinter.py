@@ -1,4 +1,5 @@
 """The module contains a fingerprinter for CSV files supporting Gzipped and raw CSV files."""
+
 from __future__ import annotations
 
 import gzip
@@ -7,7 +8,13 @@ from concurrent import futures
 from itertools import islice
 from pathlib import Path
 
+from mleko.utils.custom_logger import CustomLogger
+
 from .base_fingerprinter import BaseFingerprinter
+
+
+logger = CustomLogger()
+"""The logger for the module."""
 
 
 class CSVFingerprinter(BaseFingerprinter):
@@ -63,7 +70,9 @@ class CSVFingerprinter(BaseFingerprinter):
             The fingerprint as a hexadecimal string.
         """
         if file_path.suffix not in {".csv", ".gz", ".csv.gz"}:
-            raise ValueError(f"Unsupported file type: {file_path.suffix}")
+            msg = f"Unsupported file type: {file_path.suffix}"
+            logger.error(msg)
+            raise ValueError(msg)
 
         if file_path.suffix in {".gz", ".csv.gz"}:
             with gzip.open(file_path, "rb") as f:

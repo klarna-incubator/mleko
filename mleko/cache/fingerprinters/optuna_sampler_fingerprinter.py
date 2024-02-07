@@ -1,4 +1,5 @@
 """The module contains a fingerprinter for `Optuna` samplers."""
+
 from __future__ import annotations
 
 import hashlib

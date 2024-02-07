@@ -1,4 +1,5 @@
 """This module provides utility functions for file and directory operations."""
+
 from __future__ import annotations
 
 from pathlib import Path

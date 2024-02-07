@@ -1,4 +1,5 @@
 """Module for the base transformer class."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -95,7 +96,9 @@ class BaseTransformer(LRUCacheMixin, ABC):
             Updated data schema and transformed DataFrame.
         """
         if self._transformer is None:
-            raise RuntimeError("Transformer must be fitted before it can be used to transform data.")
+            msg = "Transformer must be fitted before it can be used to transform data."
+            logger.error(msg)
+            raise RuntimeError(msg)
 
         ds, df = self._cached_execute(
             lambda_func=lambda: self._transform(data_schema, dataframe),
