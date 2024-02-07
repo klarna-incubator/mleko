@@ -31,7 +31,7 @@ class TestCSVToVaexConverter:
         for df in dfs:
             assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, bool, null, string]"
             assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "class"]
-            assert df.shape == (3, 7)
+            assert df.shape == (4, 7)
             assert df.Name.countna() == 1
             df.close()
 
@@ -51,10 +51,11 @@ class TestCSVToVaexConverter:
         file_paths = generate_csv_files(temporary_directory, n_files)
         _, df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, string, string, string]"
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], float64, string, int8, string, string]"
         assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class"]
-        assert df.shape == (n_files * 2, 7)
+        assert df.shape == (n_files * 3, 7)
         assert df.Name.countna() == 0
+        assert df.Is_Best.tolist() == [0, None, 1]
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 1
 
