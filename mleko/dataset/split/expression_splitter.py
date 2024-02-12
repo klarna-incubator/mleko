@@ -24,8 +24,8 @@ class ExpressionSplitter(BaseSplitter):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         expression: str,
+        cache_directory: str | Path = "data/expression-splitter",
         cache_size: int = 1,
     ):
         """Initializes the `ExpressionSplitter` with the given parameters.
@@ -40,17 +40,17 @@ class ExpressionSplitter(BaseSplitter):
             expression `"date < scalar_datetime('2020-06-01')"`.
 
         Args:
-            cache_directory: The target directory where the split dataframes are to be saved.
             expression: A valid Vaex expression that evaluates to a boolean value. The rows for which the expression
                 evaluates to True will be returned as the first dataframe, and the remaining rows will be returned
                 as the second dataframe.
+            cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of entries to keep in the cache.
 
         Example:
             >>> import vaex
             >>> from mleko.data.split import ExpressionSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6])
-            >>> splitter = ExpressionSplitter(cache_directory="cache", expression="x > 1")
+            >>> splitter = ExpressionSplitter(expression="x > 1")
             >>> df_train, df_test = splitter.split(df)
             >>> df_train
                 #    x    y

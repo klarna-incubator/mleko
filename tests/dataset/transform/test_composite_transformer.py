@@ -37,11 +37,11 @@ class TestCompositeTransformer:
     ):
         """Should return vaex dataframe with transformed features."""
         test_composite_transformer = CompositeTransformer(
-            temporary_directory,
             [
-                LabelEncoderTransformer(temporary_directory, features=["a"]),
-                FrequencyEncoderTransformer(temporary_directory, features=["b"]),
+                LabelEncoderTransformer(features=["a"]),
+                FrequencyEncoderTransformer(features=["b"]),
             ],
+            temporary_directory,
         )
 
         ds, _, df = test_composite_transformer.fit_transform(example_data_schema, example_vaex_dataframe)
@@ -61,11 +61,11 @@ class TestCompositeTransformer:
     ):
         """Should return vaex dataframe with transformed features."""
         test_composite_transformer = CompositeTransformer(
-            temporary_directory,
             [
-                LabelEncoderTransformer(temporary_directory, features=["a"]),
-                FrequencyEncoderTransformer(temporary_directory, features=["b"]),
+                LabelEncoderTransformer(features=["a"]),
+                FrequencyEncoderTransformer(features=["b"]),
             ],
+            temporary_directory,
         )
 
         ds, _ = test_composite_transformer.fit(example_data_schema, example_vaex_dataframe)
@@ -86,11 +86,11 @@ class TestCompositeTransformer:
     ):
         """Should fit and transform the data and save the transformer to disk."""
         ds, _, df = CompositeTransformer(
-            temporary_directory,
             [
-                LabelEncoderTransformer(temporary_directory, features=["a"]),
-                FrequencyEncoderTransformer(temporary_directory, features=["b"]),
+                LabelEncoderTransformer(features=["a"]),
+                FrequencyEncoderTransformer(features=["b"]),
             ],
+            temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
         first_cache = list(temporary_directory.glob("*"))
 
@@ -101,11 +101,11 @@ class TestCompositeTransformer:
         assert str(ds) == "{'numerical': ['b'], 'categorical': ['a'], 'boolean': [], 'datetime': [], 'timedelta': []}"
 
         ds, _, df = CompositeTransformer(
-            temporary_directory,
             [
-                LabelEncoderTransformer(temporary_directory, features=["a"]),
-                FrequencyEncoderTransformer(temporary_directory, features=["b"]),
+                LabelEncoderTransformer(features=["a"]),
+                FrequencyEncoderTransformer(features=["b"]),
             ],
+            temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
         second_cache = list(temporary_directory.glob("*"))
 

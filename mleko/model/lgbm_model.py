@@ -91,7 +91,6 @@ class LGBMModel(BaseModel):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         target: str,
         feval: (
             _LGBM_CustomMetricFunction
@@ -181,6 +180,7 @@ class LGBMModel(BaseModel):
         eval_at: list[int] | tuple[int, ...] | None = None,
         multi_error_top_k: int = 1,
         auc_mu_weights: list[float] | tuple[float, ...] | None = None,
+        cache_directory: str | Path = "data/lgbm-model",
         cache_size: int = 1,
     ) -> None:
         """Initialize the LightGBM model with the given hyperparameters.
@@ -192,7 +192,6 @@ class LGBMModel(BaseModel):
 
 
         Args:
-            cache_directory: The target directory where the model will be saved.
             target: The name of the target feature.
             feval: Custom evaluation function(s). Should return a tuple (eval_name, eval_result, is_higher_better).
                 Refer to https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html#lightgbm.train.
@@ -301,6 +300,7 @@ class LGBMModel(BaseModel):
             eval_at: Used only with `ndcg` and `map` metrics, specifies the evaluation positions.
             multi_error_top_k: Used only in `multi_error` metric, specifies the threshold for top-k error metric.
             auc_mu_weights: Used only in `auc_mu` metric, specifies the weights for `auc_mu` metric.
+            cache_directory: The target directory where the model will be saved.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -312,7 +312,6 @@ class LGBMModel(BaseModel):
             ...    numerical=["sepal_length", "sepal_width", "petal_length", "petal_width"],
             ... )
             >>> model = LGBMModel(
-            ...     cache_directory=".",
             ...     target="class_",
             ...     features=["sepal_width", "petal_length", "petal_width"],
             ...     num_iterations=100,
@@ -322,7 +321,7 @@ class LGBMModel(BaseModel):
             ... )
             >>> booster, df_train_pred, df_test_pred = model.fit_transform(data_schema, df_train, df_test, {})
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(features, ignore_features, cache_directory, cache_size)
         lgb.register_logger(logger)
 
         self._verbosity = verbosity

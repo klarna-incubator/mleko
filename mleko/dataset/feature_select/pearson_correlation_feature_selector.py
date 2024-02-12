@@ -26,10 +26,10 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         correlation_threshold: float,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
+        cache_directory: str | Path = "data/pearson-correlation-feature-selector",
         cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
@@ -46,10 +46,10 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             correlation_threshold: The maximum correlation allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -63,14 +63,13 @@ class PearsonCorrelationFeatureSelector(BaseFeatureSelector):
             ... )
             >>> ds = DataSchema(numerical=["a", "b", "c"])
             >>> feature_selector = PearsonCorrelationFeatureSelector(
-            ...     cache_directory=".",
             ...     correlation_threshold=0.75,
             ... )
             >>> ds, _, df = feature_selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(features, ignore_features, cache_directory, cache_size)
         self._correlation_threshold = correlation_threshold
         self._feature_selector: set[str] = set()
 

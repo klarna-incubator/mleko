@@ -28,8 +28,8 @@ class CompositeTransformer(BaseTransformer):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         transformers: list[BaseTransformer] | tuple[BaseTransformer, ...],
+        cache_directory: str | Path = "data/composite-transformer",
         cache_size: int = 1,
     ) -> None:
         """Initializes the composite transformer.
@@ -39,8 +39,8 @@ class CompositeTransformer(BaseTransformer):
         and will only be performed on the final DataFrame.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             transformers: List of transformers to be combined.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -58,14 +58,11 @@ class CompositeTransformer(BaseTransformer):
             ...     categorical=["a", "b"],
             ... )
             >>> transformer = CompositeTransformer(
-            ...     cache_directory=".",
             ...     transformers=[
             ...         LabelEncoderTransformer(
-            ...             cache_directory=".",
             ...             features=["a"],
             ...         ),
             ...         FrequencyEncoderTransformer(
-            ...             cache_directory=".",
             ...             features=["b"],
             ...         ),
             ...     ],
@@ -76,7 +73,7 @@ class CompositeTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, [], cache_size)
+        super().__init__([], cache_directory, cache_size)
         self._transformers = tuple(transformers)
         self._transformer: list[Any] = []
 

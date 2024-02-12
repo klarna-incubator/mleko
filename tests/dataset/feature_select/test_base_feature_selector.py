@@ -54,7 +54,7 @@ class TestBaseFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should fit and transform dataframe."""
-        test_derived_transformer = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
+        test_derived_transformer = self.DerivedFeatureSelector([], None, temporary_directory, 1)
 
         _, transformer = test_derived_transformer.fit(example_data_schema, example_vaex_dataframe)
         _, df = test_derived_transformer.transform(example_data_schema, example_vaex_dataframe)
@@ -74,7 +74,7 @@ class TestBaseFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should return vaex dataframe from feature_select method."""
-        test_derived_feature_selector = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
+        test_derived_feature_selector = self.DerivedFeatureSelector([], None, temporary_directory, 1)
 
         _, feature_selector, df = test_derived_feature_selector.fit_transform(
             example_data_schema, example_vaex_dataframe
@@ -87,7 +87,7 @@ class TestBaseFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should raise error when transform is called before fit."""
-        test_derived_feature_selector = self.DerivedFeatureSelector(temporary_directory, [], None, 1)
+        test_derived_feature_selector = self.DerivedFeatureSelector([], None, temporary_directory, 1)
 
         with pytest.raises(RuntimeError):
             test_derived_feature_selector.transform(example_data_schema, example_vaex_dataframe)
@@ -95,4 +95,4 @@ class TestBaseFeatureSelector:
     def test_mutually_exclusive_arguments(self, temporary_directory: Path):
         """Should raise ValueError when both `features` and `exclude_features` are provided."""
         with pytest.raises(ValueError):
-            self.DerivedFeatureSelector(temporary_directory, [], [], 1)
+            self.DerivedFeatureSelector([], [], temporary_directory, 1)

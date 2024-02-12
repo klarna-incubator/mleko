@@ -37,9 +37,9 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
 
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...] | None,
         ignore_features: list[str] | tuple[str, ...] | None,
+        cache_directory: str | Path,
         cache_size: int,
     ) -> None:
         """Initializes the feature selector and ensures the destination directory exists.
@@ -49,11 +49,11 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             `ValueError` is raised.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the feature selector. If None, the default is all features
                 applicable to the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector. If None, the default is to
                 ignore no features.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of cache entries.
 
         Raises:

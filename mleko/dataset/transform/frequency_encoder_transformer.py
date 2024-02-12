@@ -25,9 +25,9 @@ class FrequencyEncoderTransformer(BaseTransformer):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
         unseen_strategy: Literal["zero", "nan"] = "nan",
+        cache_directory: str | Path = "data/frequency-encoder-transformer",
         cache_size: int = 1,
     ) -> None:
         """Initializes the transformer.
@@ -42,9 +42,9 @@ class FrequencyEncoderTransformer(BaseTransformer):
             result in very small frequencies.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             unseen_strategy: Strategy to use for unseen values once the transformer is fitted.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -60,7 +60,6 @@ class FrequencyEncoderTransformer(BaseTransformer):
             ...     categorical=["a", "b", "c"],
             ... )
             >>> _, _, df = FrequencyEncoderTransformer(
-            ...     cache_directory=".",
             ...     features=["a", "b"],
             ... ).fit_transform(ds, df)
             >>> df["a"].tolist()
@@ -68,7 +67,7 @@ class FrequencyEncoderTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
         """
-        super().__init__(cache_directory, features, cache_size)
+        super().__init__(features, cache_directory, cache_size)
         self._unseen_strategy = unseen_strategy
         self._transformer = vaex.ml.FrequencyEncoder(
             features=self._features, unseen_strategy=self._unseen_strategy, prefix=""

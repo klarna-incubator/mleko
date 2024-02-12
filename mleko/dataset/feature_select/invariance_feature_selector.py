@@ -25,9 +25,9 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
+        cache_directory: str | Path = "data/invariance-feature-selector",
         cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
@@ -43,9 +43,9 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -62,14 +62,12 @@ class InvarianceFeatureSelector(BaseFeatureSelector):
             ...     numerical=["a", "b", "c"],
             ...     categorical=["d"],
             ... )
-            >>> selector = InvarianceFeatureSelector(
-            ...     cache_directory=".",
-            ... )
+            >>> selector = InvarianceFeatureSelector()
             >>> ds, _, df = selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c', 'd']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(features, ignore_features, cache_directory, cache_size)
         self._feature_selector: set[str] = set()
 
     def _fit(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> tuple[DataSchema, set[str]]:

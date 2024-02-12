@@ -45,9 +45,9 @@ class BaseModel(LRUCacheMixin, ABC):
 
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...] | None,
         ignore_features: list[str] | tuple[str, ...] | None,
+        cache_directory: str | Path,
         cache_size: int,
     ) -> None:
         """Initializes the model and ensures the destination directory exists.
@@ -57,11 +57,11 @@ class BaseModel(LRUCacheMixin, ABC):
             `ValueError` is raised.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the model. If None, the default is all features
                 applicable to the model.
             ignore_features: List of feature names to be ignored by the model. If None, the default is to
                 ignore no features.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Raises:

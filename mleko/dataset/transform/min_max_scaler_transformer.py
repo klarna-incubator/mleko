@@ -25,10 +25,10 @@ class MinMaxScalerTransformer(BaseTransformer):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
         min_value: float = 0.0,
         max_value: float = 1.0,
+        cache_directory: str | Path = "data/min-max-scaler-transformer",
         cache_size: int = 1,
     ) -> None:
         """Initializes the min-max scaler transformer.
@@ -41,10 +41,10 @@ class MinMaxScalerTransformer(BaseTransformer):
             or an error will be raised.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
             min_value: The minimum value of the range.
             max_value: The maximum value of the range.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -58,7 +58,6 @@ class MinMaxScalerTransformer(BaseTransformer):
             ...     numerical=["a", "b"],
             ... )
             >>> _, _, df = MaxAbsScalerTransformer(
-            ...     cache_directory=".",
             ...     features=["a", "b"],
             ... ).fit_transform(ds, df)
             >>> df["a"].tolist()
@@ -66,7 +65,7 @@ class MinMaxScalerTransformer(BaseTransformer):
             >>> df["b"].tolist()
             [-0.2, -0.4, -0.6, -0.8, -1.0, 0.0, 0.2, 0.4, 0.6, 0.8]
         """
-        super().__init__(cache_directory, features, cache_size)
+        super().__init__(features, cache_directory, cache_size)
         self._min_value = min_value
         self._max_value = max_value
         self._transformer = vaex.ml.MinMaxScaler(

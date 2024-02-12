@@ -32,7 +32,7 @@ class TestMinMaxScalerTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly scale the specified features."""
-        min_max_scaler_transformer = MinMaxScalerTransformer(temporary_directory, features=["a", "b"])
+        min_max_scaler_transformer = MinMaxScalerTransformer(cache_directory=temporary_directory, features=["a", "b"])
         _, _, df = min_max_scaler_transformer._fit_transform(example_data_schema, example_vaex_dataframe)
 
         assert df["a"].tolist() == [0.0, 0.25, 0.5, 0.75, 1.0]  # type: ignore
@@ -43,7 +43,7 @@ class TestMinMaxScalerTransformer:
     ):
         """Should correctly scale the specified features on a larger range."""
         min_max_scaler_transformer = MinMaxScalerTransformer(
-            temporary_directory, features=["a", "b"], min_value=-1, max_value=1
+            cache_directory=temporary_directory, features=["a", "b"], min_value=-1, max_value=1
         )
         _, _, df = min_max_scaler_transformer._fit_transform(example_data_schema, example_vaex_dataframe)
 
@@ -54,12 +54,12 @@ class TestMinMaxScalerTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly scale the specified features and use cache if possible."""
-        MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(
+        MinMaxScalerTransformer(cache_directory=temporary_directory, features=["a", "b"]).fit_transform(
             example_data_schema, example_vaex_dataframe
         )
 
         with patch.object(MinMaxScalerTransformer, "_fit_transform") as mocked_fit_transform:
-            MinMaxScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(
+            MinMaxScalerTransformer(cache_directory=temporary_directory, features=["a", "b"]).fit_transform(
                 example_data_schema, example_vaex_dataframe
             )
             mocked_fit_transform.assert_not_called()

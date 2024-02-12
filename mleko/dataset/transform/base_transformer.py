@@ -31,15 +31,15 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
+        cache_directory: str | Path,
         cache_size: int,
     ) -> None:
         """Initializes the transformer and ensures the destination directory exists.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of cache entries to keep in the cache.
         """
         super().__init__(cache_directory, cache_size)

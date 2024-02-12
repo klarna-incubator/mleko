@@ -26,10 +26,10 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         missing_rate_threshold: float,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
+        cache_directory: str | Path = "data/missing-rate-feature-selector",
         cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
@@ -45,10 +45,10 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             missing_rate_threshold: The maximum missing rate allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -62,14 +62,13 @@ class MissingRateFeatureSelector(BaseFeatureSelector):
             ... )
             >>> ds = DataSchema(numerical=["a", "b", "c"])
             >>> ds, _, df = MissingRateFeatureSelector(
-            ...     cache_directory=".",
             ...     ignore_features=["c"],
             ...     missing_rate_threshold=0.3,
             ... ).fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'b']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(features, ignore_features, cache_directory, cache_size)
         self._missing_rate_threshold = missing_rate_threshold
         self._feature_selector: set[str] = set()
 

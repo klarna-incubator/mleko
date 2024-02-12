@@ -47,7 +47,6 @@ class OptunaTuner(BaseTuner):
 
     def __init__(
         self,
-        cache_directory: str | Path,
         objective_function: Callable[
             [optuna.Trial, DataSchema, vaex.DataFrame], float | list[float] | tuple[float, ...]
         ],
@@ -56,6 +55,7 @@ class OptunaTuner(BaseTuner):
         sampler: BaseSampler | None = None,
         pruner: optuna.pruners.BasePruner | None = None,
         random_state: int | None = None,
+        cache_directory: str | Path = "data/optuna-tuner",
         cache_size: int = 1,
     ) -> None:
         """Initializes a new OptunaTuner instance.
@@ -80,7 +80,6 @@ class OptunaTuner(BaseTuner):
             to avoid caching the results of each trial.
 
         Args:
-            cache_directory: The target directory where the output is to be saved.
             objective_function: The objective function to optimize. The function must
                 accept three arguments: the Optuna trial, the data schema, and the
                 DataFrame to be tuned on. The function must return either a single
@@ -99,6 +98,7 @@ class OptunaTuner(BaseTuner):
             random_state: The random state to use for the Optuna sampler. If None, the
                 default random state of the sampler is used. Setting this will override
                 the random state of the sampler.
+            cache_directory: The target directory where the output is to be saved.
             cache_size: The maximum number of cache entries.
 
         Examples:
@@ -113,7 +113,6 @@ class OptunaTuner(BaseTuner):
             ...         "num_leaves": trial.suggest_int("num_leaves", 10, 100),
             ...     }
             >>>     model = LGBMModel(
-            ...         cache_directory=".",
             ...         target="class_",
             ...         features=["sepal_width", "petal_length", "petal_width"],
             ...         num_iterations=100,
@@ -126,7 +125,6 @@ class OptunaTuner(BaseTuner):
             >>>     _, metrics, _, _ = model._fit_transform(data_schema, df_train, df_val, params)
             >>>     return metrics['validation']['auc'][-1]
             >>> optuna_tuner = OptunaTuner(
-            ...     cache_directory=f"data/{DATASET_NAME}/tune",
             ...     objective_function=objective_function,
             ...     direction="maximize",
             ...     num_trials=51,

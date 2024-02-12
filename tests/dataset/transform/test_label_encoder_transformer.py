@@ -33,7 +33,9 @@ class TestLabelEncoderTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly label encode specified features."""
-        label_encoder_transformer = LabelEncoderTransformer(temporary_directory, features=["a", "b", "c"])
+        label_encoder_transformer = LabelEncoderTransformer(
+            cache_directory=temporary_directory, features=["a", "b", "c"]
+        )
         _, _, df = label_encoder_transformer._fit_transform(example_data_schema, example_vaex_dataframe)
 
         assert sorted(df["a"].tolist()) == [0, 0, 1, 1]  # type: ignore
@@ -44,12 +46,12 @@ class TestLabelEncoderTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly label encode features and use cache if possible."""
-        LabelEncoderTransformer(temporary_directory, features=["a", "b", "c"]).fit_transform(
+        LabelEncoderTransformer(cache_directory=temporary_directory, features=["a", "b", "c"]).fit_transform(
             example_data_schema, example_vaex_dataframe
         )
 
         with patch.object(LabelEncoderTransformer, "_fit_transform") as mocked_fit_transform:
-            LabelEncoderTransformer(temporary_directory, features=["a", "b", "c"]).fit_transform(
+            LabelEncoderTransformer(cache_directory=temporary_directory, features=["a", "b", "c"]).fit_transform(
                 example_data_schema, example_vaex_dataframe
             )
             mocked_fit_transform.assert_not_called()

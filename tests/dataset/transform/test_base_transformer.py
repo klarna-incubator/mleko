@@ -50,7 +50,7 @@ class TestBaseTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should fit and transform dataframe."""
-        test_derived_transformer = self.DerivedTransformer(temporary_directory, [], 1)
+        test_derived_transformer = self.DerivedTransformer([], temporary_directory, 1)
 
         _, transformer = test_derived_transformer.fit(example_data_schema, example_vaex_dataframe)
         _, df = test_derived_transformer.transform(example_data_schema, example_vaex_dataframe)
@@ -70,7 +70,7 @@ class TestBaseTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should return vaex dataframe from feature_select method."""
-        test_derived_transformer = self.DerivedTransformer(temporary_directory, [], 1)
+        test_derived_transformer = self.DerivedTransformer([], temporary_directory, 1)
 
         _, transformer, df = test_derived_transformer.fit_transform(example_data_schema, example_vaex_dataframe)
         assert transformer == 1337
@@ -81,7 +81,7 @@ class TestBaseTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should raise error when transform is called before fit."""
-        test_derived_transformer = self.DerivedTransformer(temporary_directory, [], 1)
+        test_derived_transformer = self.DerivedTransformer([], temporary_directory, 1)
 
         with pytest.raises(RuntimeError):
             test_derived_transformer.transform(example_data_schema, example_vaex_dataframe)
