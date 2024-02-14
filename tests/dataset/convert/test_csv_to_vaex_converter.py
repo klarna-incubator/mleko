@@ -91,3 +91,22 @@ class TestCSVToVaexConverter:
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 2
         df.close()
         df_new.close()
+
+    def test_convert_meta_columns(self, temporary_directory: Path):
+        """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""
+        csv_to_arrow_converter = CSVToVaexConverter(
+            cache_directory=temporary_directory,
+            forced_categorical_columns=["Name", "Count"],
+            meta_columns=["Extra_Column", "Count"],
+        )
+
+        n_files = 1
+        file_paths = generate_csv_files(temporary_directory, n_files)
+        ds, df = csv_to_arrow_converter.convert(file_paths)
+
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], string, string, int8, string, string, string]"
+        assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class", "_empty"]
+        assert df.shape == (4, 8)
+        assert df.Name.countna() == 1
+        assert "Count" not in ds.get_features()
+        df.close()
