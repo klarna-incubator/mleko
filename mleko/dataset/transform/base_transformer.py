@@ -27,6 +27,12 @@ class BaseTransformer(LRUCacheMixin, ABC):
     `fit` method fits the transformer to the specified DataFrame, the `transform` method transforms the specified
     features in the DataFrame, and the `fit_transform` method fits the transformer to the specified DataFrame and
     transforms the specified features in the DataFrame.
+
+    Warning:
+        The _transformer attribute is not set by the base class. Subclasses must place all transformer-related logic
+        inside the attribute to correctly handle caching and ensure that the transformer is correctly assigned. For
+        example, the `fit` method should assign the fitted transformer to the _transformer attribute, and the
+        `transform` method should use the _transformer attribute to transform the DataFrame.
     """
 
     def __init__(
