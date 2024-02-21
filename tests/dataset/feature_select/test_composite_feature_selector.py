@@ -50,8 +50,8 @@ class TestCompositeFeatureSelector:
         """Should return vaex dataframe from feature_select method."""
         test_composite_feature_selector = CompositeFeatureSelector(
             [
-                MissingRateFeatureSelector(missing_rate_threshold=0.5),
-                VarianceFeatureSelector(variance_threshold=0.0),
+                MissingRateFeatureSelector(missing_rate_threshold=0.5, cache_directory=temporary_directory),
+                VarianceFeatureSelector(variance_threshold=0.0, cache_directory=temporary_directory),
             ],
             cache_directory=temporary_directory,
         )
@@ -70,8 +70,8 @@ class TestCompositeFeatureSelector:
         """Should return vaex dataframe from feature_select method using separate fit and transform calls."""
         test_composite_feature_selector = CompositeFeatureSelector(
             [
-                MissingRateFeatureSelector(missing_rate_threshold=0.5),
-                VarianceFeatureSelector(variance_threshold=0.0),
+                MissingRateFeatureSelector(missing_rate_threshold=0.5, cache_directory=temporary_directory),
+                VarianceFeatureSelector(variance_threshold=0.0, cache_directory=temporary_directory),
             ],
             cache_directory=temporary_directory,
         )
@@ -91,8 +91,8 @@ class TestCompositeFeatureSelector:
         """Should fit and transform the data and save the feature selector to disk."""
         (_, _, df) = CompositeFeatureSelector(
             [
-                MissingRateFeatureSelector(missing_rate_threshold=0.5),
-                VarianceFeatureSelector(variance_threshold=0.0),
+                MissingRateFeatureSelector(missing_rate_threshold=0.5, cache_directory=temporary_directory),
+                VarianceFeatureSelector(variance_threshold=0.0, cache_directory=temporary_directory),
             ],
             cache_directory=temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
@@ -103,8 +103,8 @@ class TestCompositeFeatureSelector:
 
         (_, _, df) = CompositeFeatureSelector(
             [
-                MissingRateFeatureSelector(missing_rate_threshold=0.5),
-                VarianceFeatureSelector(variance_threshold=0.0),
+                MissingRateFeatureSelector(missing_rate_threshold=0.5, cache_directory=temporary_directory),
+                VarianceFeatureSelector(variance_threshold=0.0, cache_directory=temporary_directory),
             ],
             cache_directory=temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)

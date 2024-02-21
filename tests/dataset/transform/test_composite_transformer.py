@@ -38,8 +38,8 @@ class TestCompositeTransformer:
         """Should return vaex dataframe with transformed features."""
         test_composite_transformer = CompositeTransformer(
             [
-                LabelEncoderTransformer(features=["a"]),
-                FrequencyEncoderTransformer(features=["b"]),
+                LabelEncoderTransformer(features=["a"], cache_directory=temporary_directory),
+                FrequencyEncoderTransformer(features=["b"], cache_directory=temporary_directory),
             ],
             temporary_directory,
         )
@@ -62,8 +62,8 @@ class TestCompositeTransformer:
         """Should return vaex dataframe with transformed features."""
         test_composite_transformer = CompositeTransformer(
             [
-                LabelEncoderTransformer(features=["a"]),
-                FrequencyEncoderTransformer(features=["b"]),
+                LabelEncoderTransformer(features=["a"], cache_directory=temporary_directory),
+                FrequencyEncoderTransformer(features=["b"], cache_directory=temporary_directory),
             ],
             temporary_directory,
         )
@@ -87,8 +87,8 @@ class TestCompositeTransformer:
         """Should fit and transform the data and save the transformer to disk."""
         ds, _, df = CompositeTransformer(
             [
-                LabelEncoderTransformer(features=["a"]),
-                FrequencyEncoderTransformer(features=["b"]),
+                LabelEncoderTransformer(features=["a"], cache_directory=temporary_directory),
+                FrequencyEncoderTransformer(features=["b"], cache_directory=temporary_directory),
             ],
             temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
@@ -102,8 +102,8 @@ class TestCompositeTransformer:
 
         ds, _, df = CompositeTransformer(
             [
-                LabelEncoderTransformer(features=["a"]),
-                FrequencyEncoderTransformer(features=["b"]),
+                LabelEncoderTransformer(features=["a"], cache_directory=temporary_directory),
+                FrequencyEncoderTransformer(features=["b"], cache_directory=temporary_directory),
             ],
             temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
