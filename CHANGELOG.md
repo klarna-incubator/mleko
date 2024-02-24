@@ -1,5 +1,15 @@
 # Changelog
 
+## [v2.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.1.0) (2024-02-24)
+
+### 🐛 Bug Fixes
+
+- **data cleaning:** Fix `meta_columns` not being forcefully cast to correct data type in `CSVToVaexConverter`. ([`b42b9ed`](https://github.com/klarna-incubator/mleko/commit/b42b9ed7a8592a4c3038bb3dc5b7dd512e4be2e6))
+
+### 🧪 Tests
+
+- Fix test cases generating cache directory outside temporary directory. ([`ba57fbf`](https://github.com/klarna-incubator/mleko/commit/ba57fbfc838fd213446524a652cf235e002dde25))
+
 ## [v2.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.0.0) (2024-02-07)
 
 ### ⛔️ BREAKING CHANGES
