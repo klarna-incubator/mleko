@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import inspect
 import logging
+import os
+import platform
+from datetime import datetime
 from pathlib import Path
 from typing import Callable, Hashable, Literal
 
@@ -21,6 +25,7 @@ from optuna.samplers import (
     TPESampler,
 )
 from optuna.samplers.nsgaii._child_generation_strategy import NSGAIIChildGenerationStrategy
+from optuna_dashboard import save_note
 from tqdm.auto import tqdm
 
 from mleko.cache.fingerprinters import (
@@ -54,15 +59,29 @@ class OptunaTuner(BaseTuner):
         num_trials: int,
         sampler: BaseSampler | None = None,
         pruner: optuna.pruners.BasePruner | None = None,
+        study_name: str | None = None,
+        storage_name: str | None = None,
         random_state: int | None = None,
         cache_directory: str | Path = "data/optuna-tuner",
         cache_size: int = 1,
     ) -> None:
         """Initializes a new OptunaTuner instance.
 
+        For more information about Optuna, please refer to the documentation:
+        https://optuna.readthedocs.io/en/stable/.
+
         Note:
-            For more information about Optuna, please refer to the documentation:
-            https://optuna.readthedocs.io/en/stable/
+            To visualize the optimization process, you can use the `optuna-dashboard`
+            package. By specifying the `storage_name` parameter, the tuner will save
+            the study to the specified file, which can then be visualized using the
+            `optuna-dashboard` command:
+            ```bash
+            optuna-dashboard sqlite:///PATH_TO_YOUR_OPTUNA_STORAGE.sqlite3
+            ```
+
+            The `study_name` parameter can be used to specify the name of the study,
+            which will be displayed in the `optuna-dashboard` interface. If the
+            `study_name` is not specified, the current date and time will be used.
 
         Warning:
             The caching functionality of the obective function is implemented by
@@ -95,6 +114,13 @@ class OptunaTuner(BaseTuner):
                 is used for multi-objective optimization.
             pruner: The Optuna pruner to use, if None `optuna.pruners.MedianPruner` is
                 used.
+            study_name: The name of the study. If None, the current date and time will
+                be used.
+            storage_name: The name of the storage to save the study to. If None, the
+                study will not be saved to disk. Specify the name of the file to save
+                the study to. The file will be saved to the `cache_directory` directory
+                withe the `.sqlite3` extension. E.g. `storage_name="my-study"` will
+                save the study to `cache_directory/my-study.sqlite3`.
             random_state: The random state to use for the Optuna sampler. If None, the
                 default random state of the sampler is used. Setting this will override
                 the random state of the sampler.
@@ -142,6 +168,11 @@ class OptunaTuner(BaseTuner):
         self._num_trials = num_trials
         self._sampler = sampler or (TPESampler() if isinstance(direction, list) else NSGAIISampler())
         self._pruner = pruner or optuna.pruners.MedianPruner()
+        self._study_name = study_name if study_name is not None else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self._storage_name = (
+            f"sqlite:///{self._cache_directory}/{storage_name}.sqlite3" if storage_name is not None else None
+        )
+        self._using_optuna_dashboard = True if self._storage_name is not None else False
         self._random_state = random_state
 
         self._reset_sampler_rng(self._sampler)
@@ -151,6 +182,9 @@ class OptunaTuner(BaseTuner):
             optuna_logger.removeHandler(handler)
         for handler in logger.handlers:
             optuna_logger.addHandler(handler)
+
+        if self._storage_name is not None:
+            logger.info(f"Optuna study is saved to {self._storage_name}, use optuna-dashboard to visualize it.")
 
     def _tune(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
@@ -167,9 +201,63 @@ class OptunaTuner(BaseTuner):
         self._reset_sampler_rng(self._sampler)
 
         if isinstance(self._direction, list):
-            study = optuna.create_study(sampler=self._sampler, pruner=self._pruner, directions=self._direction)
+            study = optuna.create_study(
+                sampler=self._sampler,
+                pruner=self._pruner,
+                directions=self._direction,
+                study_name=self._study_name,
+                storage=self._storage_name,
+            )
         else:
-            study = optuna.create_study(sampler=self._sampler, pruner=self._pruner, direction=self._direction)
+            study = optuna.create_study(
+                sampler=self._sampler,
+                pruner=self._pruner,
+                direction=self._direction,
+                study_name=self._study_name,
+                storage=self._storage_name,
+            )
+
+        if self._using_optuna_dashboard:
+
+            direction_str = (
+                self._direction if isinstance(self._direction, str) else ", ".join(self._direction)
+            ).upper()
+            save_note(
+                study,
+                f"""# Experiment Documentation
+
+## Overview
+| | |
+|---|---|
+| **Study Name** | {self._study_name} |
+| **Creation Date** | {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} |
+| **Creator** | {os.getlogin()} |
+---
+
+## Methodology
+
+### Experimental Setup
+
+| | |
+|---|---|
+| **Python Version** | `{platform.python_version()}` |
+| **Optuna Version** | `{optuna.__version__}` |
+| **Random State** | `{self._random_state}` |
+| **Number of Trials** | `{self._num_trials}` |
+| **Sampler** | `{self._sampler.__class__.__name__}` |
+| **Pruner** | `{self._pruner.__class__.__name__}` |
+| **Optimization Direction** | {direction_str} |
+
+## Notes
+> _Add any additional notes about the experiment here._
+
+## Appendix
+### Objective Function
+```python
+{inspect.getsource(self._objective_function)}
+```
+                """,
+            )
 
         with tqdm(total=self._num_trials) as pbar:
 
@@ -213,6 +301,7 @@ class OptunaTuner(BaseTuner):
             OptunaSamplerFingerprinter().fingerprint(self._sampler),
             OptunaPrunerFingerprinter().fingerprint(self._pruner),
             self._random_state,
+            self._storage_name,
         )
 
     def _reset_sampler_rng(self, sampler: BaseSampler) -> None:
