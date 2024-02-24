@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import getpass
 import inspect
 import logging
-import os
 import platform
 from datetime import datetime
 from pathlib import Path
@@ -218,7 +218,6 @@ class OptunaTuner(BaseTuner):
             )
 
         if self._using_optuna_dashboard:
-
             direction_str = (
                 self._direction if isinstance(self._direction, str) else ", ".join(self._direction)
             ).upper()
@@ -231,7 +230,7 @@ class OptunaTuner(BaseTuner):
 |---|---|
 | **Study Name** | {self._study_name} |
 | **Creation Date** | {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} |
-| **Creator** | {os.getlogin()} |
+| **Creator** | {getpass.getuser()} |
 ---
 
 ## Methodology
