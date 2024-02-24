@@ -58,6 +58,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any]:
         """Fits the transformer to the specified DataFrame, using the cached result if available.
 
@@ -66,6 +67,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame to be fitted.
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Updated data schema and fitted transformer.
@@ -76,6 +78,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=JOBLIB_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
         self._assign_transformer(transformer)
         return ds, transformer
@@ -86,6 +89,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, vaex.DataFrame]:
         """Transforms the specified features in the DataFrame, using the cached result if available.
 
@@ -94,6 +98,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame to be transformed.
             cache_group: The cache group to use.
             force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             RuntimeError: If the transformer has not been fitted.
@@ -112,6 +117,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         return ds, df
 
@@ -121,6 +127,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any, vaex.DataFrame]:
         """Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
 
@@ -129,6 +136,8 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame used for fitting and transformation.
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple of updated data schema, fitted transformer, and transformed DataFrame.
@@ -139,6 +148,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         self._assign_transformer(transformer)
         return ds, transformer, df

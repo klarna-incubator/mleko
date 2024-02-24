@@ -86,7 +86,11 @@ class RandomSplitter(BaseSplitter):
         self._random_state = random_state
 
     def split(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+        self,
+        dataframe: vaex.DataFrame,
+        cache_group: str | None = None,
+        force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.
 
@@ -98,6 +102,7 @@ class RandomSplitter(BaseSplitter):
             dataframe: The dataframe to be split.
             cache_group: The cache group to use.
             force_recompute: Whether to force recompute the split, even if the cache is available.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A tuple containing the split dataframes.
@@ -114,6 +119,7 @@ class RandomSplitter(BaseSplitter):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:

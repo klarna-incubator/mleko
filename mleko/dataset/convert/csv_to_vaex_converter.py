@@ -182,7 +182,11 @@ class CSVToVaexConverter(BaseConverter):
         self._random_state = random_state
 
     def convert(
-        self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
+        self,
+        file_paths: list[Path] | list[str],
+        cache_group: str | None = None,
+        force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, vaex.DataFrame]:
         """Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
 
@@ -199,6 +203,7 @@ class CSVToVaexConverter(BaseConverter):
             file_paths: A list of file paths to be converted.
             cache_group: The cache group to use.
             force_recompute: If set to True, forces recomputation and ignores the cache.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             The resulting dataframe with the combined converted data.
@@ -229,6 +234,7 @@ class CSVToVaexConverter(BaseConverter):
                     can_handle_none=False,
                 ),
             ],
+            disable_cache=disable_cache,
         )
         return ds, df
 

@@ -75,6 +75,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any]:
         """Fits the feature selector to the specified DataFrame, using the cached result if available.
 
@@ -83,6 +84,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             dataframe: DataFrame to be fitted.
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Updated DataSchema and fitted feature selector.
@@ -93,6 +95,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=JOBLIB_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
         self._assign_feature_selector(feature_selector)
         return ds, feature_selector
@@ -103,6 +106,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, vaex.DataFrame]:
         """Extracts the selected features from the DataFrame, using the cached result if available.
 
@@ -111,6 +115,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             dataframe: DataFrame to be transformed.
             cache_group: The cache group to use.
             force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             RuntimeError: If the feature selector has not been fitted.
@@ -129,6 +134,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         return ds, df
 
@@ -138,6 +144,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any, vaex.DataFrame]:
         """Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
 
@@ -147,6 +154,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
                 cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
@@ -157,6 +165,7 @@ class BaseFeatureSelector(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         self._assign_feature_selector(feature_selector)
         return ds, feature_selector, df

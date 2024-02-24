@@ -93,7 +93,7 @@ class CompositeTransformer(BaseTransformer):
                 f"Fitting composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            data_schema, fitted_transformer = transformer._fit(data_schema, dataframe)
+            data_schema, fitted_transformer = transformer.fit(data_schema, dataframe, disable_cache=True)
             fitted_transformers.append(fitted_transformer)
             logger.info(f"Finished fitting composite transformation step {i+1}/{len(self._transformers)}.")
         return data_schema, fitted_transformers
@@ -113,7 +113,7 @@ class CompositeTransformer(BaseTransformer):
                 f"Executing composite feature transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            data_schema, dataframe = transformer._transform(data_schema, dataframe)
+            data_schema, dataframe = transformer.transform(data_schema, dataframe, disable_cache=True)
             dataframe = dataframe.extract()
             logger.info(f"Finished composite transformation step {i+1}/{len(self._transformers)}.")
         return data_schema, dataframe
@@ -136,7 +136,9 @@ class CompositeTransformer(BaseTransformer):
                 f"Executing composite transformation step {i+1}/{len(self._transformers)}: "
                 f"{transformer.__class__.__name__}."
             )
-            data_schema, fitted_transformer, dataframe = transformer._fit_transform(data_schema, dataframe)
+            data_schema, fitted_transformer, dataframe = transformer.fit_transform(
+                data_schema, dataframe, disable_cache=True
+            )
             fitted_transformers.append(fitted_transformer)
             dataframe = dataframe.extract()
             logger.info(

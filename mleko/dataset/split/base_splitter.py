@@ -27,7 +27,11 @@ class BaseSplitter(LRUCacheMixin, ABC):
 
     @abstractmethod
     def split(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+        self,
+        dataframe: vaex.DataFrame,
+        cache_group: str | None = None,
+        force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Abstract method to split the given dataframe into two parts.
 
@@ -35,6 +39,7 @@ class BaseSplitter(LRUCacheMixin, ABC):
             dataframe: The dataframe to be split.
             cache_group: The cache group to use.
             force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             NotImplementedError: If the method is not implemented.

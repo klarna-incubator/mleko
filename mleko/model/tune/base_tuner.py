@@ -38,6 +38,7 @@ class BaseTuner(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[HyperparametersType, float | list[float] | tuple[float, ...], Any]:
         """Perform the hyperparameter tuning on the given DataFrame.
 
@@ -46,6 +47,7 @@ class BaseTuner(LRUCacheMixin, ABC):
             dataframe: DataFrame to be tuned on.
             cache_group: The cache group to use for caching.
             force_recompute: Weather to force recompute the result.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple containing the best hyperparameters, the best score, and a dictionary
@@ -59,6 +61,7 @@ class BaseTuner(LRUCacheMixin, ABC):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
 
     @abstractmethod

@@ -97,7 +97,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Fitting composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            data_schema, feature_selector = feature_selector._fit(data_schema, dataframe)
+            data_schema, feature_selector = feature_selector.fit(data_schema, dataframe, disable_cache=True)
             feature_selectors.append(feature_selector)
             logger.info(f"Finished fitting composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return data_schema, feature_selectors
@@ -117,7 +117,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            data_schema, dataframe = feature_selector._transform(data_schema, dataframe)
+            data_schema, dataframe = feature_selector.transform(data_schema, dataframe, disable_cache=True)
             dataframe = dataframe.extract()
             logger.info(f"Finished composite feature selection step {i+1}/{len(self._feature_selectors)}.")
         return data_schema, dataframe
@@ -140,7 +140,9 @@ class CompositeFeatureSelector(BaseFeatureSelector):
                 f"Executing composite feature selection step {i+1}/{len(self._feature_selectors)}: "
                 f"{feature_selector.__class__.__name__}."
             )
-            data_schema, feature_selector, dataframe = feature_selector._fit_transform(data_schema, dataframe)
+            data_schema, feature_selector, dataframe = feature_selector.fit_transform(
+                data_schema, dataframe, disable_cache=True
+            )
             feature_selectors.append(feature_selector)
             dataframe = dataframe.extract()
             logger.info(
