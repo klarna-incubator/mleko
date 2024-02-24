@@ -2,9 +2,20 @@
 
 ## [v2.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.1.0) (2024-02-24)
 
+### ✨ Features
+
+- Update Titanic dataset to `mleko` 2.0 API. ([`62bf991`](https://github.com/klarna-incubator/mleko/commit/62bf991fa1324fefe5d83fc0ea1c36f62f2cdbb3))
+- **tuning:** Add `optuna-dashboard` support to `OptunaTuner` including automatically generated experiment notes. ([`29d81c2`](https://github.com/klarna-incubator/mleko/commit/29d81c288b8dffcc9374bfa813e987bda80228df))
+- **transformer:** Improve flexibility of `LabelEncoderTransformer` by adding optional null encoding and manual dictionary mapping. ([`f7b30a9`](https://github.com/klarna-incubator/mleko/commit/f7b30a9a17388b27163fd9addae378935974ddab))
+- Set `cache_directory` as optional argument, with custom default locations. ([`08e8777`](https://github.com/klarna-incubator/mleko/commit/08e8777aac8fca0429e0cdc887426fbc25907bc2))
+
 ### 🐛 Bug Fixes
 
 - **data cleaning:** Fix `meta_columns` not being forcefully cast to correct data type in `CSVToVaexConverter`. ([`b42b9ed`](https://github.com/klarna-incubator/mleko/commit/b42b9ed7a8592a4c3038bb3dc5b7dd512e4be2e6))
+
+### 📝 Documentation
+
+- Update year in Copyright in README.md (#192) ([`eeb56e1`](https://github.com/klarna-incubator/mleko/commit/eeb56e1e04f34aff44527da463717f8cd41a2302))
 
 ### 🧪 Tests
 
@@ -16,6 +27,12 @@
 
 - **pipeline:** Refactor `PipelineStep` to use `TypedDict` for both inputs and outputs. ([`2eb623c`](https://github.com/klarna-incubator/mleko/commit/2eb623c593deab9fc87d3accdc7dcc8f5f600f97))
 
+### ✨ Features
+
+- **model:** Refactor validation_dataframe parameter in BaseModel and LGBMModel to be optional. ([`d18ed29`](https://github.com/klarna-incubator/mleko/commit/d18ed291926e1969ba8d4163964f443956626ae2))
+- **cache:** Add cache support for `None` returns on fields using cache handlers not equipped to process None. ([`a489996`](https://github.com/klarna-incubator/mleko/commit/a489996258884d1a584fc33388617ae758c7c009))
+- **model:** Add support for custom evaluation function in LGBMModel. ([`4e70a55`](https://github.com/klarna-incubator/mleko/commit/4e70a55304fd6a49109add2e6d987bb77f3a9eaf))
+
 ### 🐛 Bug Fixes
 
 - **data cleaning:** Rename empty column name to `_empty` to prevent `vaex` crashes. ([`da72b75`](https://github.com/klarna-incubator/mleko/commit/da72b757f8395112bd0a17644af09547d5c72c0a))
@@ -26,6 +43,10 @@
 
 - Improve error logging messages, and update codebase to new `black` format. ([`a29ad45`](https://github.com/klarna-incubator/mleko/commit/a29ad45156cad00e9cd01b09d677390187fc24d9))
 - **cache:** Break out cache handler retrieval method. ([`aba9e41`](https://github.com/klarna-incubator/mleko/commit/aba9e4158bc76b9fa8b2444ae26fd6889ec832e3))
+
+### 📝 Documentation
+
+- Refactor mleko package documentation to format bullet list correctly. ([`76ee895`](https://github.com/klarna-incubator/mleko/commit/76ee895fe284aff3409501a8628af61f18392364))
 
 ### 🤖 Continous Integration
 
@@ -79,6 +100,10 @@
 
 ## [v1.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v1.2.0) (2023-10-09)
 
+### ✨ Features
+
+- **data source:** ✨ Add support for pattern matching in `*Ingester` and add `LocalManifest` to index fetched files. ([`75974a4`](https://github.com/klarna-incubator/mleko/commit/75974a40aa1af5e21a4dedc7e0d05be2153ec7aa))
+
 ### 🐛 Bug Fixes
 
 - **logging:** 🐛 Fix LGBM logging routing to correct log level. ([`0e5fa77`](https://github.com/klarna-incubator/mleko/commit/0e5fa77ae14ccd27eb9b435ec8a73815fe764350))
@@ -94,6 +119,10 @@
 
 ## [v1.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v1.1.0) (2023-09-27)
 
+### ✨ Features
+
+- **tuning:** ✨ Add hyperparameter tuning functionality, initially including `OptunaTuner`. ([`be38c07`](https://github.com/klarna-incubator/mleko/commit/be38c075e269ed2e42560dfa26ac71ab08448444))
+
 ### 🧪 Tests
 
 - **tuning:** 🧪 Add test cases for `TuneStep`. ([`d811c7d`](https://github.com/klarna-incubator/mleko/commit/d811c7d4f60b4440b669cf723d3b85ee962efc97))
@@ -104,6 +133,14 @@
 
 - 📝 Improve `README.md` with more up to date information. ([`b388b59`](https://github.com/klarna-incubator/mleko/commit/b388b59a9c8da0df56da532a0cc17b347089a146))
 
+### ✨ Features
+
+- **transformer:** ✨ Add `DataSchema` API to transformers `fit`, `transform` and `fit_transform`. ([`e053c85`](https://github.com/klarna-incubator/mleko/commit/e053c854238614ef23c6e8ff7eedc004cbeedf71))
+
+### 📝 Documentation
+
+- 📝 Add example notebook for `Titanic` dataset. ([`e651af9`](https://github.com/klarna-incubator/mleko/commit/e651af99d96f2d012faaf6ab5c73cc681f7a5b5b))
+
 ## [v0.8.1](https://github.com/klarna-incubator/mleko/releases/tag/v0.8.1) (2023-09-07)
 
 ### 🐛 Bug Fixes
@@ -111,6 +148,14 @@
 - **config:** 🐛 Fix readthedocs build to only generate html. ([`13fc207`](https://github.com/klarna-incubator/mleko/commit/13fc207adbba82fa9cc2d4dcad91038aecafa34f))
 
 ## [v0.8.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.8.0) (2023-09-06)
+
+### ✨ Features
+
+- **model:** ✨ Add `LGBMModel` along with base class which can be extended for all types of future models. ([`b47a241`](https://github.com/klarna-incubator/mleko/commit/b47a2412e8925226d5612e4b57c521f562c51636))
+- ✨ Add` DataSchema` which tracks dataset features throughout the pipeline and methods. ([`e03bd2c`](https://github.com/klarna-incubator/mleko/commit/e03bd2cbc9e75347eeea37f5f818d05a2548c3de))
+- **feature selection:** ✨ Update `BaseFeatureSelector` and children to use the `fit`, `transform` and `fit_transform` pattern. ([`62e4dd1`](https://github.com/klarna-incubator/mleko/commit/62e4dd13a37a852f239c490d2693b20665095cf6))
+- **transformer:** ✨ Add `fit`, `transform` and `fit_transform` to all `Transformers`, along with API and caching simplificatons. ([`5cc4ebc`](https://github.com/klarna-incubator/mleko/commit/5cc4ebc9da3b3f3aa5e8788d1237ac2c79ee4693))
+- **cache:** ✨ Add `CacheHandler` which allows customization of read/write functions for each cached return value individually. ([`609e084`](https://github.com/klarna-incubator/mleko/commit/609e084e7c354bed5a298b3a3a1c3b033d3db71d))
 
 ### 🐛 Bug Fixes
 
@@ -121,6 +166,11 @@
 - **cache:** 🚸 Replace `disable_cache` with a check if `cache_size=0` for `LRUCacheMixin`. ([`cfd7592`](https://github.com/klarna-incubator/mleko/commit/cfd759297d2d0e3b21f0f79827baab7c8b882784))
 
 ## [v0.7.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.7.0) (2023-07-11)
+
+### ✨ Features
+
+- ✨ Add fit transform support to all `FeatureSelector` along with refactoring the `LRUCacheMixin`. ([`3df0601`](https://github.com/klarna-incubator/mleko/commit/3df06011085a1230c00250260374e5fd5d325fad))
+- ✨ Add support for separate fitting and transforming inside the pipeline. ([`bb9b7a4`](https://github.com/klarna-incubator/mleko/commit/bb9b7a4ea9920d5588972a29e390bac4017b45af))
 
 ### 🐛 Bug Fixes
 
@@ -139,7 +189,20 @@
 
 ## [v0.6.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.6.0) (2023-06-26)
 
+### ✨ Features
+
+- **cache:** ✨ Add cache_group that can segment an instance cache into different isolated parts. (#66) ([`5fa8c9c`](https://github.com/klarna-incubator/mleko/commit/5fa8c9c39b96402daab25f12dabdcf95f425e066))
+- **cache:** ✨ Add cache_group that can segment an instance cache into different isolated parts. ([`b5c3de5`](https://github.com/klarna-incubator/mleko/commit/b5c3de5f1397bfb9422590ba037f431c2eaad9ac))
+
 ## [v0.5.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.5.0) (2023-06-17)
+
+### ✨ Features
+
+- **transformer:** ✨ Add MinMaxScalerTransformer for normalizing numerical features. ([`9b26c00`](https://github.com/klarna-incubator/mleko/commit/9b26c00ecefa12929a2316309ba5b3e55022b5a5))
+- **transformer:** ✨ Add MaxAbsScalerTransformer that scales numerical features. ([`1fd2a93`](https://github.com/klarna-incubator/mleko/commit/1fd2a9369bfb74eba3d0015024857070f31bbe34))
+- **transformer:** ✨ Add CompositeTransformer for chaining together multiple transformers sequentially. ([`006d741`](https://github.com/klarna-incubator/mleko/commit/006d74157167e4ddb2c575ca897662de8a1c0d4d))
+- **transformer:** ✨ Add LabelEncoderTransformer for ordinal encoding. ([`41a4c45`](https://github.com/klarna-incubator/mleko/commit/41a4c45dcb7a232f2a8f3af3a39e9bcf4bcb3929))
+- **transformer:** ✨ Add FrequencyEncoderTransformer along with support for pipeline. ([`465e6db`](https://github.com/klarna-incubator/mleko/commit/465e6db3b2830e3cc3f996af9eacb36b8ccf8468))
 
 ### 🛠️ Code Refactoring
 
@@ -150,6 +213,10 @@
 - ✅ Now _get_local_filenames returns a sorted list of filenames to ensure stability. ([`774e8eb`](https://github.com/klarna-incubator/mleko/commit/774e8eb2a38e5904a170473c56523926b3acffb4))
 
 ## [v0.4.2](https://github.com/klarna-incubator/mleko/releases/tag/v0.4.2) (2023-06-11)
+
+### 🚀 Performance improvements
+
+- ⚡️ Optimize VarianceFeatureSelector when threshold is 0. ([`906dde3`](https://github.com/klarna-incubator/mleko/commit/906dde391d83bc3b07ac5a56bb690dba294e757f))
 
 ### 🛠️ Code Refactoring
 
@@ -167,6 +234,14 @@
 - **feature selection:** 🐛 Fix `FeatureSelector` cache to use tuple instead of frozenset to have stable fingerprint. ([`cd82417`](https://github.com/klarna-incubator/mleko/commit/cd824177e252ae00af4d2ed8cc50b607c4a4928f))
 
 ## [v0.4.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.4.0) (2023-06-03)
+
+### ✨ Features
+
+- **feature selection:** ✨ Add  that filters out invariant features. ([`798c261`](https://github.com/klarna-incubator/mleko/commit/798c26103b41fd32f71d16b7b8d40f647f2c849b))
+- **feature selection:** ✨ Add `PearsonCorrelationFeatureSelector` which drops highly correlated features. ([`66e5cd2`](https://github.com/klarna-incubator/mleko/commit/66e5cd28a4621172ed1c3d27cfc430b89d7da321))
+- **feature selection:** ✨ Add `CompositeFeatureSelector`, for chaining multiple feature selection steps on the same DataFrame. ([`3d75079`](https://github.com/klarna-incubator/mleko/commit/3d75079d1bc9ab1102a9edb6dbb545b03f43b4dd))
+- **feature selection:** ✨ Add standard deviation feature selector. ([`c56177b`](https://github.com/klarna-incubator/mleko/commit/c56177bb7e25cbf763418707d09976290f659088))
+- **feature selection:** ✨ Add missing rate feature selector. ([`d5ba8b5`](https://github.com/klarna-incubator/mleko/commit/d5ba8b57ae4102b2c5c424556d86640f2934dc46))
 
 ### 🐛 Bug Fixes
 
@@ -194,6 +269,10 @@
 
 ## [v0.3.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.3.0) (2023-05-21)
 
+### ✨ Features
+
+- new notes (#54) ([`21239f7`](https://github.com/klarna-incubator/mleko/commit/21239f7f7f26cb8fe7b419e81a3e7fe9dd3736fd))
+
 ### 🐛 Bug Fixes
 
 - **data splitting:** :bug: Added notes and examples to splitters docstrings. ([`d162c86`](https://github.com/klarna-incubator/mleko/commit/d162c8611c0284d0a83e4b5ad9664f964351d194))
@@ -204,6 +283,15 @@
 - :rocket: Updated release to only trigger if the commit message does not contain chore(release). ([`c9f3f3f`](https://github.com/klarna-incubator/mleko/commit/c9f3f3f4a666bcbac44bf86478487057e95609e0))
 
 ## [v0.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.2.0) (2023-05-21)
+
+### ✨ Features
+
+- add data splitting step (#53) ([`a668b1a`](https://github.com/klarna-incubator/mleko/commit/a668b1a0cd61b6fa1970f401f8209accd40e083f))
+
+### 📝 Documentation
+
+- Removed duplicate row. ([`5d77131`](https://github.com/klarna-incubator/mleko/commit/5d77131341fb9d241fb179115f1dbd51c9962059))
+- Adding pre-commit check for conventional commits. ([`dd2076e`](https://github.com/klarna-incubator/mleko/commit/dd2076e38711368a94ba7b454ce830caf23ebf1d))
 
 ## [v0.1.3](https://github.com/klarna-incubator/mleko/releases/tag/v0.1.3) (2023-05-13)
 
@@ -218,7 +306,15 @@
 - **cache:** :bug: Fixed LRUCacheMixin eviction test case. ([`ce5bfc1`](https://github.com/klarna-incubator/mleko/commit/ce5bfc17aabaf858778eb42ef40c9f38a9e2ae97))
 - :bug: Temporarely disabled failing tests for cache. ([`9c17960`](https://github.com/klarna-incubator/mleko/commit/9c17960185606b6e9d150154bc4b6aac6592a7cc))
 
+### 📝 Documentation
+
+- :memo: Fixed sphinx-autoapi build warnings. ([`040963a`](https://github.com/klarna-incubator/mleko/commit/040963ae3e0bcf871ea80591d9efa43aee66c157))
+
 ## [v0.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v0.1.0) (2023-05-12)
+
+### ✨ Features
+
+- **data source:** :sparkles: Add KaggleDataSource to download the dataset from Kaggle by providing a destination directory, owner slug, dataset slug, and necessary API credentials. ([`3fa07b6`](https://github.com/klarna-incubator/mleko/commit/3fa07b633a4347c27b576ea93d38946d721babdf))
 
 ### 🐛 Bug Fixes
 
