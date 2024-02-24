@@ -66,7 +66,7 @@ Their insights and contributions provided a solid foundation for this library. W
 
 ## License
 
-Copyright © 2023 Klarna Bank AB
+Copyright © 2024 Klarna Bank AB
 
 For license details, see the [LICENSE](https://github.com/klarna-incubator/mleko/blob/main/LICENSE) file in the root of this project.
 
