@@ -34,11 +34,11 @@ class RandomSplitter(BaseSplitter):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         data_split: tuple[float, float] = (0.80, 0.20),
         shuffle: bool = True,
         stratify: str | None = None,
         random_state: int | None = None,
+        cache_directory: str | Path = "data/random-splitter",
         cache_size: int = 1,
     ):
         """Initializes the `RandomSplitter` with the given parameters.
@@ -55,20 +55,20 @@ class RandomSplitter(BaseSplitter):
             the rows with missing values, imputing the missing values, or transforming the target to numeric or boolean.
 
         Args:
-            cache_directory: The target directory where the split dataframes are to be saved.
             data_split: A tuple containing the desired split percentages or weights for the train and test dataframes.
                 If the sum of the values is not equal to 1, the values will be normalized. Meaning, if the values are
                 (0.90, 0.20), the resulting split will be (0.818, 0.182).
             shuffle: Whether to shuffle the data before splitting.
             stratify: The name of the column to use for stratification. If None, stratification will not be performed.
             random_state: The seed to use for random number generation.
+            cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of entries to keep in the cache.
 
         Example:
             >>> import vaex
             >>> from mleko.data.split import RandomSplitter
             >>> df = vaex.from_arrays(x=[1, 2, 3, 4], y=[0, 1, 1, 0])
-            >>> splitter = RandomSplitter(cache_directory="cache", data_split=(0.50, 0.50), shuffle=True, stratify="y")
+            >>> splitter = RandomSplitter(data_split=(0.50, 0.50), shuffle=True, stratify="y")
             >>> df_train, df_test = splitter.split(df)
             >>> df_train
                 #    x    y

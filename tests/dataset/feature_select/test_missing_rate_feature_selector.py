@@ -46,7 +46,7 @@ class TestMissingRateFeatureSelector:
     ):
         """Should filter away columns with missing rate above threshold excluding ignored columns."""
         test_missing_rate_feature_selector = MissingRateFeatureSelector(
-            temporary_directory, ignore_features=["target"], missing_rate_threshold=0.2
+            cache_directory=temporary_directory, ignore_features=["target"], missing_rate_threshold=0.2
         )
 
         (_, _, df) = test_missing_rate_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
@@ -58,7 +58,7 @@ class TestMissingRateFeatureSelector:
     ):
         """Should filter away columns with missing rate above threshold including only specified columns."""
         test_missing_rate_feature_selector = MissingRateFeatureSelector(
-            temporary_directory, features=["b"], missing_rate_threshold=0.5
+            cache_directory=temporary_directory, features=["b"], missing_rate_threshold=0.5
         )
 
         (_, _, df) = test_missing_rate_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
@@ -69,14 +69,14 @@ class TestMissingRateFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should filter away columns with missing rate above threshold."""
-        (_, _, df) = MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).fit_transform(
-            example_data_schema, example_vaex_dataframe
-        )
+        (_, _, df) = MissingRateFeatureSelector(
+            cache_directory=temporary_directory, missing_rate_threshold=0.2
+        ).fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (10, 1)
         assert df.column_names == ["a"]
 
         with patch.object(MissingRateFeatureSelector, "_fit_transform") as mock_fit_transform:
-            MissingRateFeatureSelector(temporary_directory, missing_rate_threshold=0.2).fit_transform(
+            MissingRateFeatureSelector(cache_directory=temporary_directory, missing_rate_threshold=0.2).fit_transform(
                 example_data_schema, example_vaex_dataframe
             )
             mock_fit_transform.assert_not_called()

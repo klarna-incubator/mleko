@@ -17,7 +17,7 @@ class TestCSVToVaexConverter:
 
     def test_convert(self, temporary_directory: Path):
         """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""
-        csv_to_arrow_converter = CSVToVaexConverter(temporary_directory)
+        csv_to_arrow_converter = CSVToVaexConverter(cache_directory=temporary_directory)
 
         n_files = 2
         file_paths = generate_csv_files(temporary_directory, n_files)
@@ -38,7 +38,7 @@ class TestCSVToVaexConverter:
     def test_cache_hit(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and return cached values on second call."""
         csv_to_arrow_converter = CSVToVaexConverter(
-            temporary_directory,
+            cache_directory=temporary_directory,
             forced_numerical_columns=["Count"],
             forced_categorical_columns=["Name"],
             forced_boolean_columns=["Is_Best"],
@@ -61,7 +61,7 @@ class TestCSVToVaexConverter:
 
         with patch.object(CSVToVaexConverter, "_convert") as patched_convert:
             new_csv_to_arrow_converter = CSVToVaexConverter(
-                temporary_directory,
+                cache_directory=temporary_directory,
                 forced_numerical_columns=["Count"],
                 forced_categorical_columns=["Name"],
                 forced_boolean_columns=["Is_Best"],
@@ -76,7 +76,7 @@ class TestCSVToVaexConverter:
     def test_cache_miss(self, temporary_directory: Path):
         """Should convert a number of CSV files to arrow and cache miss on second call."""
         csv_to_arrow_converter = CSVToVaexConverter(
-            temporary_directory, downcast_float=True, num_workers=1, cache_size=2
+            cache_directory=temporary_directory, downcast_float=True, num_workers=1, cache_size=2
         )
 
         n_files = 1
@@ -84,10 +84,29 @@ class TestCSVToVaexConverter:
         _, df = csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         new_csv_to_arrow_converter = CSVToVaexConverter(
-            temporary_directory, downcast_float=False, num_workers=1, cache_size=2
+            cache_directory=temporary_directory, downcast_float=False, num_workers=1, cache_size=2
         )
         _, df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
         assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 2
         df.close()
         df_new.close()
+
+    def test_convert_meta_columns(self, temporary_directory: Path):
+        """Should convert CSV files to arrow files using '_convert' and save them to the output directory."""
+        csv_to_arrow_converter = CSVToVaexConverter(
+            cache_directory=temporary_directory,
+            forced_categorical_columns=["Name", "Count"],
+            meta_columns=["Extra_Column", "Count"],
+        )
+
+        n_files = 1
+        file_paths = generate_csv_files(temporary_directory, n_files)
+        ds, df = csv_to_arrow_converter.convert(file_paths)
+
+        assert str(list(df.dtypes)) == "[datetime64[s], datetime64[s], string, string, int8, string, string, string]"
+        assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class", "_empty"]
+        assert df.shape == (4, 8)
+        assert df.Name.countna() == 1
+        assert "Count" not in ds.get_features()
+        df.close()

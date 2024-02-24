@@ -37,7 +37,7 @@ class TestPearsonCorrelationFeatureSelector:
     ):
         """Should drop identical columns."""
         correlation_feature_selector = PearsonCorrelationFeatureSelector(
-            temporary_directory, ignore_features=["target"], correlation_threshold=1.0
+            cache_directory=temporary_directory, ignore_features=["target"], correlation_threshold=1.0
         )
         (_, _, df) = correlation_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 5)
@@ -48,7 +48,7 @@ class TestPearsonCorrelationFeatureSelector:
     ):
         """Should drop features with correlation above threshold."""
         correlation_feature_selector = PearsonCorrelationFeatureSelector(
-            temporary_directory, ignore_features=["b", "target"], correlation_threshold=0.7
+            cache_directory=temporary_directory, ignore_features=["b", "target"], correlation_threshold=0.7
         )
         (_, _, df) = correlation_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 4)
@@ -59,13 +59,13 @@ class TestPearsonCorrelationFeatureSelector:
     ):
         """Should cache the result of the feature selection."""
         (_, _, df) = PearsonCorrelationFeatureSelector(
-            temporary_directory, ignore_features=["target"], correlation_threshold=0.7
+            cache_directory=temporary_directory, ignore_features=["target"], correlation_threshold=0.7
         ).fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 4)
         assert df.column_names == ["a", "b", "string_col", "target"]
 
         with patch.object(PearsonCorrelationFeatureSelector, "_fit_transform") as mocked_fit_transform:
             PearsonCorrelationFeatureSelector(
-                temporary_directory, ignore_features=["target"], correlation_threshold=0.7
+                cache_directory=temporary_directory, ignore_features=["target"], correlation_threshold=0.7
             ).fit_transform(example_data_schema, example_vaex_dataframe)
             mocked_fit_transform.assert_not_called()

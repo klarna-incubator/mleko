@@ -35,7 +35,7 @@ class TestInvarianceFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should drop invariant categorical and boolean columns."""
-        invariance_feature_selector = InvarianceFeatureSelector(temporary_directory)
+        invariance_feature_selector = InvarianceFeatureSelector(cache_directory=temporary_directory)
         (_, _, df) = invariance_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 3)
         assert df.column_names == ["a", "d", "e"]
@@ -44,7 +44,9 @@ class TestInvarianceFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should include numerical columns if specified."""
-        invariance_feature_selector = InvarianceFeatureSelector(temporary_directory, features=["a", "b", "d", "e"])
+        invariance_feature_selector = InvarianceFeatureSelector(
+            cache_directory=temporary_directory, features=["a", "b", "d", "e"]
+        )
         (_, _, df) = invariance_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 3)
         assert df.column_names == ["c", "d", "e"]
@@ -53,12 +55,14 @@ class TestInvarianceFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly drop invariant columns and use cache if possible."""
-        (_, _, df) = InvarianceFeatureSelector(temporary_directory).fit_transform(
+        (_, _, df) = InvarianceFeatureSelector(cache_directory=temporary_directory).fit_transform(
             example_data_schema, example_vaex_dataframe
         )
         assert df.shape == (5, 3)
         assert df.column_names == ["a", "d", "e"]
 
         with patch.object(InvarianceFeatureSelector, "_fit_transform") as mocked_fit_transform:
-            InvarianceFeatureSelector(temporary_directory).fit_transform(example_data_schema, example_vaex_dataframe)
+            InvarianceFeatureSelector(cache_directory=temporary_directory).fit_transform(
+                example_data_schema, example_vaex_dataframe
+            )
             mocked_fit_transform.assert_not_called()

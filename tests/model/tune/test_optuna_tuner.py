@@ -139,3 +139,29 @@ class TestOptunaTuner:
             num_trials=10,
             random_state=42,
         )
+
+    def test_tune_with_storage(
+        self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
+    ):
+        """Should run hyperparameter tuning with `Optuna` towards a single objective and use a storage."""
+
+        def objective_function(trial, _data_schema, _dataframe):
+            hyperparameters = {
+                "x": trial.suggest_float("x", 1e-8, 10.0, log=True),
+            }
+
+            return len(example_vaex_dataframe["a"].tolist()) * hyperparameters["x"]  # type: ignore
+
+        test_tuner = OptunaTuner(
+            cache_directory=temporary_directory,
+            objective_function=objective_function,
+            direction="maximize",
+            storage_name="test",
+            num_trials=10,
+            random_state=42,
+        )
+
+        params, score, study = test_tuner._tune(example_data_schema, example_vaex_dataframe)
+        assert params == {"x": 3.6010467344475403}
+        assert score == 14.404186937790161
+        assert isinstance(study, optuna.study.Study)

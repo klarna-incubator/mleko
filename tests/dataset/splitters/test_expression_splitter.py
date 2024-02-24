@@ -39,7 +39,9 @@ class TestExpressionDataSplitter:
 
     def test_split_by_index(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes based on index."""
-        test_expression_data_splitter = ExpressionSplitter(temporary_directory, expression="(a < 2) | (a > 7)")
+        test_expression_data_splitter = ExpressionSplitter(
+            cache_directory=temporary_directory, expression="(a < 2) | (a > 7)"
+        )
 
         df_train, df_test = test_expression_data_splitter._split(example_vaex_dataframe)
         assert df_train.shape == (4, 4)
@@ -53,7 +55,7 @@ class TestExpressionDataSplitter:
     def test_split_by_date(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes based on date."""
         test_expression_data_splitter = ExpressionSplitter(
-            temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
+            cache_directory=temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
         )
 
         df_train, df_test = test_expression_data_splitter._split(example_vaex_dataframe)
@@ -74,7 +76,7 @@ class TestExpressionDataSplitter:
     def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should test the cache of the expression splitter."""
         test_expression_data_splitter = ExpressionSplitter(
-            temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
+            cache_directory=temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
         )
 
         test_expression_data_splitter.split(example_vaex_dataframe)

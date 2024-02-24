@@ -820,6 +820,17 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 botocore = ["botocore"]
 
 [[package]]
+name = "bottle"
+version = "0.12.25"
+description = "Fast and simple WSGI-framework for small web-applications."
+optional = false
+python-versions = "*"
+files = [
+    {file = "bottle-0.12.25-py3-none-any.whl", hash = "sha256:d6f15f9d422670b7c073d63bd8d287b135388da187a0f3e3c19293626ce034ea"},
+    {file = "bottle-0.12.25.tar.gz", hash = "sha256:e1a9c94970ae6d710b3fb4526294dfeb86f2cb4a81eff3a4b98dc40fb0e5e021"},
+]
+
+[[package]]
 name = "bqplot"
 version = "0.12.42"
 description = "Interactive plotting for the Jupyter notebook, using d3.js and ipywidgets."
@@ -3051,6 +3062,29 @@ document = ["ase", "botorch", "cma", "cmaes (>=0.10.0)", "distributed", "fvcore"
 integration = ["botorch (>=0.4.0)", "catboost (>=0.26)", "catboost (>=0.26,<1.2)", "cma", "distributed", "lightgbm", "lightning", "mlflow", "pandas", "pytorch-ignite", "scikit-learn (>=0.24.2)", "scikit-optimize", "shap", "tensorflow", "torch", "torchaudio", "torchvision", "wandb", "xgboost"]
 optional = ["boto3", "botorch", "cmaes (>=0.10.0)", "google-cloud-storage", "matplotlib (!=3.6.0)", "pandas", "plotly (>=4.9.0)", "redis", "scikit-learn (>=0.24.2)"]
 test = ["coverage", "fakeredis[lua]", "kaleido", "moto", "pytest", "scipy (>=1.9.2)"]
+
+[[package]]
+name = "optuna-dashboard"
+version = "0.14.0"
+description = "Real-time dashboard for Optuna"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "optuna-dashboard-0.14.0.tar.gz", hash = "sha256:d3cd381a7b8b30246d3ac9014e25a3725cfaef6928807ceac96698d97badd988"},
+    {file = "optuna_dashboard-0.14.0-py3-none-any.whl", hash = "sha256:e17af62420bd7888e99c6c98b696b05851de264cd74fe44e2862fe598ec3d9cb"},
+]
+
+[package.dependencies]
+bottle = "*"
+optuna = ">=2.4.0"
+packaging = "*"
+scikit-learn = "*"
+
+[package.extras]
+docs = ["boto3", "botorch", "sphinx", "sphinx-rtd-theme", "streamlit"]
+optional = ["boto3", "botorch (>=0.8.1)", "streamlit"]
+preferential = ["botorch (>=0.8.1)"]
+test = ["coverage", "moto[s3]", "plotly", "pytest"]
 
 [[package]]
 name = "packaging"
@@ -5563,4 +5597,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.11.dev0"
-content-hash = "c5d1c2d5166af27b1fdabb01f361e8649e5a43261682fe948611f07a65223973"
+content-hash = "f68d1e82e15b17991ce56ffb58829e648216207de0db474c356d0bf301db9830"

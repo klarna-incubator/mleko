@@ -32,7 +32,7 @@ class TestMaxAbsScalerTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly scale the specified features."""
-        max_abs_scaler_transformer = MaxAbsScalerTransformer(temporary_directory, features=["a", "b"])
+        max_abs_scaler_transformer = MaxAbsScalerTransformer(cache_directory=temporary_directory, features=["a", "b"])
         _, _, df = max_abs_scaler_transformer._fit_transform(example_data_schema, example_vaex_dataframe)
 
         assert df["a"].tolist() == [0.2, 0.4, 0.6, 0.8, 1.0]  # type: ignore
@@ -42,12 +42,12 @@ class TestMaxAbsScalerTransformer:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should correctly scale the specified features and use cache if possible."""
-        MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(
+        MaxAbsScalerTransformer(cache_directory=temporary_directory, features=["a", "b"]).fit_transform(
             example_data_schema, example_vaex_dataframe
         )
 
         with patch.object(MaxAbsScalerTransformer, "_fit_transform") as mocked_fit_transform:
-            MaxAbsScalerTransformer(temporary_directory, features=["a", "b"]).fit_transform(
+            MaxAbsScalerTransformer(cache_directory=temporary_directory, features=["a", "b"]).fit_transform(
                 example_data_schema, example_vaex_dataframe
             )
             mocked_fit_transform.assert_not_called()

@@ -23,14 +23,14 @@ class TestBaseIngester:
         """Should create the destination directory and sets _destination_dir attribute."""
         test_data = self.DataSource(temporary_directory, None)
         assert temporary_directory.exists()
-        assert test_data._destination_directory == temporary_directory
+        assert test_data._cache_directory == temporary_directory
 
     def test_init_with_fingerprint(self, temporary_directory: Path):
         """Should create the destination directory and sets _destination_dir attribute."""
         test_data = self.DataSource(temporary_directory, "fingerprint")
-        destination_directory = temporary_directory / "fingerprint"
-        assert destination_directory.exists()
-        assert test_data._destination_directory == destination_directory
+        cache_directory = temporary_directory / "fingerprint"
+        assert cache_directory.exists()
+        assert test_data._cache_directory == cache_directory
 
 
 class TestLocalManifestHandler:

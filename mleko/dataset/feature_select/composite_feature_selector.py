@@ -28,8 +28,8 @@ class CompositeFeatureSelector(BaseFeatureSelector):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         feature_selectors: list[BaseFeatureSelector] | tuple[BaseFeatureSelector, ...],
+        cache_directory: str | Path = "data/composite-feature-selector",
         cache_size: int = 1,
     ) -> None:
         """Initializes the composite feature selector.
@@ -38,8 +38,8 @@ class CompositeFeatureSelector(BaseFeatureSelector):
         selector will be applied to the DataFrame in the order they are specified.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             feature_selectors: List of feature selectors to be combined.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -54,14 +54,11 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             ...     numerical=["a", "b", "c"],
             ... )
             >>> feature_selector = CompositeFeatureSelector(
-            ...     cache_directory=".",
             ...     feature_selectors=[
             ...         MissingRateFeatureSelector(
-            ...             cache_directory=".",
             ...             missing_rate_threshold=0.75,
             ...         ),
             ...         MissingRateFeatureSelector(
-            ...             cache_directory=".",
             ...             missing_rate_threshold=0.50,
             ...         ),
             ...     ],
@@ -80,7 +77,7 @@ class CompositeFeatureSelector(BaseFeatureSelector):
             8    9    None
             9   10    None
         """
-        super().__init__(cache_directory, None, None, cache_size)
+        super().__init__(None, None, cache_directory, cache_size)
         self._feature_selectors = tuple(feature_selectors)
         self._feature_selector: list[Any] = []
 

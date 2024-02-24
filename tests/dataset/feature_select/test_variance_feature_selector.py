@@ -41,7 +41,7 @@ class TestVarianceFeatureSelector:
     ):
         """Should drop columns with standard deviation of 0."""
         variance_feature_selector = VarianceFeatureSelector(
-            temporary_directory, ignore_features=["target"], variance_threshold=0
+            cache_directory=temporary_directory, ignore_features=["target"], variance_threshold=0
         )
         (_, _, df) = variance_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 4)
@@ -52,7 +52,7 @@ class TestVarianceFeatureSelector:
     ):
         """Should drop columns depending on normalized standard deviation threshold."""
         variance_feature_selector = VarianceFeatureSelector(
-            temporary_directory, ignore_features=["b", "target"], variance_threshold=0.004
+            cache_directory=temporary_directory, ignore_features=["b", "target"], variance_threshold=0.004
         )
         (_, _, df) = variance_feature_selector._fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 3)
@@ -62,14 +62,14 @@ class TestVarianceFeatureSelector:
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
         """Should perform standard deviation feature selection on numeric columns by default."""
-        (_, _, df) = VarianceFeatureSelector(temporary_directory, variance_threshold=0.004).fit_transform(
-            example_data_schema, example_vaex_dataframe
-        )
+        (_, _, df) = VarianceFeatureSelector(
+            cache_directory=temporary_directory, variance_threshold=0.004
+        ).fit_transform(example_data_schema, example_vaex_dataframe)
         assert df.shape == (5, 2)
         assert df.column_names == ["string_col", "target"]
 
         with patch.object(VarianceFeatureSelector, "_fit_transform") as mocked_fit_transform:
-            VarianceFeatureSelector(temporary_directory, variance_threshold=0.004).fit_transform(
+            VarianceFeatureSelector(cache_directory=temporary_directory, variance_threshold=0.004).fit_transform(
                 example_data_schema, example_vaex_dataframe
             )
             mocked_fit_transform.assert_not_called()

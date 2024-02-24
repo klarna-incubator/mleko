@@ -27,19 +27,25 @@ class BaseTransformer(LRUCacheMixin, ABC):
     `fit` method fits the transformer to the specified DataFrame, the `transform` method transforms the specified
     features in the DataFrame, and the `fit_transform` method fits the transformer to the specified DataFrame and
     transforms the specified features in the DataFrame.
+
+    Warning:
+        The _transformer attribute is not set by the base class. Subclasses must place all transformer-related logic
+        inside the attribute to correctly handle caching and ensure that the transformer is correctly assigned. For
+        example, the `fit` method should assign the fitted transformer to the _transformer attribute, and the
+        `transform` method should use the _transformer attribute to transform the DataFrame.
     """
 
     def __init__(
         self,
-        cache_directory: str | Path,
         features: list[str] | tuple[str, ...],
+        cache_directory: str | Path,
         cache_size: int,
     ) -> None:
         """Initializes the transformer and ensures the destination directory exists.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             features: List of feature names to be used by the transformer.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of cache entries to keep in the cache.
         """
         super().__init__(cache_directory, cache_size)

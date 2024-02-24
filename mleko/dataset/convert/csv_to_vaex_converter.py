@@ -92,7 +92,6 @@ class CSVToVaexConverter(BaseConverter):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         forced_numerical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_categorical_columns: list[str] | tuple[str, ...] | tuple[()] = (),
         forced_boolean_columns: list[str] | tuple[str, ...] | tuple[()] = (),
@@ -123,12 +122,12 @@ class CSVToVaexConverter(BaseConverter):
         downcast_float: bool = False,
         random_state: int | None = None,
         num_workers: int = V_CPU_COUNT,
+        cache_directory: str | Path = "data/csv-to-vaex-converter",
         cache_size: int = 1,
     ) -> None:
         """Initializes the `CSVToArrowConverter` with the necessary configurations and parameters.
 
         Args:
-            cache_directory: The directory where the converted files will be saved.
             forced_numerical_columns: A sequence of column names to force as numerical type.
             forced_categorical_columns: A sequence of column names to force as categorical type.
             forced_boolean_columns: A sequence of column names to force as boolean type.
@@ -141,6 +140,7 @@ class CSVToVaexConverter(BaseConverter):
             downcast_float: If True, downcast float64 to float32 during conversion.
             random_state: A seed for the random number generator.
             num_workers: Number of workers to use for parallel processing.
+            cache_directory: The directory where the converted files will be saved.
             cache_size: Maximum number of cache entries for the LRUCacheMixin.
 
         Warning:
@@ -153,7 +153,6 @@ class CSVToVaexConverter(BaseConverter):
             >>> import vaex
             >>> from mleko.dataset.convert import CSVToArrowConverter
             >>> converter = CSVToArrowConverter(
-            ...     cache_directory="cache",
             ...     forced_numerical_columns=["x"],
             ...     forced_categorical_columns=["y"],
             ...     forced_boolean_columns=["z"],
@@ -345,6 +344,9 @@ class CSVToVaexConverter(BaseConverter):
                 logger.warning(f"Renaming column {column_name!r} to '_empty'")
                 df.rename(column_name, "_empty")
 
+        for column_name in df.get_column_names(dtype="bool"):
+            df[column_name] = get_column(df, column_name).astype("int8")
+
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
 
@@ -360,7 +362,5 @@ class CSVToVaexConverter(BaseConverter):
         )
         ds.drop_features(self._meta_columns)
 
-        for column_name in df.get_column_names(dtype="bool"):
-            df[column_name] = get_column(df, column_name).astype("int8")
         logger.info("Merging chunks into a single DataFrame.")
         return ds, df

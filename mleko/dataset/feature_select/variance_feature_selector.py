@@ -26,10 +26,10 @@ class VarianceFeatureSelector(BaseFeatureSelector):
     @auto_repr
     def __init__(
         self,
-        cache_directory: str | Path,
         variance_threshold: float,
         features: list[str] | tuple[str, ...] | None = None,
         ignore_features: list[str] | tuple[str, ...] | None = None,
+        cache_directory: str | Path = "data/variance-feature-selector",
         cache_size: int = 1,
     ) -> None:
         """Initializes the feature selector.
@@ -45,10 +45,10 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             target feature or some identifier.
 
         Args:
-            cache_directory: Directory where the cache will be stored locally.
             variance_threshold: The minimum variance allowed for a feature to be selected.
             features: List of feature names to be used by the feature selector.
             ignore_features: List of feature names to be ignored by the feature selector.
+            cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
         Examples:
@@ -66,15 +66,14 @@ class VarianceFeatureSelector(BaseFeatureSelector):
             ...     categorical=["d"],
             ... )
             >>> selector = VarianceFeatureSelector(
-            ...     cache_directory=".",
-            ...     ignore_features=["c"],
             ...     variance_threshold=0.1,
+            ...     ignore_features=["c"],
             ... )
             >>> ds, _, df = selector.fit_transform(ds, df)
             >>> df.get_column_names()
             ['a', 'c', 'd']
         """
-        super().__init__(cache_directory, features, ignore_features, cache_size)
+        super().__init__(features, ignore_features, cache_directory, cache_size)
         self._variance_threshold = variance_threshold
         self._feature_selector: set[str] = set()
 
