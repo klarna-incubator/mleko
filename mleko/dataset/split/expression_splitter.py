@@ -27,7 +27,7 @@ class ExpressionSplitter(BaseSplitter):
         expression: str,
         cache_directory: str | Path = "data/expression-splitter",
         cache_size: int = 1,
-    ):
+    ) -> None:
         """Initializes the `ExpressionSplitter` with the given parameters.
 
         The expression should be a valid Vaex expression that evaluates to a boolean

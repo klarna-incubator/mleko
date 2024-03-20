@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from .convert_step import ConvertStep
 from .feature_select_step import FeatureSelectStep
+from .filter_step import FilterStep
 from .ingest_step import IngestStep
 from .model_step import ModelStep
 from .split_step import SplitStep
@@ -16,4 +17,13 @@ from .transform_step import TransformStep
 from .tune_step import TuneStep
 
 
-__all__ = ["IngestStep", "ConvertStep", "SplitStep", "FeatureSelectStep", "TransformStep", "ModelStep", "TuneStep"]
+__all__ = [
+    "IngestStep",
+    "ConvertStep",
+    "SplitStep",
+    "FeatureSelectStep",
+    "TransformStep",
+    "ModelStep",
+    "TuneStep",
+    "FilterStep",
+]

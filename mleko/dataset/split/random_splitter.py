@@ -40,7 +40,7 @@ class RandomSplitter(BaseSplitter):
         random_state: int | None = None,
         cache_directory: str | Path = "data/random-splitter",
         cache_size: int = 1,
-    ):
+    ) -> None:
         """Initializes the `RandomSplitter` with the given parameters.
 
         Note:
