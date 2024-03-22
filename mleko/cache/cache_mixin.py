@@ -118,6 +118,7 @@ class CacheMixin:
         cache_group: str | None = None,
         force_recompute: bool = False,
         cache_handlers: CacheHandler | list[CacheHandler] | None = None,
+        disable_cache: bool = False,
     ) -> Any:
         """Executes the given function, caching the results based on the provided cache keys and fingerprints.
 
@@ -140,13 +141,14 @@ class CacheMixin:
                 be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
                 files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
                 each cache file.
+            disable_cache: Overrides the class-level `disable_cache` attribute. If set to True, disables the cache.
 
         Returns:
             A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
             given function. If a cached result is available and `force_recompute` is False, the cached result will be
             returned instead of recomputing the result.
         """
-        if self._disable_cache:
+        if self._disable_cache or disable_cache:
             return lambda_func()
 
         if cache_handlers is None:

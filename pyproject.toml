@@ -31,6 +31,7 @@ lightgbm = "^4.0.0"
 optuna = "^3.3.0"
 optuna-dashboard = "^0.14.0"
 urllib3 = ">=1.25.4,<1.27" # workaround for: https://github.com/python-poetry/poetry-plugin-export/issues/183
+imbalanced-learn = "^0.12.0"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"

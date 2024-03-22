@@ -107,7 +107,7 @@ class LGBMModel(BaseModel):
         learning_rate: float = 0.1,
         num_leaves: int = 31,
         tree_learner: LGBMTreeLearnerType = "serial",
-        random_state: int | None = None,
+        random_state: int | None = 42,
         force_col_wise: bool = False,
         force_row_wise: bool = False,
         histogram_pool_size: float = -1,

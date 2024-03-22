@@ -28,7 +28,11 @@ class BaseConverter(LRUCacheMixin, ABC):
 
     @abstractmethod
     def convert(
-        self, file_paths: list[Path] | list[str], cache_group: str | None = None, force_recompute: bool = False
+        self,
+        file_paths: list[Path] | list[str],
+        cache_group: str | None = None,
+        force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, vaex.DataFrame]:
         """Abstract method to convert the input file paths to the desired output format.
 
@@ -36,6 +40,7 @@ class BaseConverter(LRUCacheMixin, ABC):
             file_paths: A list of input file paths to be converted.
             cache_group: The cache group to use.
             force_recompute: If set to True, forces recomputation and ignores the cache.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             NotImplementedError: If the method is not implemented.

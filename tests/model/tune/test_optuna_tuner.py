@@ -75,6 +75,46 @@ class TestOptunaTuner:
             test_tuner.tune(example_data_schema, example_vaex_dataframe)
             mocked_tune.assert_not_called()
 
+    def test_tune_single_objective_with_cv(
+        self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
+    ):
+        """Should run hyperparameter tuning with `Optuna` towards a single objective with cross validation."""
+
+        def objective_function(trial, _data_schema, _dataframe):
+            hyperparameters = {
+                "x": trial.suggest_float("x", 1e-8, 10.0, log=True),
+            }
+
+            return len(example_vaex_dataframe["a"].tolist()) * hyperparameters["x"]  # type: ignore
+
+        def cv_folds(_data_schema, dataframe):
+            cv_datasets = []
+            splits = dataframe.split_random(into=3, random_state=1)
+            for i, validation_df in enumerate(splits):
+                train_df = vaex.concat([df for j, df in enumerate(splits) if j != i])
+                cv_datasets.append((train_df, validation_df))
+
+            return cv_datasets
+
+        test_tuner = OptunaTuner(
+            cache_directory=temporary_directory,
+            objective_function=objective_function,
+            cv_folds=cv_folds,
+            direction="maximize",
+            num_trials=10,
+            random_state=42,
+        )
+
+        params, score, study = test_tuner.tune(example_data_schema, example_vaex_dataframe)
+        assert params == {"x": 3.6010467344475403}
+        assert score == 14.404186937790161
+        assert isinstance(study, optuna.study.Study)
+
+        with patch.object(OptunaTuner, "_tune") as mocked_tune:
+            mocked_tune.return_value = {}, 1337, {}
+            test_tuner.tune(example_data_schema, example_vaex_dataframe)
+            mocked_tune.assert_not_called()
+
     def test_tune_multi_objective(
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
     ):

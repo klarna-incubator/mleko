@@ -9,9 +9,8 @@ from typing import Any, Dict, Hashable, Union
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
-from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
+from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -86,6 +85,7 @@ class BaseModel(LRUCacheMixin, ABC):
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]]]:
         """Fits the model to the specified DataFrame, using the specified hyperparameters.
 
@@ -99,6 +99,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 be merged with the default hyperparameters specified during the model initialization.
             cache_group: The cache group to use for caching.
             force_recompute: Whether to force recompute the result.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Fitted model and the metrics dictionary. The metrics dictionary is a dictionary of dictionaries. The outer
@@ -121,13 +122,14 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=JOBLIB_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
         self._assign_model(model)
         return model, metrics
@@ -138,6 +140,7 @@ class BaseModel(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> vaex.DataFrame:
         """Transforms the specified DataFrame using the fitted model.
 
@@ -146,6 +149,7 @@ class BaseModel(LRUCacheMixin, ABC):
             dataframe: DataFrame to be transformed.
             cache_group: The cache group to use for caching.
             force_recompute: Whether to force recompute the result.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             RuntimeError: If the model has not been fitted.
@@ -163,12 +167,13 @@ class BaseModel(LRUCacheMixin, ABC):
             cache_key_inputs=[
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
 
     def fit_transform(
@@ -179,6 +184,7 @@ class BaseModel(LRUCacheMixin, ABC):
         hyperparameters: HyperparametersType | None = None,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]:
         """Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
 
@@ -191,6 +197,7 @@ class BaseModel(LRUCacheMixin, ABC):
             hyperparameters: Hyperparameters to be used for fitting.
             cache_group: The cache group to use for caching.
             force_recompute: Whether to force recompute the result.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple of fitted model, the metrics dictionary, transformed train DataFrame,
@@ -217,7 +224,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,
             ],
@@ -229,6 +236,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 VAEX_DATAFRAME_CACHE_HANDLER,
                 VAEX_DATAFRAME_CACHE_HANDLER,
             ],
+            disable_cache=disable_cache,
         )
         self._assign_model(model)
         return model, metrics, df_train, df_validation

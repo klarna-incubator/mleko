@@ -1,8 +1,4 @@
-"""Module handling dataframe splitting.
-
-This module contains the SplitStep class, which is responsible for splitting a DataFrame into two parts.
-It uses a BaseDataSplitter to perform the actual splitting.
-"""
+"""Module containing the SplitStep class."""
 
 from __future__ import annotations
 
