@@ -11,6 +11,7 @@
     "transformer",
     "model",
     "tuning",
-    "logging"
+    "logging",
+    "filter"
   ]
 }

@@ -8,9 +8,8 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
-from mleko.cache.handlers.pickle_cache_handler import PICKLE_CACHE_HANDLER
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
+from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
 from mleko.model.base_model import HyperparametersType
@@ -38,6 +37,7 @@ class BaseTuner(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[HyperparametersType, float | list[float] | tuple[float, ...], Any]:
         """Perform the hyperparameter tuning on the given DataFrame.
 
@@ -46,6 +46,7 @@ class BaseTuner(LRUCacheMixin, ABC):
             dataframe: DataFrame to be tuned on.
             cache_group: The cache group to use for caching.
             force_recompute: Weather to force recompute the result.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple containing the best hyperparameters, the best score, and a dictionary
@@ -55,10 +56,15 @@ class BaseTuner(LRUCacheMixin, ABC):
         """
         return self._cached_execute(
             lambda_func=lambda: self._tune(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
 
     @abstractmethod

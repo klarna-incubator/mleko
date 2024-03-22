@@ -27,7 +27,7 @@ class ExpressionSplitter(BaseSplitter):
         expression: str,
         cache_directory: str | Path = "data/expression-splitter",
         cache_size: int = 1,
-    ):
+    ) -> None:
         """Initializes the `ExpressionSplitter` with the given parameters.
 
         The expression should be a valid Vaex expression that evaluates to a boolean
@@ -64,7 +64,11 @@ class ExpressionSplitter(BaseSplitter):
         self._expression = expression
 
     def split(
-        self, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False
+        self,
+        dataframe: vaex.DataFrame,
+        cache_group: str | None = None,
+        force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[vaex.DataFrame, vaex.DataFrame]:
         """Split the given dataframe into two parts.
 
@@ -72,6 +76,7 @@ class ExpressionSplitter(BaseSplitter):
             dataframe: The dataframe to be split.
             cache_group: The cache group to use.
             force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A tuple containing the split dataframes.
@@ -85,6 +90,7 @@ class ExpressionSplitter(BaseSplitter):
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
 
     def _split(self, dataframe: vaex.DataFrame) -> tuple[vaex.DataFrame, vaex.DataFrame]:

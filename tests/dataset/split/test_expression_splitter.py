@@ -34,16 +34,16 @@ def example_vaex_dataframe() -> vaex.DataFrame:
     return df
 
 
-class TestExpressionDataSplitter:
-    """Test suite for `dataset.split.expression_splitter.ExpressionDataSplitter`."""
+class TestExpressionSplitter:
+    """Test suite for `dataset.split.expression_splitter.ExpressionSplitter`."""
 
     def test_split_by_index(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes based on index."""
-        test_expression_data_splitter = ExpressionSplitter(
+        test_expression_splitter = ExpressionSplitter(
             cache_directory=temporary_directory, expression="(a < 2) | (a > 7)"
         )
 
-        df_train, df_test = test_expression_data_splitter._split(example_vaex_dataframe)
+        df_train, df_test = test_expression_splitter._split(example_vaex_dataframe)
         assert df_train.shape == (4, 4)
         assert df_train.column_names == ["a", "b", "target", "date"]
         assert df_train["target"].tolist() == [0, 0, 1, 0]  # type: ignore
@@ -54,11 +54,11 @@ class TestExpressionDataSplitter:
 
     def test_split_by_date(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes based on date."""
-        test_expression_data_splitter = ExpressionSplitter(
+        test_expression_splitter = ExpressionSplitter(
             cache_directory=temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
         )
 
-        df_train, df_test = test_expression_data_splitter._split(example_vaex_dataframe)
+        df_train, df_test = test_expression_splitter._split(example_vaex_dataframe)
         assert df_train.shape == (5, 4)
         assert df_train.column_names == ["a", "b", "target", "date"]
         assert df_train["target"].tolist() == [0, 0, 0, 0, 0]  # type: ignore
@@ -75,12 +75,12 @@ class TestExpressionDataSplitter:
 
     def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should test the cache of the expression splitter."""
-        test_expression_data_splitter = ExpressionSplitter(
+        test_expression_splitter = ExpressionSplitter(
             cache_directory=temporary_directory, expression='date < scalar_datetime("2020-06-01 00:00:00")'
         )
 
-        test_expression_data_splitter.split(example_vaex_dataframe)
+        test_expression_splitter.split(example_vaex_dataframe)
 
         with patch.object(ExpressionSplitter, "_split") as mocked_split:
-            test_expression_data_splitter.split(example_vaex_dataframe)
+            test_expression_splitter.split(example_vaex_dataframe)
             mocked_split.assert_not_called()

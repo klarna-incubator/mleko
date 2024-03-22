@@ -52,16 +52,24 @@ class OptunaTuner(BaseTuner):
 
     def __init__(
         self,
-        objective_function: Callable[
-            [optuna.Trial, DataSchema, vaex.DataFrame], float | list[float] | tuple[float, ...]
-        ],
+        objective_function: (
+            Callable[
+                [optuna.Trial, DataSchema, vaex.DataFrame],
+                float | list[float] | tuple[float, ...],
+            ]
+            | Callable[
+                [optuna.Trial, DataSchema, list[tuple[vaex.DataFrame, vaex.DataFrame]]],
+                float | list[float] | tuple[float, ...],
+            ]
+        ),
         direction: OptimizeDirection | list[OptimizeDirection],
         num_trials: int,
+        cv_folds: Callable[[DataSchema, vaex.DataFrame], list[tuple[vaex.DataFrame, vaex.DataFrame]]] | None = None,
         sampler: BaseSampler | None = None,
         pruner: optuna.pruners.BasePruner | None = None,
         study_name: str | None = None,
         storage_name: str | None = None,
-        random_state: int | None = None,
+        random_state: int | None = 42,
         cache_directory: str | Path = "data/optuna-tuner",
         cache_size: int = 1,
     ) -> None:
@@ -101,13 +109,18 @@ class OptunaTuner(BaseTuner):
         Args:
             objective_function: The objective function to optimize. The function must
                 accept three arguments: the Optuna trial, the data schema, and the
-                DataFrame to be tuned on. The function must return either a single
-                float value or a list/tuple of float values. If a list/tuple is
-                returned, the tuner will perform multi-objective optimization.
+                DataFrame or CV list of DataFrames to be tuned on. The function must
+                return either a single float value or a list/tuple of float values.
+                If a list/tuple is returned, the tuner will perform multi-objective
+                optimization.
             direction: The direction of optimization. Either "maximize" or "minimize".
                 If a list of directions is given, the tuner will perform multi-objective
                 optimization. The length of the list must match the length of the list
                 returned by the objective function.
+            cv_folds: The cross-validation function to use. The function must accept
+                the data schema and the DataFrame to be tuned on and return a list of
+                tuples containing the training and validation DataFrames. The length
+                of the list must match the number of folds to perform.
             num_trials: The number of trials to perform.
             sampler: The Optuna sampler to use, if None `TPESampler` is
                 used for single-objective optimization and `NSGAIISampler`
@@ -154,7 +167,7 @@ class OptunaTuner(BaseTuner):
             ...     objective_function=objective_function,
             ...     direction="maximize",
             ...     num_trials=51,
-            ...     random_state=RANDOM_STATE,
+            ...     random_state=42,
             ... )
             >>> dataframe = vaex.ml.datasets.load_iris()
             >>> data_schema = DataSchema(
@@ -166,6 +179,7 @@ class OptunaTuner(BaseTuner):
         self._objective_function = objective_function
         self._direction = direction
         self._num_trials = num_trials
+        self._cv_folds = cv_folds
         self._sampler = sampler or (TPESampler() if isinstance(direction, list) else NSGAIISampler())
         self._pruner = pruner or optuna.pruners.MedianPruner()
         self._study_name = study_name if study_name is not None else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -272,11 +286,21 @@ class OptunaTuner(BaseTuner):
 
                 pbar.set_description(f"Best trial: {best_trial} | Best score: {best_values}")
 
-            study.optimize(
-                lambda trial: self._objective_function(trial, data_schema.copy(), dataframe.copy()),
-                n_trials=self._num_trials,
-                callbacks=[tqdm_callback],
-            )
+            if self._cv_folds is not None:
+                cv_folds = [
+                    (df_train.copy(), df_val.copy()) for df_train, df_val in self._cv_folds(data_schema, dataframe)
+                ]
+                study.optimize(
+                    lambda trial: self._objective_function(trial, data_schema.copy(), cv_folds),  # type: ignore
+                    n_trials=self._num_trials,
+                    callbacks=[tqdm_callback],
+                )
+            else:
+                study.optimize(
+                    lambda trial: self._objective_function(trial, data_schema.copy(), dataframe.copy()),
+                    n_trials=self._num_trials,
+                    callbacks=[tqdm_callback],
+                )
 
         best_parameters = study.best_trials[0].params
         best_score = study.best_trials[0].values
@@ -297,6 +321,7 @@ class OptunaTuner(BaseTuner):
             CallableSourceFingerprinter().fingerprint(self._objective_function),
             self._direction,
             self._num_trials,
+            CallableSourceFingerprinter().fingerprint(self._cv_folds) if self._cv_folds is not None else None,
             OptunaSamplerFingerprinter().fingerprint(self._sampler),
             OptunaPrunerFingerprinter().fingerprint(self._pruner),
             self._random_state,

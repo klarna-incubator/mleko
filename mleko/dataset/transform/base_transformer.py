@@ -8,7 +8,7 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
 from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
@@ -58,6 +58,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any]:
         """Fits the transformer to the specified DataFrame, using the cached result if available.
 
@@ -66,16 +67,22 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame to be fitted.
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Updated data schema and fitted transformer.
         """
         ds, transformer = self._cached_execute(
             lambda_func=lambda: self._fit(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=JOBLIB_CACHE_HANDLER,
+            disable_cache=disable_cache,
         )
         self._assign_transformer(transformer)
         return ds, transformer
@@ -86,6 +93,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, vaex.DataFrame]:
         """Transforms the specified features in the DataFrame, using the cached result if available.
 
@@ -94,6 +102,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame to be transformed.
             cache_group: The cache group to use.
             force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             RuntimeError: If the transformer has not been fitted.
@@ -108,10 +117,15 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
         ds, df = self._cached_execute(
             lambda_func=lambda: self._transform(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         return ds, df
 
@@ -121,6 +135,7 @@ class BaseTransformer(LRUCacheMixin, ABC):
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
+        disable_cache: bool = False,
     ) -> tuple[DataSchema, Any, vaex.DataFrame]:
         """Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
 
@@ -129,16 +144,23 @@ class BaseTransformer(LRUCacheMixin, ABC):
             dataframe: DataFrame used for fitting and transformation.
             cache_group: The cache group to use.
             force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                cached.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             Tuple of updated data schema, fitted transformer, and transformed DataFrame.
         """
         ds, transformer, df = self._cached_execute(
             lambda_func=lambda: self._fit_transform(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
+            disable_cache=disable_cache,
         )
         self._assign_transformer(transformer)
         return ds, transformer, df
