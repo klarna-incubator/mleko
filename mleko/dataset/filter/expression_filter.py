@@ -6,8 +6,9 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
+from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
 
@@ -58,6 +59,7 @@ class ExpressionFilter(BaseFilter):
 
     def filter(
         self,
+        data_schema: DataSchema,
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
@@ -66,6 +68,7 @@ class ExpressionFilter(BaseFilter):
         """Filter the given dataframe based on the expression.
 
         Args:
+            data_schema: The data schema to be used for filtering.
             dataframe: The dataframe to be filtered.
             cache_group: The cache group to use.
             force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
@@ -75,15 +78,19 @@ class ExpressionFilter(BaseFilter):
             The filtered dataframe.
         """
         return self._cached_execute(
-            lambda_func=lambda: self._filter(dataframe),
-            cache_key_inputs=[self._expression, (dataframe, VaexFingerprinter())],
+            lambda_func=lambda: self._filter(data_schema, dataframe),
+            cache_key_inputs=[
+                self._expression,
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=VAEX_DATAFRAME_CACHE_HANDLER,
             disable_cache=disable_cache,
         )
 
-    def _filter(self, dataframe: vaex.DataFrame) -> vaex.DataFrame:
+    def _filter(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> vaex.DataFrame:
         """Filter the given dataframe based on the expression.
 
         Args:

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 from typing_extensions import TypedDict
 from vaex import DataFrame
 
+from mleko.dataset.data_schema import DataSchema
 from mleko.dataset.filter.base_filter import BaseFilter
 from mleko.pipeline.data_container import DataContainer
 from mleko.pipeline.pipeline_step import PipelineStep
@@ -14,7 +17,10 @@ from mleko.utils.decorators import auto_repr
 class FilterStepInputType(TypedDict):
     """The input type of the FilterStep."""
 
-    dataframe: str
+    data_schema: Union[str, DataSchema]
+    """The key for the DataSchema."""
+
+    dataframe: Union[str, DataFrame]
     """The key for the DataFrame to be filtered."""
 
 
@@ -60,9 +66,10 @@ class FilterStep(PipelineStep):
         Returns:
             A DataContainer containing the result.
         """
+        data_schema = self._validate_and_get_input(self._inputs["data_schema"], DataSchema, data_container)
         dataframe = self._validate_and_get_input(self._inputs["dataframe"], DataFrame, data_container)
 
-        filtered_dataframe = self._filter.filter(dataframe, self._cache_group, force_recompute)
+        filtered_dataframe = self._filter.filter(data_schema, dataframe, self._cache_group, force_recompute)
         data_container.data[self._outputs["dataframe"]] = filtered_dataframe
         return data_container
 

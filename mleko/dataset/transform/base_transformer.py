@@ -8,7 +8,7 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
 from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
@@ -74,7 +74,11 @@ class BaseTransformer(LRUCacheMixin, ABC):
         """
         ds, transformer = self._cached_execute(
             lambda_func=lambda: self._fit(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=JOBLIB_CACHE_HANDLER,
@@ -113,7 +117,11 @@ class BaseTransformer(LRUCacheMixin, ABC):
 
         ds, df = self._cached_execute(
             lambda_func=lambda: self._transform(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],
@@ -144,7 +152,11 @@ class BaseTransformer(LRUCacheMixin, ABC):
         """
         ds, transformer, df = self._cached_execute(
             lambda_func=lambda: self._fit_transform(data_schema, dataframe),
-            cache_key_inputs=[self._fingerprint(), str(data_schema), (dataframe, VaexFingerprinter())],
+            cache_key_inputs=[
+                self._fingerprint(),
+                (data_schema.to_dict(), DictFingerprinter()),
+                (dataframe, VaexFingerprinter()),
+            ],
             cache_group=cache_group,
             force_recompute=force_recompute,
             cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER],

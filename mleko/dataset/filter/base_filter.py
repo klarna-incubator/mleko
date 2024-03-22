@@ -8,6 +8,7 @@ from pathlib import Path
 import vaex
 
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
+from mleko.dataset.data_schema import DataSchema
 
 
 class BaseFilter(LRUCacheMixin, ABC):
@@ -28,6 +29,7 @@ class BaseFilter(LRUCacheMixin, ABC):
     @abstractmethod
     def filter(
         self,
+        data_schema: DataSchema,
         dataframe: vaex.DataFrame,
         cache_group: str | None = None,
         force_recompute: bool = False,
@@ -36,6 +38,7 @@ class BaseFilter(LRUCacheMixin, ABC):
         """Abstract method to filter the given dataframe.
 
         Args:
+            data_schema: The data schema to be used for filtering.
             dataframe: The dataframe to be filtered.
             cache_group: The cache group to use.
             force_recompute: Forces recomputation if True, otherwise reads from the cache if available.

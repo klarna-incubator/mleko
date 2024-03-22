@@ -120,7 +120,7 @@ class CSVToVaexConverter(BaseConverter):
         true_values: list[str] | tuple[str, ...] | tuple[()] = ("t", "True", "true", "1"),
         false_values: list[str] | tuple[str, ...] | tuple[()] = ("f", "False", "false", "0"),
         downcast_float: bool = False,
-        random_state: int | None = None,
+        random_state: int | None = 42,
         num_workers: int = V_CPU_COUNT,
         cache_directory: str | Path = "data/csv-to-vaex-converter",
         cache_size: int = 1,

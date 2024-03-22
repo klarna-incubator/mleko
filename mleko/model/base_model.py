@@ -9,9 +9,8 @@ from typing import Any, Dict, Hashable, Union
 
 import vaex
 
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
-from mleko.cache.handlers.joblib_cache_handler import JOBLIB_CACHE_HANDLER
-from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
+from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
+from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -123,7 +122,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
             ],
@@ -168,7 +167,7 @@ class BaseModel(LRUCacheMixin, ABC):
             cache_key_inputs=[
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
@@ -225,7 +224,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 self._fingerprint(),
                 json.dumps(self._hyperparameters, sort_keys=True),
                 json.dumps(hyperparameters, sort_keys=True),
-                str(data_schema),
+                (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,
             ],

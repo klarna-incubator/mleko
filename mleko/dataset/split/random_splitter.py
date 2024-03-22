@@ -37,7 +37,7 @@ class RandomSplitter(BaseSplitter):
         data_split: tuple[float, float] = (0.80, 0.20),
         shuffle: bool = True,
         stratify: str | None = None,
-        random_state: int | None = None,
+        random_state: int | None = 42,
         cache_directory: str | Path = "data/random-splitter",
         cache_size: int = 1,
     ) -> None:
