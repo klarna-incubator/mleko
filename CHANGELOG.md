@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.2.0) (2024-03-22)
+
+### ✨ Features
+
+- **filter:** Add `ImblearnResamplingFilter` which is a wrapper for `imblearn` over- and under-samplers. ([`77a3d7d`](https://github.com/klarna-incubator/mleko/commit/77a3d7d1a86c37ff91725afb12e6d2b1a6f1e649))
+- **filter:** Add `ExpressionFilter` and base class for simple DataFrame filtering using `vaex` expressions. ([`dc679ff`](https://github.com/klarna-incubator/mleko/commit/dc679ffc92d4ea2f4e064f51076b3edea61fd838))
+- **cache:** Add `disable_cache` argument to all cached functions to completely bypass all caching functionality. ([`fbdfc5d`](https://github.com/klarna-incubator/mleko/commit/fbdfc5dd94e5aaf440268efecf3ea1c4c6762d86))
+
+### 📝 Documentation
+
+- Update `CHANGELOG.md` format to include missing categories. ([`d97b32c`](https://github.com/klarna-incubator/mleko/commit/d97b32c9e825f59518b214d8b8338a470fcee7d4))
+
 ## [v2.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.1.0) (2024-02-24)
 
 ### ✨ Features
