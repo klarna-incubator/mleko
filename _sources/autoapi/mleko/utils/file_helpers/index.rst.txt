@@ -1,0 +1,35 @@
+:py:mod:`mleko.utils.file_helpers`
+==================================
+
+.. py:module:: mleko.utils.file_helpers
+
+.. autoapi-nested-parse::
+
+   This module provides utility functions for file and directory operations.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.file_helpers.clear_directory
+
+
+
+.. py:function:: clear_directory(directory: pathlib.Path, pattern: str = '*') -> None
+
+   Remove all files in a directory that match a given pattern.
+
+   This function takes a directory and, using the provided pattern, searches for all matching files
+   and removes them. This is useful when cleaning up temporary or intermediate files in a workspace.
+
+   :param directory: The `Path` object referring to the directory to be cleared.
+   :param pattern: The search pattern to match the files in the directory (default: "*", matches all files).
+
+

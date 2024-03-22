@@ -1,0 +1,229 @@
+:py:mod:`mleko.model.base_model`
+================================
+
+.. py:module:: mleko.model.base_model
+
+.. autoapi-nested-parse::
+
+   Module for the base model class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.base_model.BaseModel
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.base_model.logger
+   mleko.model.base_model.HyperparametersType
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:data:: HyperparametersType
+
+   
+
+.. py:class:: BaseModel(features: list[str] | tuple[str, Ellipsis] | None, ignore_features: list[str] | tuple[str, Ellipsis] | None, cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.lru_cache_mixin.LRUCacheMixin`, :py:obj:`abc.ABC`
+
+   Abstract class for models.
+
+   The model fitting and transformation process is implemented in the `fit`, `transform`, and `fit_transform` methods,
+   similar to the scikit-learn API. The `fit` method fits the model to the specified DataFrame, the `transform`
+   method transforms the specified features in the DataFrame, and the `fit_transform` method fits the model to the
+   specified DataFrame and transforms the specified features in the DataFrame.
+
+   Initializes the model and ensures the destination directory exists.
+
+   .. note::
+
+      The `features` and `ignore_features` arguments are mutually exclusive. If both are specified, a
+      `ValueError` is raised.
+
+   :param features: List of feature names to be used by the model. If None, the default is all features
+                    applicable to the model.
+   :param ignore_features: List of feature names to be ignored by the model. If None, the default is to
+                           ignore no features.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   :raises ValueError: If both `features` and `ignore_features` are specified.
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, train_dataframe: vaex.DataFrame, validation_dataframe: vaex.DataFrame | None = None, hyperparameters: HyperparametersType | None = None, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[Any, dict[str, dict[str, list[Any]]]]
+
+      Fits the model to the specified DataFrame, using the specified hyperparameters.
+
+      The validation DataFrame is used to validate the model during fitting.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param train_dataframe: DataFrame to fit the model on.
+      :param validation_dataframe: DataFrame to be used for validation.
+      :param hyperparameters: Hyperparameters to be used for fitting. If any hyperparameters are specified, they will
+                              be merged with the default hyperparameters specified during the model initialization.
+      :param cache_group: The cache group to use for caching.
+      :param force_recompute: Whether to force recompute the result.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Fitted model and the metrics dictionary. The metrics dictionary is a dictionary of dictionaries. The outer
+                dictionary is keyed by the dataset name, and the inner dictionary is keyed by the metric name. The value
+                of the inner dictionary is a list of metric values for each iteration of the model.
+                >>> metrics = {
+                ...     "train": {
+                ...         "accuracy": [0.90, 0.91, 0.92],
+                ...         "f1": [0.80, 0.81, 0.82],
+                ...     },
+                ...     "validation": {
+                ...         "accuracy": [0.80, 0.81, 0.82],
+                ...         "f1": [0.70, 0.71, 0.72],
+                ...     },
+                ... }
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> vaex.DataFrame
+
+      Transforms the specified DataFrame using the fitted model.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use for caching.
+      :param force_recompute: Whether to force recompute the result.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the model has not been fitted.
+
+      :returns: Transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, train_dataframe: vaex.DataFrame, validation_dataframe: vaex.DataFrame | None = None, hyperparameters: HyperparametersType | None = None, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]
+
+      Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
+
+      The validation DataFrame is used to validate the model during fitting.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param train_dataframe: DataFrame to fit the model on.
+      :param validation_dataframe: DataFrame to be used for validation.
+      :param hyperparameters: Hyperparameters to be used for fitting.
+      :param cache_group: The cache group to use for caching.
+      :param force_recompute: Whether to force recompute the result.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of fitted model, the metrics dictionary, transformed train DataFrame,
+                and transformed validation DataFrame. The metrics dictionary is a dictionary of dictionaries.
+                The outer dictionary is keyed by the dataset name, and the inner dictionary is keyed by the
+                metric name. The value of the inner dictionary is a list of metric values for each
+                iteration of the model.
+                >>> metrics = {
+                ...     "train": {
+                ...         "accuracy": [0.90, 0.91, 0.92],
+                ...         "f1": [0.80, 0.81, 0.82],
+                ...     },
+                ...     "validation": {
+                ...         "accuracy": [0.80, 0.81, 0.82],
+                ...         "f1": [0.70, 0.71, 0.72],
+                ...     },
+                ... }
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, train_dataframe: vaex.DataFrame, validation_dataframe: vaex.DataFrame | None = None, hyperparameters: HyperparametersType | None = None) -> tuple[Any, dict[str, dict[str, list[Any]]], vaex.DataFrame, vaex.DataFrame | None]
+
+      Fits the model to the specified DataFrame and transforms the train and validation DataFrames.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param train_dataframe: DataFrame to fit the model on.
+      :param validation_dataframe: DataFrame to be used for validation.
+      :param hyperparameters: Hyperparameters to be used for fitting.
+
+      :returns: Tuple of fitted model, the metrics dictionary, transformed train DataFrame, and
+                transformed validation DataFrame.
+
+
+   .. py:method:: _assign_model(model: Any) -> None
+
+      Assigns the specified model to the model attribute.
+
+      Can be overridden by subclasses to assign the model using a different method.
+
+      :param model: Model to be assigned.
+
+
+   .. py:method:: _feature_set(data_schema: mleko.dataset.data_schema.DataSchema) -> list[str]
+
+      Returns the list of features to be used as input by the model.
+
+      It is the default set of features minus the features to be ignored if the `features` argument is None, or the
+      list of names in the `features` argument if it is not None.
+
+      :param data_schema: Data schema for the DataFrame.
+
+      :returns: Sorted list of feature names to be used by the model.
+
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, train_dataframe: vaex.DataFrame, validation_dataframe: vaex.DataFrame | None = None, hyperparameters: HyperparametersType | None = None) -> tuple[Any, dict[str, dict[str, list[Any]]]]
+      :abstractmethod:
+
+      Fits the model to the specified DataFrame.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param train_dataframe: DataFrame to be fitted.
+      :param validation_dataframe: DataFrame to be used for validation.
+      :param hyperparameters: Hyperparameters to be used for fitting.
+
+      :raises NotImplementedError: Must be implemented by subclasses.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> vaex.DataFrame
+      :abstractmethod:
+
+      Transforms the specified DataFrame using the fitted model.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+
+      :raises NotImplementedError: Must be implemented by subclasses.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+      :abstractmethod:
+
+      Returns a hashable object that uniquely identifies the model.
+
+      The base implementation fingerprints the class name and the important attributes of the model.
+
+      .. note::
+
+         Subclasses should call the parent method and include the result in the hashable object along with any
+         other parameters that uniquely identify the model. All attributes that are used in the
+         model that affect the result of the fitting and transforming should be included in the hashable object.
+
+      :returns: Hashable object that uniquely identifies the model.
+
+
+   .. py:method:: _default_features(data_schema: mleko.dataset.data_schema.DataSchema) -> tuple[str, Ellipsis]
+      :abstractmethod:
+
+      Returns the default set of features to be used by the model.
+
+      :param data_schema: Data schema for the DataFrame.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseModel`.
+
+
+

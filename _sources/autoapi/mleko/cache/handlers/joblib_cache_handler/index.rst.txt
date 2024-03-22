@@ -1,0 +1,54 @@
+:py:mod:`mleko.cache.handlers.joblib_cache_handler`
+===================================================
+
+.. py:module:: mleko.cache.handlers.joblib_cache_handler
+
+.. autoapi-nested-parse::
+
+   This module contains the CacheHandler for serializing and deserializing data using joblib.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.joblib_cache_handler.write_joblib
+   mleko.cache.handlers.joblib_cache_handler.read_joblib
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.joblib_cache_handler.JOBLIB_CACHE_HANDLER
+
+
+.. py:function:: write_joblib(cache_file_path: pathlib.Path, output: Any) -> None
+
+   Writes the given data to a cache file at the specified path, serializing it using joblib.
+
+   :param cache_file_path: A Path object representing the location where the cache file should be saved.
+   :param output: The data to be serialized and saved to the cache file.
+
+
+.. py:function:: read_joblib(cache_file_path: pathlib.Path) -> Any
+
+   Reads the cache file from the specified path and returns the deserialized data.
+
+   :param cache_file_path: A Path object representing the location of the cache file.
+
+   :returns: The deserialized data stored in the cache file.
+
+
+.. py:data:: JOBLIB_CACHE_HANDLER
+
+   A CacheHandler for Python objects using joblib.
+

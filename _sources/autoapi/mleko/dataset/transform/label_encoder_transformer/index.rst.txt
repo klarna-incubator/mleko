@@ -1,0 +1,170 @@
+:py:mod:`mleko.dataset.transform.label_encoder_transformer`
+===========================================================
+
+.. py:module:: mleko.dataset.transform.label_encoder_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the label encoder transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.label_encoder_transformer.LabelEncoderTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.label_encoder_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: LabelEncoderTransformer(features: list[str] | tuple[str, Ellipsis], label_dict: dict[str, dict[str | None, int | None]] | None = None, allow_unseen: bool = False, encode_null: bool = False, cache_directory: str | pathlib.Path = 'data/label-encoder-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   Transforms features using label encoding.
+
+   Initializes the transformer.
+
+   Encodes categorical features with integer values between `0` and `n_classes-1`. If a value is not seen during
+   fitting, it will be encoded as `-2`, unless `allow_unseen` is set to False, in which case an error will be
+   raised. If `encode_null` is set to True, null values will be encoded as `-1`, otherwise they will be kept as
+   `None`.
+
+   .. warning:: Should only be used with categorical features of string type.
+
+   .. note::
+
+      If `label_dict` is not provided, during fitting, the transformer will assign label mappings from the data
+      with no guarantee of consistency across different runs. If `label_dict` is provided, keep in mind that
+      the mappings must be integers between `0` and `n_classes-1` or `None`. Otherwise, the transformer will
+      raise an error during fitting.
+
+   :param features: List of feature names to be used by the transformer.
+   :param label_dict: A dictionary of label mappings dicts for each feature. Encoded labels must be integers
+                      between `0` and `n_classes-1` or `None`. If only some features are provided, the transformer will
+                      only use the provided label mappings for those features, while the rest will be assigned during
+                      fitting. If not provided at all, the transformer will assign label mappings for all features
+                      during fitting.
+   :param allow_unseen: Whether to allow unseen values once the transformer is fitted.
+   :param encode_null: Whether to encode null values as a separate category or keep them as null.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.transform import LabelEncoderTransformer
+   >>> df = vaex.from_arrays(
+   ...     a=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+   ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
+   ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
+   ... )
+   >>> ds = DataSchema(
+   ...     categorical=["a", "b", "c"],
+   ... )
+   >>> _, _, df = LabelEncoderTransformer(
+   ...     features=["a", "b"],
+   ...     allow_unseen=True,
+   ...     label_dict={  # Optional, but recommended
+   ...         "a": {
+   ...             "a": 0,
+   ...             "b": 1,
+   ...             "c": 2,
+   ...             "d": 3,
+   ...             "e": 4,
+   ...             "f": 5,
+   ...             "g": 6,
+   ...             "h": 7,
+   ...             "i": 8,
+   ...             "j": 9,
+   ...         },
+   ...         "b": {
+   ...             "a": 1,
+   ...             "b": 0,
+   ...         },
+   ...         "c": {
+   ...             "a": 1,
+   ...             "b": 0,
+   ...         },
+   ...     },
+   ... ).fit_transform(ds, df)
+   >>> df["a"].tolist()
+   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+   >>> df["b"].tolist()
+   [1, 1, 1, 1, None, None, None, None, None, None]
+   >>> df["c"].tolist()
+   [1, 0, 0, 0, 0, 0, None, None, None, None]
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, dict[str, dict[str | None, int | None]] | dict[str, dict[str | None, int]]]
+
+      Fits the transformer on the given DataFrame.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to fit the transformer on.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the features of the given DataFrame using label encoding.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      Appends the `allow_unseen`, `encode_null`, and `label_dict` attributes to the fingerprint.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+   .. py:method:: _fit_using_label_dict(feature: str, observed_labels: list[str]) -> bool
+
+      Attempts to fit the label dictionary for the specified feature.
+
+      If the label dictionary is not provided or the feature is not in the label dictionary, the function will
+      return False. Otherwise, it will fit the label dictionary and return True.
+
+      :param feature: The feature to fit the label dictionary for.
+      :param observed_labels: The observed labels for the feature.
+
+      :raises ValueError: If the label dictionary contains invalid mappings.
+
+      :returns: Whether the label dictionary was fitted.
+
+
+   .. py:method:: _ensure_valid_feature_type(feature: str, data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> None
+
+      Check if the feature is of the correct type.
+
+      :param feature: The feature to check.
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to check.
+
+      :raises ValueError: If the feature is not of the correct type.
+
+
+

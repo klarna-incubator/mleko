@@ -1,0 +1,54 @@
+:py:mod:`mleko.cache`
+=====================
+
+.. py:module:: mleko.cache
+
+.. autoapi-nested-parse::
+
+   The subpackage provides caching mixins and fingerprinting utilities to efficiently cache method call results.
+
+   The core of the caching functionality is provided by the `CacheMixin` class, which can be used to
+   cache the results of method calls.
+
+   The following caching mixins are provided by the subpackage:
+       - `CacheMixin`: The core caching mixin.
+       - `LRUCacheMixin`: A mixin that adds LRU eviction to the cache.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   fingerprinters/index.rst
+   handlers/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   cache_mixin/index.rst
+   lru_cache_mixin/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.CacheMixin
+   mleko.cache.LRUCacheMixin
+
+
+
+
+
+

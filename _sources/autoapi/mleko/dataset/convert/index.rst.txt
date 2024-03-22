@@ -1,0 +1,41 @@
+:py:mod:`mleko.dataset.convert`
+===============================
+
+.. py:module:: mleko.dataset.convert
+
+.. autoapi-nested-parse::
+
+   The subpackage provides functionality for converting data between different file formats.
+
+   The subpackage contains the following converter classes:
+       - `BaseConverter`: The abstract base class for all converters.
+       - `CSVToVaexConverter`: A converter for converting CSV files to Vaex DataFrames.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_converter/index.rst
+   csv_to_vaex_converter/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.convert.BaseConverter
+   mleko.dataset.convert.CSVToVaexConverter
+
+
+
+
+
+

@@ -1,0 +1,51 @@
+:py:mod:`mleko.dataset.split.base_splitter`
+===========================================
+
+.. py:module:: mleko.dataset.split.base_splitter
+
+.. autoapi-nested-parse::
+
+   The module containing the base class for data splitter.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.split.base_splitter.BaseSplitter
+
+
+
+
+.. py:class:: BaseSplitter(cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.lru_cache_mixin.LRUCacheMixin`, :py:obj:`abc.ABC`
+
+   Abstract base class for data splitter.
+
+   Will cache the split dataframes in the output directory.
+
+   Initializes the `BaseSplitter` with an output directory.
+
+   :param cache_directory: The target directory where the split dataframes are to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. py:method:: split(dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[vaex.DataFrame, vaex.DataFrame]
+      :abstractmethod:
+
+      Abstract method to split the given dataframe into two parts.
+
+      :param dataframe: The dataframe to be split.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises NotImplementedError: If the method is not implemented.
+
+
+

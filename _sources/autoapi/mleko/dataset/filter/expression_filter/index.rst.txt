@@ -1,0 +1,91 @@
+:py:mod:`mleko.dataset.filter.expression_filter`
+================================================
+
+.. py:module:: mleko.dataset.filter.expression_filter
+
+.. autoapi-nested-parse::
+
+   This module contains the `ExpressionFilter` class, which is used to filter `vaex` DataFrames.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.filter.expression_filter.ExpressionFilter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.filter.expression_filter.logger
+
+
+.. py:data:: logger
+
+   A module-level logger instance.
+
+.. py:class:: ExpressionFilter(expression: str, cache_directory: str | pathlib.Path = 'data/expression-filter', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.filter.base_filter.BaseFilter`
+
+   A class that handles filtering of `vaex` DataFrames based on a given `vaex` expression.
+
+   Initializes the `ExpressionFilter` with the given expression.
+
+   The expression should be a valid Vaex expression that evaluates to a boolean value.
+
+   .. note::
+
+      To filter by a date column, use the `scalar_datetime` function. For example, to filter by a date column
+      named `date` and return the rows before `2020-06-01`, use the
+      expression `"date < scalar_datetime('2020-06-01')"`.
+
+   :param expression: The expression to be used for filtering.
+   :param cache_directory: The target directory where the filtered dataframes are to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. rubric:: Example
+
+   >>> import vaex
+   >>> from mleko.data.filter import ExpressionFilter
+   >>> df = vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6])
+   >>> filter = ExpressionFilter(expression="x > 1")
+   >>> df_filtered = filter.filter(df)
+   >>> df_filtered
+       #    x    y
+       0    2    5
+       1    3    6
+
+   .. py:method:: filter(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> vaex.DataFrame
+
+      Filter the given dataframe based on the expression.
+
+      :param data_schema: The data schema to be used for filtering.
+      :param dataframe: The dataframe to be filtered.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: The filtered dataframe.
+
+
+   .. py:method:: _filter(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> vaex.DataFrame
+
+      Filter the given dataframe based on the expression.
+
+      :param dataframe: The dataframe to be filtered.
+
+      :returns: The filtered dataframe.
+
+
+

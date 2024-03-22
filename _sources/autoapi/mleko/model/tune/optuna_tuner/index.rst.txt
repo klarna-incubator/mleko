@@ -1,0 +1,176 @@
+:py:mod:`mleko.model.tune.optuna_tuner`
+=======================================
+
+.. py:module:: mleko.model.tune.optuna_tuner
+
+.. autoapi-nested-parse::
+
+   Module for the base hyperparameter tuning class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.optuna_tuner.OptunaTuner
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.optuna_tuner.logger
+   mleko.model.tune.optuna_tuner.OptimizeDirection
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:data:: OptimizeDirection
+
+   Literal type for the direction of optimization.
+
+.. py:class:: OptunaTuner(objective_function: Callable[[optuna.Trial, mleko.dataset.data_schema.DataSchema, vaex.DataFrame], float | list[float] | tuple[float, Ellipsis]] | Callable[[optuna.Trial, mleko.dataset.data_schema.DataSchema, list[tuple[vaex.DataFrame, vaex.DataFrame]]], float | list[float] | tuple[float, Ellipsis]], direction: OptimizeDirection | list[OptimizeDirection], num_trials: int, cv_folds: Callable[[mleko.dataset.data_schema.DataSchema, vaex.DataFrame], list[tuple[vaex.DataFrame, vaex.DataFrame]]] | None = None, sampler: optuna.samplers.BaseSampler | None = None, pruner: optuna.pruners.BasePruner | None = None, study_name: str | None = None, storage_name: str | None = None, random_state: int | None = 42, cache_directory: str | pathlib.Path = 'data/optuna-tuner', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.model.tune.base_tuner.BaseTuner`
+
+   Hyperparameter tuner using `Optuna`.
+
+   Initializes a new OptunaTuner instance.
+
+   For more information about Optuna, please refer to the documentation:
+   https://optuna.readthedocs.io/en/stable/.
+
+   .. note::
+
+      To visualize the optimization process, you can use the `optuna-dashboard`
+      package. By specifying the `storage_name` parameter, the tuner will save
+      the study to the specified file, which can then be visualized using the
+      `optuna-dashboard` command:
+      ```bash
+      optuna-dashboard sqlite:///PATH_TO_YOUR_OPTUNA_STORAGE.sqlite3
+      ```
+
+      The `study_name` parameter can be used to specify the name of the study,
+      which will be displayed in the `optuna-dashboard` interface. If the
+      `study_name` is not specified, the current date and time will be used.
+
+   .. warning::
+
+      The caching functionality of the obective function is implemented by
+      serializing the function source code itself. Ensure that all dependencies
+      of the objective function are defined within the function itself. Otherwise,
+      the dependencies will not be included in the fingerprint of the tuner and
+      the results of the hyperparameter tuning will be unpredictable. For example,
+      if the objective function depends on a global variable, the cahing
+      functionality will not detect changes to the value itself and will not
+      recompute the result.
+
+      In addition, the objective function should preferably not use any cached
+      methods, such as `BaseModel.fit_transform`. Instead, the objective
+      function should use the underscored methods (`BaseModell._fit_transform`)
+      to avoid caching the results of each trial.
+
+   :param objective_function: The objective function to optimize. The function must
+                              accept three arguments: the Optuna trial, the data schema, and the
+                              DataFrame or CV list of DataFrames to be tuned on. The function must
+                              return either a single float value or a list/tuple of float values.
+                              If a list/tuple is returned, the tuner will perform multi-objective
+                              optimization.
+   :param direction: The direction of optimization. Either "maximize" or "minimize".
+                     If a list of directions is given, the tuner will perform multi-objective
+                     optimization. The length of the list must match the length of the list
+                     returned by the objective function.
+   :param cv_folds: The cross-validation function to use. The function must accept
+                    the data schema and the DataFrame to be tuned on and return a list of
+                    tuples containing the training and validation DataFrames. The length
+                    of the list must match the number of folds to perform.
+   :param num_trials: The number of trials to perform.
+   :param sampler: The Optuna sampler to use, if None `TPESampler` is
+                   used for single-objective optimization and `NSGAIISampler`
+                   is used for multi-objective optimization.
+   :param pruner: The Optuna pruner to use, if None `optuna.pruners.MedianPruner` is
+                  used.
+   :param study_name: The name of the study. If None, the current date and time will
+                      be used.
+   :param storage_name: The name of the storage to save the study to. If None, the
+                        study will not be saved to disk. Specify the name of the file to save
+                        the study to. The file will be saved to the `cache_directory` directory
+                        withe the `.sqlite3` extension. E.g. `storage_name="my-study"` will
+                        save the study to `cache_directory/my-study.sqlite3`.
+   :param random_state: The random state to use for the Optuna sampler. If None, the
+                        default random state of the sampler is used. Setting this will override
+                        the random state of the sampler.
+   :param cache_directory: The target directory where the output is to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.model import LGBMModel
+   >>> from mleko.tune import OptunaTuner
+   >>> from mleko.dataset import DataSchema
+   >>> def objective_function(trial, data_schema, dataframe):
+   ...     params = {
+   ...         "num_iterations": trial.suggest_int("num_iterations", 10, 100),
+   ...         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
+   ...         "num_leaves": trial.suggest_int("num_leaves", 10, 100),
+   ...     }
+   >>>     model = LGBMModel(
+   ...         target="class_",
+   ...         features=["sepal_width", "petal_length", "petal_width"],
+   ...         num_iterations=100,
+   ...         learning_rate=0.1,
+   ...         num_leaves=31,
+   ...         random_state=42,
+   ...         metric=["auc"],
+   ...     )
+   >>>     df_train, df_val = dataframe.ml.random_split(test_size=0.20, verbose=False)
+   >>>     _, metrics, _, _ = model._fit_transform(data_schema, df_train, df_val, params)
+   >>>     return metrics['validation']['auc'][-1]
+   >>> optuna_tuner = OptunaTuner(
+   ...     objective_function=objective_function,
+   ...     direction="maximize",
+   ...     num_trials=51,
+   ...     random_state=42,
+   ... )
+   >>> dataframe = vaex.ml.datasets.load_iris()
+   >>> data_schema = DataSchema(
+   ...     numerical=["sepal_length", "sepal_width", "petal_length", "petal_width"],
+   ... )
+   >>> best_trial, best_score, study = optuna_tuner.tune(data_schema, dataframe)
+
+   .. py:method:: _tune(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.model.base_model.HyperparametersType, float | list[float] | tuple[float, Ellipsis], optuna.study.Study]
+
+      Perform the hyperparameter tuning.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be tuned on.
+
+      :returns: Tuple containing the best hyperparameters, the best score, and a the Optuna study.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Generates a fingerprint for the tuner.
+
+      :returns: The fingerprint of the tuner.
+
+
+   .. py:method:: _reset_sampler_rng(sampler: optuna.samplers.BaseSampler) -> None
+
+      Resets the random number generator of the given Optuna sampler.
+
+      :param sampler: The Optuna sampler to reset the random number generator of.
+
+
+

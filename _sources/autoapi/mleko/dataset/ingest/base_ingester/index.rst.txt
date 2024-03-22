@@ -1,0 +1,163 @@
+:py:mod:`mleko.dataset.ingest.base_ingester`
+============================================
+
+.. py:module:: mleko.dataset.ingest.base_ingester
+
+.. autoapi-nested-parse::
+
+   Abstract base class module for data source implementations to fetch and store data from various sources.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.base_ingester.LocalFileEntry
+   mleko.dataset.ingest.base_ingester.LocalManifest
+   mleko.dataset.ingest.base_ingester.LocalManifestHandler
+   mleko.dataset.ingest.base_ingester.BaseIngester
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.base_ingester.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: LocalFileEntry
+
+   Manifest entry for a single local file.
+
+   .. py:attribute:: name
+      :type: str
+
+      Name of the file.
+
+   .. py:attribute:: size
+      :type: int
+
+      Size of the file in bytes.
+
+
+.. py:class:: LocalManifest
+
+   Manifest for the local dataset.
+
+   .. py:attribute:: files
+      :type: list[LocalFileEntry]
+
+      List of files in the local dataset.
+
+
+.. py:class:: LocalManifestHandler(manifest_path: str | pathlib.Path)
+
+   `LocalManifestHandler` provides a convenient interface for reading and writing local manifest files.
+
+   Initializes the local manifest handler.
+
+   The manifest is intended to be used to keep track of the downloaded file names and sizes.
+   It should reflect the current state of the local dataset.
+
+   :param manifest_path: Path to the manifest file.
+
+   .. py:method:: set_files(file_data: list[LocalFileEntry]) -> None
+
+      Sets the manifest to the specified files.
+
+      :param file_data: List of file data to set the manifest to.
+
+
+   .. py:method:: remove_files(file_names: list[str]) -> None
+
+      Removes the specified files from the manifest.
+
+      :param file_names: List of file names to remove from the manifest.
+
+
+   .. py:method:: get_file_names() -> list[str]
+
+      Gets the list of file names in the manifest.
+
+      :returns: List of file names in the manifest.
+
+
+   .. py:method:: _read_manifest() -> LocalManifest
+
+      Reads the manifest from the manifest file.
+
+      :returns: Manifest data read from the manifest file.
+
+
+   .. py:method:: _write_manifest(manifest_data: LocalManifest) -> None
+
+      Writes the manifest to the manifest file.
+
+      :param manifest_data: Manifest data to write to the manifest file.
+
+
+   .. py:method:: _deserialize_manifest(manifest_dict: dict) -> LocalManifest
+
+      Deserializes the manifest from the manifest dictionary.
+
+      :param manifest_dict: Manifest dictionary to deserialize.
+
+      :returns: Deserialized manifest.
+
+
+
+.. py:class:: BaseIngester(cache_directory: str | pathlib.Path, fingerprint: str | None)
+
+   Bases: :py:obj:`abc.ABC`
+
+   `BaseIngester` is an abstract base class for data source classes that interact with various external sources.
+
+   This class provides the basic structure and methods necessary for derived data source classes, facilitating data
+   fetching from various sources.
+
+   Initializes the data source and ensures the destination directory exists.
+
+   :param cache_directory: Directory where the fetched data will be stored locally.
+   :param fingerprint: Optional fingerprint to append to the destination directory.
+
+   .. py:method:: fetch_data(force_recompute: bool = False) -> list[pathlib.Path]
+      :abstractmethod:
+
+      Downloads and stores data in the 'cache_directory' using the specific data source implementation.
+
+      :param force_recompute: Whether to force the data source to recompute its output, even if it already exists.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseIngester`.
+
+
+   .. py:method:: _get_full_file_paths(file_names: list[str]) -> list[pathlib.Path]
+
+      Gets the full file paths for the specified file names.
+
+      Note that this method only returns the file paths for files that exist locally.
+
+      :param file_names: List of file names to get the full file paths for.
+
+      :returns: List of full file paths for the specified file names.
+
+
+   .. py:method:: _delete_local_files(file_names: list[str]) -> None
+
+      Deletes the specified files from the local dataset.
+
+      :param file_names: List of file names to delete from the local dataset.
+
+
+

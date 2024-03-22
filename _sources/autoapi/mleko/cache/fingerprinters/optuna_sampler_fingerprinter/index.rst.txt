@@ -1,0 +1,169 @@
+:py:mod:`mleko.cache.fingerprinters.optuna_sampler_fingerprinter`
+=================================================================
+
+.. py:module:: mleko.cache.fingerprinters.optuna_sampler_fingerprinter
+
+.. autoapi-nested-parse::
+
+   The module contains a fingerprinter for `Optuna` samplers.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.optuna_sampler_fingerprinter.OptunaSamplerFingerprinter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.optuna_sampler_fingerprinter.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: OptunaSamplerFingerprinter
+
+   Bases: :py:obj:`mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter`
+
+   Class to generate unique fingerprints for different types of Optuna samplers.
+
+   .. py:method:: fingerprint(data: optuna.samplers.BaseSampler) -> str
+
+      Generate a fingerprint string for a given Optuna sampler.
+
+      :param data: The sampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the sampler's configuration.
+
+
+   .. py:method:: _fingerprint_gridsampler(sampler: optuna.samplers.GridSampler) -> str
+
+      Generate a fingerprint string for an Optuna GridSampler.
+
+      :param sampler: The GridSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the GridSampler's configuration.
+
+
+   .. py:method:: _fingerprint_randomsampler(sampler: optuna.samplers.RandomSampler) -> str
+
+      Generate a fingerprint string for an Optuna RandomSampler.
+
+      :param sampler: The RandomSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the RandomSampler's configuration.
+
+
+   .. py:method:: _fingerprint_tpesampler(sampler: optuna.samplers.TPESampler) -> str
+
+      Generate a fingerprint string for an Optuna TPESampler.
+
+      :param sampler: The TPESampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the TPESampler's configuration.
+
+
+   .. py:method:: _fingerprint_cmaessampler(sampler: optuna.samplers.CmaEsSampler) -> str
+
+      Generate a fingerprint string for an Optuna CmaEsSampler.
+
+      :param sampler: The CmaEsSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the CmaEsSampler's configuration.
+
+
+   .. py:method:: _fingerprint_partialfixedsampler(sampler: optuna.samplers.PartialFixedSampler) -> str
+
+      Generate a fingerprint string for an Optuna PartialFixedSampler.
+
+      :param sampler: The PartialFixedSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the PartialFixedSampler's configuration.
+
+
+   .. py:method:: _fingerprint_nsgaiisampler(sampler: optuna.samplers.NSGAIISampler) -> str
+
+      Generate a fingerprint string for an Optuna NSGAIISampler.
+
+      :param sampler: The NSGAIISampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the NSGAIISampler's configuration.
+
+
+   .. py:method:: _fingerprint_nsgaiiisampler(sampler: optuna.samplers.NSGAIIISampler) -> str
+
+      Generate a fingerprint string for an Optuna NSGAIIISampler.
+
+      :param sampler: The NSGAIIISampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the NSGAIIISampler's configuration.
+
+
+   .. py:method:: _fingerprint_qmcsampler(sampler: optuna.samplers.QMCSampler) -> str
+
+      Generate a fingerprint string for an Optuna QMCSampler.
+
+      :param sampler: The QMCSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the QMCSampler's configuration.
+
+
+   .. py:method:: _fingerprint_bruteforcesampler(sampler: optuna.samplers.BruteForceSampler) -> str
+
+      Generate a fingerprint string for an Optuna BruteForceSampler.
+
+      :param sampler: The BruteForceSampler to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the BruteForceSampler's configuration.
+
+
+   .. py:method:: _get_nsgaiichildgenerationstrategy(strategy: optuna.samplers.nsgaii._child_generation_strategy.NSGAIIChildGenerationStrategy) -> str
+
+      Generate a fingerprint string for an Optuna NSGAIIChildGenerationStrategy.
+
+      :param strategy: The NSGAIIChildGenerationStrategy to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the NSGAIIChildGenerationStrategy's configuration.
+
+
+   .. py:method:: _get_inspect_source(func: Callable | None) -> str
+
+      Get the source code of a Callable.
+
+      :param func: The Callable to get the source code of.
+
+      :returns: The source code of the Callable.
+
+
+   .. py:method:: _get_sorted_json_dump(data: dict[str, Any] | None) -> str
+
+      Get a sorted JSON dump of a dictionary.
+
+      :param data: The dictionary to dump.
+
+      :returns: The sorted JSON dump of the dictionary.
+
+
+   .. py:method:: _get_rng_state(rng: optuna.samplers._lazy_random_state.LazyRandomState) -> str
+
+      Get the state of a RandomState.
+
+      :param rng: The RandomState to get the state of.
+
+      :returns: The state of the RandomState.
+
+
+

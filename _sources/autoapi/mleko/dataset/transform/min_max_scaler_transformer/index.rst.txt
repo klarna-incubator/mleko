@@ -1,0 +1,168 @@
+:py:mod:`mleko.dataset.transform.min_max_scaler_transformer`
+============================================================
+
+.. py:module:: mleko.dataset.transform.min_max_scaler_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the min-max scaler transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.min_max_scaler_transformer.MinMaxScalerTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.min_max_scaler_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: MinMaxScalerTransformer(features: list[str] | tuple[str, Ellipsis], min_value: float = 0.0, max_value: float = 1.0, cache_directory: str | pathlib.Path = 'data/min-max-scaler-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   Transforms features using min-max scaling.
+
+   Initializes the min-max scaler transformer.
+
+   The min-max scaler transformer will scale each feature to a given range. If the range is not specified,
+   the range will be [0, 1]. The min-max scaler will not change the data distribution.
+
+   .. warning::
+
+      Should only be used with numerical features. There should be no missing values in the features
+      or an error will be raised.
+
+   :param features: List of feature names to be used by the transformer.
+   :param min_value: The minimum value of the range.
+   :param max_value: The maximum value of the range.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.transform import MaxAbsScalerTransformer
+   >>> df = vaex.from_arrays(
+   ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+   ...     b=[-1, -2, -3, -4, -5, 0, 1, 2, 3, 4]
+   ... )
+   >>> ds = DataSchema(
+   ...     numerical=["a", "b"],
+   ... )
+   >>> _, _, df = MaxAbsScalerTransformer(
+   ...     features=["a", "b"],
+   ... ).fit_transform(ds, df)
+   >>> df["a"].tolist()
+   [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+   >>> df["b"].tolist()
+   [-0.2, -0.4, -0.6, -0.8, -1.0, 0.0, 0.2, 0.4, 0.6, 0.8]
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.ml.MinMaxScaler]
+
+      Fits the transformer on the given DataFrame.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to fit the transformer on.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the features in the DataFrame using min-max scaling.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      Appends the min and max values to the fingerprint.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+
+      Fits the transformer to the specified DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the specified features in the DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the transformer has not been fitted.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                              cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _assign_transformer(transformer: Any) -> None
+
+      Assigns the specified transformer to the transformer attribute.
+
+      Can be overridden by subclasses to assign the transformer using a different method.
+
+      :param transformer: Transformer to be assigned.
+
+
+

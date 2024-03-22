@@ -1,0 +1,80 @@
+:py:mod:`mleko.model.tune.base_tuner`
+=====================================
+
+.. py:module:: mleko.model.tune.base_tuner
+
+.. autoapi-nested-parse::
+
+   Module for the base hyperparameter tuning class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.base_tuner.BaseTuner
+
+
+
+
+.. py:class:: BaseTuner(cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.lru_cache_mixin.LRUCacheMixin`, :py:obj:`abc.ABC`
+
+   Abstract base class for hyperparameter tuners.
+
+   Initializes the `BaseTuner` with an output directory.
+
+   :param cache_directory: The target directory where the output is to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. py:method:: tune(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.model.base_model.HyperparametersType, float | list[float] | tuple[float, Ellipsis], Any]
+
+      Perform the hyperparameter tuning on the given DataFrame.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be tuned on.
+      :param cache_group: The cache group to use for caching.
+      :param force_recompute: Weather to force recompute the result.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple containing the best hyperparameters, the best score, and a dictionary
+                containing any additional information about the tuning process. The dictionary
+                is specific to each tuner, please refer to the documentation of the tuner
+                for more information.
+
+
+   .. py:method:: _tune(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.model.base_model.HyperparametersType, float | list[float] | tuple[float, Ellipsis], Any]
+      :abstractmethod:
+
+      Perform the hyperparameter tuning.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be tuned on.
+
+      :raises NotImplementedError: Must be implemented by subclasses.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+      :abstractmethod:
+
+      Returns a hashable object that uniquely identifies the hyperparameter tuning process.
+
+      The base implementation fingerprints the class name of the tuner.
+
+      .. note::
+
+         Subclasses should call the parent method and include the result in the hashable object along with any
+         other parameters that uniquely identify the tuner. All attributes that are used in the
+         tuner that affect the result of the fitting and transforming should be included in the hashable object.
+
+      :returns: A hashable object that uniquely identifies the hyperparameter tuning process.
+      :rtype: Hashable
+
+
+

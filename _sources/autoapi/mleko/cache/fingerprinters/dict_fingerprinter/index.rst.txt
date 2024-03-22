@@ -1,0 +1,52 @@
+:py:mod:`mleko.cache.fingerprinters.dict_fingerprinter`
+=======================================================
+
+.. py:module:: mleko.cache.fingerprinters.dict_fingerprinter
+
+.. autoapi-nested-parse::
+
+   The module contains a fingerprinter for dictionaries.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.dict_fingerprinter.DictFingerprinter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.dict_fingerprinter.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: DictFingerprinter
+
+   Bases: :py:obj:`mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter`
+
+   Class to generate unique fingerprints for dictionaries.
+
+   .. py:method:: fingerprint(data: dict[str, Any] | None) -> str
+
+      Generate a fingerprint string for a given dictionary.
+
+      :param data: The dictionary to dump.
+
+      :returns: A fingerprint that uniquely identifies the dictionary.
+
+
+

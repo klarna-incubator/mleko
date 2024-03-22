@@ -1,0 +1,160 @@
+:py:mod:`mleko.dataset.transform.base_transformer`
+==================================================
+
+.. py:module:: mleko.dataset.transform.base_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the base transformer class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.base_transformer.BaseTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.base_transformer.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: BaseTransformer(features: list[str] | tuple[str, Ellipsis], cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.lru_cache_mixin.LRUCacheMixin`, :py:obj:`abc.ABC`
+
+   Abstract class for feature transformation.
+
+   The feature transformation process is implemented in the `fit`, `transform`, and `fit_transform` methods. The
+   `fit` method fits the transformer to the specified DataFrame, the `transform` method transforms the specified
+   features in the DataFrame, and the `fit_transform` method fits the transformer to the specified DataFrame and
+   transforms the specified features in the DataFrame.
+
+   .. warning::
+
+      The _transformer attribute is not set by the base class. Subclasses must place all transformer-related logic
+      inside the attribute to correctly handle caching and ensure that the transformer is correctly assigned. For
+      example, the `fit` method should assign the fitted transformer to the _transformer attribute, and the
+      `transform` method should use the _transformer attribute to transform the DataFrame.
+
+   Initializes the transformer and ensures the destination directory exists.
+
+   :param features: List of feature names to be used by the transformer.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of cache entries to keep in the cache.
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+
+      Fits the transformer to the specified DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the specified features in the DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the transformer has not been fitted.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                              cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _assign_transformer(transformer: Any) -> None
+
+      Assigns the specified transformer to the transformer attribute.
+
+      Can be overridden by subclasses to assign the transformer using a different method.
+
+      :param transformer: Transformer to be assigned.
+
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+      :abstractmethod:
+
+      Fits the transformer to the specified DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+
+      :raises NotImplementedError: Must be implemented by subclasses.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+      :abstractmethod:
+
+      Transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+
+      :raises NotImplementedError: Must be implemented by subclasses.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+      :abstractmethod:
+
+      Returns a hashable object that uniquely identifies the transformer.
+
+      The base implementation fingerprints the class name and the features used by the transformer.
+
+      .. note::
+
+         Subclasses should call the parent method and include the result in the hashable object along with any
+         other parameters that uniquely identify the transformer. All attributes that are used in the
+         transformer that affect the result of the transformation should be included in the hashable object.
+
+      :returns: Hashable object that uniquely identifies the transformer.
+
+
+

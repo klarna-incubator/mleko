@@ -1,0 +1,761 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="mleko.pipeline" href="../../pipeline/index.html" /><link rel="prev" title="mleko.model.base_model" href="../base_model/index.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.09.10 -->
+        <title>mleko.model.lgbm_model - mleko documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">mleko  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">mleko  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of mleko</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../cache/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of mleko.cache</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../cache/fingerprinters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of mleko.cache.fingerprinters</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/base_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.base_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/callable_source_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.callable_source_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/csv_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.csv_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/dict_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.dict_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/optuna_pruner_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_pruner_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/optuna_sampler_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_sampler_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/fingerprinters/vaex_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.vaex_fingerprinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../cache/handlers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of mleko.cache.handlers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/handlers/base_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.base_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/handlers/joblib_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.joblib_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/handlers/pickle_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.pickle_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cache/handlers/vaex_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.vaex_cache_handler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../cache/cache_mixin/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.cache_mixin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../cache/lru_cache_mixin/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.lru_cache_mixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../dataset/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of mleko.dataset</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/convert/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of mleko.dataset.convert</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/convert/base_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.base_converter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/convert/csv_to_vaex_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.csv_to_vaex_converter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/feature_select/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of mleko.dataset.feature_select</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/base_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.base_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/composite_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.composite_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/invariance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.invariance_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/missing_rate_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.missing_rate_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/pearson_correlation_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.pearson_correlation_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/variance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.variance_feature_selector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of mleko.dataset.filter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/base_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.base_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/expression_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.expression_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/imblearn_resampling_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.imblearn_resampling_filter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/ingest/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of mleko.dataset.ingest</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/base_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.base_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/kaggle_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.kaggle_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/s3_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.s3_ingester</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/split/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of mleko.dataset.split</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/base_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.base_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/expression_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.expression_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/random_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.random_splitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/transform/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of mleko.dataset.transform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/base_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.base_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/composite_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.composite_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/frequency_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.frequency_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/label_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.label_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/max_abs_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.max_abs_scaler_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/min_max_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.min_max_scaler_transformer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../dataset/data_schema/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.data_schema</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of mleko.model</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4 has-children"><a class="reference internal" href="../tune/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of mleko.model.tune</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../tune/base_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.base_tuner</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../tune/optuna_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.optuna_tuner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../base_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.base_model</span></code></a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.lgbm_model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of mleko.pipeline</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../pipeline/steps/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of mleko.pipeline.steps</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/convert_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.convert_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/feature_select_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.feature_select_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/filter_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.filter_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/ingest_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.ingest_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/model_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.model_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/split_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.split_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/transform_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.transform_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/tune_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.tune_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/data_container/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.data_container</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/pipeline_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of mleko.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/custom_logger/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.custom_logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/decorators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.decorators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/file_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.file_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/tqdm_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.tqdm_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/vaex_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.vaex_helpers</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">Contributor Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-mleko.model.lgbm_model">
+<span id="mleko-model-lgbm-model"></span><h1><a class="reference internal" href="#module-mleko.model.lgbm_model" title="mleko.model.lgbm_model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.lgbm_model</span></code></a><a class="headerlink" href="#module-mleko.model.lgbm_model" title="Permalink to this heading">#</a></h1>
+<p>Module for the LightGBM model.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel" title="mleko.model.lgbm_model.LGBMModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMModel</span></code></a></p></td>
+<td><p>Wrapper for the LightGBM model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.logger" title="mleko.model.lgbm_model.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p>The logger for the module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMObjectiveType" title="mleko.model.lgbm_model.LGBMObjectiveType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMObjectiveType</span></code></a></p></td>
+<td><p>The type of the objective function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMBoostingType" title="mleko.model.lgbm_model.LGBMBoostingType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMBoostingType</span></code></a></p></td>
+<td><p>The type of the boosting algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMDataSampleStrategyType" title="mleko.model.lgbm_model.LGBMDataSampleStrategyType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMDataSampleStrategyType</span></code></a></p></td>
+<td><p>The type of the data sampling strategy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMTreeLearnerType" title="mleko.model.lgbm_model.LGBMTreeLearnerType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMTreeLearnerType</span></code></a></p></td>
+<td><p>The type of the tree learner.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMMetricType" title="mleko.model.lgbm_model.LGBMMetricType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMMetricType</span></code></a></p></td>
+<td><p>The type of the metric.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.model.lgbm_model.LGBMMonotoneConstraintsMethodType" title="mleko.model.lgbm_model.LGBMMonotoneConstraintsMethodType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LGBMMonotoneConstraintsMethodType</span></code></a></p></td>
+<td><p>The type of the monotone constraints method.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.logger">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#mleko.model.lgbm_model.logger" title="Permalink to this definition">#</a></dt>
+<dd><p>The logger for the module.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMObjectiveType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMObjectiveType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMObjectiveType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the objective function.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMBoostingType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMBoostingType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMBoostingType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the boosting algorithm.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMDataSampleStrategyType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMDataSampleStrategyType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMDataSampleStrategyType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the data sampling strategy.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMTreeLearnerType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMTreeLearnerType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMTreeLearnerType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the tree learner.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMMetricType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMMetricType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMMetricType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the metric.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMMonotoneConstraintsMethodType">
+<span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMMonotoneConstraintsMethodType</span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMMonotoneConstraintsMethodType" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of the monotone constraints method.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mleko.model.lgbm_model.</span></span><span class="sig-name descname"><span class="pre">LGBMModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lightgbm.engine._LGBM_CustomMetricFunction</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">lightgbm.engine._LGBM_CustomMetricFunction</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">lightgbm.engine._LGBM_CustomMetricFunction</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMObjectiveType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'regression'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boosting</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMBoostingType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gbdt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_sample_strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMDataSampleStrategyType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bagging'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_leaves</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">31</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_learner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMTreeLearnerType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'serial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_col_wise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_row_wise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histogram_pool_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_data_in_leaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sum_hessian_in_leaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bagging_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_bagging_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_bagging_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bagging_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fraction_bynode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_trees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping_round</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_metric_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_delta_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_lambda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_gain_to_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xgboost_dart_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniform_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_data_per_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cat_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_l2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat_smooth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cat_to_onehot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monotone_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monotone_constraints_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMMonotoneConstraintsMethodType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'basic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monotone_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_contri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_smooth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_evaluation_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_quantized_grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_grad_quant_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quant_train_renew_leaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stochastic_rounding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bin_by_feature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_data_in_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_construct_sample_cnt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_enable_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_bundle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_missing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_as_missing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_pre_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unbalance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pos_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boost_from_average</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_sqrt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fair_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisson_max_delta_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tweedie_variance_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdarank_truncation_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambdarank_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LGBMMetricType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">LGBMMetricType</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_provide_training_metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_error_top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auc_mu_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'data/lgbm-model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../base_model/index.html#mleko.model.base_model.BaseModel" title="mleko.model.base_model.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mleko.model.base_model.BaseModel</span></code></a></p>
+<p>Wrapper for the LightGBM model.</p>
+<p>Full documentation of the LightGBM model can be found here <a class="reference external" href="https://lightgbm.readthedocs.io/en/latest/index.html">https://lightgbm.readthedocs.io/en/latest/index.html</a>.</p>
+<p>Initialize the LightGBM model with the given hyperparameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Features and ignore_features are mutually exclusive. If both are provided, a <cite>ValueError</cite> will be raised.
+By default, all features are used. If ignore_features is provided, all features except the ones in
+ignore_features will be used. If features is provided, only the features in features will be used.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>str</em>) – The name of the target feature.</p></li>
+<li><p><strong>feval</strong> (<em>lightgbm.engine._LGBM_CustomMetricFunction</em><em> | </em><em>list</em><em>[</em><em>lightgbm.engine._LGBM_CustomMetricFunction</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>lightgbm.engine._LGBM_CustomMetricFunction</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – Custom evaluation function(s). Should return a tuple (eval_name, eval_result, is_higher_better).
+Refer to <a class="reference external" href="https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html#lightgbm.train">https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html#lightgbm.train</a>.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – The names of the features to be used as input for the model.</p></li>
+<li><p><strong>ignore_features</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>str</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – The names of the features to be ignored.</p></li>
+<li><p><strong>objective</strong> (<em>LGBMObjectiveType</em>) – The objective function to be used.</p></li>
+<li><p><strong>boosting</strong> (<em>LGBMBoostingType</em>) – The type of boosting algorithm.</p></li>
+<li><p><strong>data_sample_strategy</strong> (<em>LGBMDataSampleStrategyType</em>) – How data sampling should be performed.</p></li>
+<li><p><strong>num_iterations</strong> (<em>int</em>) – The number of iterations to perform.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The learning rate.</p></li>
+<li><p><strong>num_leaves</strong> (<em>int</em>) – The maximum number of leaves in one tree.</p></li>
+<li><p><strong>tree_learner</strong> (<em>LGBMTreeLearnerType</em>) – The type of tree learner.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em> | </em><em>None</em>) – The seed to use for random number generation.</p></li>
+<li><p><strong>force_col_wise</strong> (<em>bool</em>) – Force col-wise histogram building.</p></li>
+<li><p><strong>force_row_wise</strong> (<em>bool</em>) – Force row-wise histogram building.</p></li>
+<li><p><strong>histogram_pool_size</strong> (<em>float</em>) – Size of pooled memory for histograms in MB.</p></li>
+<li><p><strong>max_depth</strong> (<em>int</em>) – The maximum depth of a tree.</p></li>
+<li><p><strong>min_data_in_leaf</strong> (<em>int</em>) – The minimum number of data in one leaf.</p></li>
+<li><p><strong>min_sum_hessian_in_leaf</strong> (<em>float</em>) – The minimum sum of hessian in one leaf.</p></li>
+<li><p><strong>bagging_fraction</strong> (<em>float</em>) – The fraction of data to be used when bagging.</p></li>
+<li><p><strong>pos_bagging_fraction</strong> (<em>float</em>) – The fraction of positive data to be used when bagging,
+only used in binary application.</p></li>
+<li><p><strong>neg_bagging_fraction</strong> (<em>float</em>) – The fraction of negative data to be used when bagging,
+only used in binary application.</p></li>
+<li><p><strong>bagging_freq</strong> (<em>int</em>) – Frequency for bagging, 0 means disable bagging; k means perform bagging at every k iteration.
+At every bagging iteration, LightGBM will randomly select <cite>baggig_fraction</cite> * <cite>data_size</cite> data from
+training data to train for the next <cite>k</cite> iterations.</p></li>
+<li><p><strong>feature_fraction</strong> (<em>float</em>) – The fraction of features to be used when building each tree.</p></li>
+<li><p><strong>feature_fraction_bynode</strong> (<em>float</em>) – The fraction of features to be used for each tree node.</p></li>
+<li><p><strong>extra_trees</strong> (<em>bool</em>) – Whether to use extremely randomized trees.</p></li>
+<li><p><strong>early_stopping_round</strong> (<em>int</em><em> | </em><em>None</em>) – Will stop training if one metric of one validation data doesn’t improve in last
+<cite>early_stopping_round</cite> rounds.</p></li>
+<li><p><strong>first_metric_only</strong> (<em>bool</em>) – Whether to only use the first metric for early stopping.</p></li>
+<li><p><strong>max_delta_step</strong> (<em>float</em>) – The maximum delta step for tree leaf output.</p></li>
+<li><p><strong>lambda_l1</strong> (<em>float</em>) – L1 regularization.</p></li>
+<li><p><strong>lambda_l2</strong> (<em>float</em>) – L2 regularization.</p></li>
+<li><p><strong>linear_lambda</strong> (<em>float</em>) – Linear tree regularization.</p></li>
+<li><p><strong>min_gain_to_split</strong> (<em>float</em>) – The minimal gain to perform split.</p></li>
+<li><p><strong>drop_rate</strong> (<em>float</em>) – Dropout rate, only used in <cite>dart</cite> boosting, will drop trees with probability <cite>drop_rate</cite>.</p></li>
+<li><p><strong>max_drop</strong> (<em>int</em>) – Maximum number of dropped trees during one iteration, only used in <cite>dart</cite> boosting.</p></li>
+<li><p><strong>skip_drop</strong> (<em>float</em>) – Probability of skipping the dropout procedure during one iteration, only
+used in <cite>dart</cite> boosting.</p></li>
+<li><p><strong>xgboost_dart_mode</strong> (<em>bool</em>) – Whether to use xgboost <cite>dart</cite> boosting.</p></li>
+<li><p><strong>uniform_drop</strong> (<em>bool</em>) – Whether to use uniform drop, only used in <cite>dart</cite> boosting.</p></li>
+<li><p><strong>top_rate</strong> (<em>float</em>) – The retain ratio of large gradient data, only used in <cite>goss</cite> boosting.</p></li>
+<li><p><strong>other_rate</strong> (<em>float</em>) – The retain ratio of small gradient data, only used in <cite>goss</cite> boosting.</p></li>
+<li><p><strong>min_data_per_group</strong> (<em>int</em>) – The minimum number of data per categorical group.</p></li>
+<li><p><strong>max_cat_threshold</strong> (<em>int</em>) – Limit number of split points for categorical features.</p></li>
+<li><p><strong>cat_l2</strong> (<em>float</em>) – L2 regularization in categorical split.</p></li>
+<li><p><strong>cat_smooth</strong> (<em>float</em>) – Can reduce the effect of noises in categorical features, especially for
+categories with few data.</p></li>
+<li><p><strong>max_cat_to_onehot</strong> (<em>int</em>) – When number of categories of one feature smaller than or equal to <cite>max_cat_to_onehot</cite>,
+one-vs-other split algorithm will be used.</p></li>
+<li><p><strong>top_k</strong> (<em>int</em>) – Set this to larger value for more accurate result, but it will slow down the training speed.</p></li>
+<li><p><strong>monotone_constraints</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>int</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – The constraints for monotonicity, set it to a list with the same size as the number
+of features to turn on the monotonicity constraint. <cite>1</cite> means increasing constraint, <cite>-1</cite> means
+decreasing constraint, and <cite>0</cite> means no constraint.</p></li>
+<li><p><strong>monotone_constraints_method</strong> (<em>LGBMMonotoneConstraintsMethodType</em>) – The method to use to deal with monotone constraints, only used when
+<cite>monotone_constraints</cite> is not None.</p></li>
+<li><p><strong>monotone_penalty</strong> (<em>float</em>) – The penalty for monotone constraints.</p></li>
+<li><p><strong>feature_contri</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – Used to control feature’s split gain, will
+use gain[i] = max(0, feature_contri[i]) * gain[i] to replace the original gain of the ith feature.</p></li>
+<li><p><strong>path_smooth</strong> (<em>float</em>) – Controls the smoothing applied to tree nodes.</p></li>
+<li><p><strong>verbosity</strong> (<em>int</em>) – Controls the level of LightGBM’s verbosity.</p></li>
+<li><p><strong>log_evaluation_period</strong> (<em>int</em><em> | </em><em>None</em>) – The period to log the evaluation results, if <cite>None</cite>, results will not be logged.</p></li>
+<li><p><strong>use_quantized_grad</strong> (<em>bool</em>) – Whether to use gradiant quantization when training.</p></li>
+<li><p><strong>num_grad_quant_bins</strong> (<em>int</em>) – Number of bin to quantization gradients and hessians.</p></li>
+<li><p><strong>quant_train_renew_leaf</strong> (<em>bool</em>) – Whether to renew the leaf values with original gradients when quantized training.</p></li>
+<li><p><strong>stochastic_rounding</strong> (<em>bool</em>) – Whether to use stochastic rounding in gradient quantization.</p></li>
+<li><p><strong>linear_tree</strong> (<em>bool</em>) – Fit piecewise linear gradient boosting tree.</p></li>
+<li><p><strong>max_bin</strong> (<em>int</em>) – Max number of bins that feature values will be bucketed in.</p></li>
+<li><p><strong>max_bin_by_feature</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>int</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – Max number of bins that feature values will be bucketed in, per feature.</p></li>
+<li><p><strong>min_data_in_bin</strong> (<em>int</em>) – Min number of data inside one bin.</p></li>
+<li><p><strong>bin_construct_sample_cnt</strong> (<em>int</em>) – Number of data that sampled to construct histogram bins.</p></li>
+<li><p><strong>is_enable_sparse</strong> (<em>bool</em>) – Used to enable/disable the sparse optimization.</p></li>
+<li><p><strong>enable_bundle</strong> (<em>bool</em>) – Set this to <cite>False</cite> to disable Exclusive Feature Bundling (EFB).</p></li>
+<li><p><strong>use_missing</strong> (<em>bool</em>) – Set this to <cite>False</cite> to disable the special handle of missing value.</p></li>
+<li><p><strong>zero_as_missing</strong> (<em>bool</em>) – Set this to <cite>True</cite> to treat zero as missing value.</p></li>
+<li><p><strong>feature_pre_filter</strong> (<em>bool</em>) – Set this to <cite>True</cite> to ignroe the features that are unsplittable based
+on <cite>min_data_in_leaf</cite>.</p></li>
+<li><p><strong>num_class</strong> (<em>int</em>) – Only used in multiclass classification.</p></li>
+<li><p><strong>is_unbalance</strong> (<em>bool</em>) – Used only in <cite>binary</cite> and <cite>multiclassova</cite> classification application, used
+to handle unbalanced training data. Mutually exclusive with <cite>scale_pos_weight</cite>.</p></li>
+<li><p><strong>scale_pos_weight</strong> (<em>float</em>) – Used only in <cite>binary</cite> and <cite>multiclassova</cite> classification application, specifies the
+ratio of positive class weight to negative class weight. Mutually exclusive with <cite>is_unbalance</cite>.</p></li>
+<li><p><strong>sigmoid</strong> (<em>float</em>) – Used only in <cite>binary</cite> and <cite>multiclassova</cite> classification and in <cite>lambdarank</cite> application,
+specifies the sigmoid parameter.</p></li>
+<li><p><strong>boost_from_average</strong> (<em>bool</em>) – Used only in <cite>regression</cite>, <cite>binary</cite>, <cite>multiclassova</cite> and <cite>cross-entropy</cite> applications,
+adjusts initial score to the mean of labels for faster convergence.</p></li>
+<li><p><strong>reg_sqrt</strong> (<em>bool</em>) – Used only in <cite>regression</cite> application, specifies whether to use <cite>sqrt(label)</cite> as labels.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Used only in <cite>huber</cite> and <cite>quantile</cite> <cite>regression</cite> application, specifies the alpha parameter.</p></li>
+<li><p><strong>fair_c</strong> (<em>float</em>) – Used only in <cite>fair</cite> <cite>regression</cite> application, specifies the parameter for Fair loss.</p></li>
+<li><p><strong>poisson_max_delta_step</strong> (<em>float</em>) – Used only in <cite>poisson</cite> <cite>regression</cite> application, specifies the parameter
+for Poisson regression to safeguard optimization.</p></li>
+<li><p><strong>tweedie_variance_power</strong> (<em>float</em>) – Used only in <cite>tweedie</cite> <cite>regression</cite> application. Used to control the variance of
+the Tweedie distribution. Set closer to 2 to shift towards a Gamma distribution. Set closer to 1 to
+shift towards a Poisson distribution.</p></li>
+<li><p><strong>lambdarank_truncation_level</strong> (<em>int</em>) – Used only in <cite>lambdarank</cite> application, controls the number of top-results
+to focus on during training.</p></li>
+<li><p><strong>lambdarank_norm</strong> (<em>bool</em>) – Set this to <cite>True</cite> to normalize the lambdas for different queries, and improve the
+performance for unbalanced data. Set this to <cite>False</cite> to enforce the original lambdarank algorithm.
+Used only in <cite>lambdarank</cite> application.</p></li>
+<li><p><strong>metric</strong> (<em>LGBMMetricType</em><em> | </em><em>list</em><em>[</em><em>LGBMMetricType</em><em>]</em>) – Metrics to be evaluated on the evaluation set(s).</p></li>
+<li><p><strong>metric_freq</strong> (<em>int</em>) – The frequency of metric output, every <cite>metric_freq</cite> iterations.</p></li>
+<li><p><strong>is_provide_training_metric</strong> (<em>bool</em>) – Set this to <cite>True</cite> to output the metric result over training data.</p></li>
+<li><p><strong>eval_at</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>int</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – Used only with <cite>ndcg</cite> and <cite>map</cite> metrics, specifies the evaluation positions.</p></li>
+<li><p><strong>multi_error_top_k</strong> (<em>int</em>) – Used only in <cite>multi_error</cite> metric, specifies the threshold for top-k error metric.</p></li>
+<li><p><strong>auc_mu_weights</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>Ellipsis</em><em>] </em><em>| </em><em>None</em>) – Used only in <cite>auc_mu</cite> metric, specifies the weights for <cite>auc_mu</cite> metric.</p></li>
+<li><p><strong>cache_directory</strong> (<em>str</em><em> | </em><em>pathlib.Path</em>) – The target directory where the model will be saved.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em>) – The maximum number of entries to keep in the cache.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">vaex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mleko.model</span> <span class="kn">import</span> <span class="n">LGBMModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">vaex</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_schema</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">numerical</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sepal_length&quot;</span><span class="p">,</span> <span class="s2">&quot;sepal_width&quot;</span><span class="p">,</span> <span class="s2">&quot;petal_length&quot;</span><span class="p">,</span> <span class="s2">&quot;petal_width&quot;</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LGBMModel</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;class_&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sepal_width&quot;</span><span class="p">,</span> <span class="s2">&quot;petal_length&quot;</span><span class="p">,</span> <span class="s2">&quot;petal_width&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">num_iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_leaves</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">booster</span><span class="p">,</span> <span class="n">df_train_pred</span><span class="p">,</span> <span class="n">df_test_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_schema</span><span class="p">,</span> <span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span><span class="p">,</span> <span class="p">{})</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><span class="pre">mleko.dataset.data_schema.DataSchema</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vaex.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vaex.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.model.base_model.HyperparametersType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">lightgbm.Booster</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._fit" title="Permalink to this definition">#</a></dt>
+<dd><p>Fits the LightGBM model to the given data with the given hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_schema</strong> (<a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><em>mleko.dataset.data_schema.DataSchema</em></a>) – The data schema of the dataframes.</p></li>
+<li><p><strong>train_dataframe</strong> (<em>vaex.DataFrame</em>) – The training dataframe.</p></li>
+<li><p><strong>validation_dataframe</strong> (<em>vaex.DataFrame</em><em> | </em><em>None</em>) – The validation dataframe, optional but required for early stopping.</p></li>
+<li><p><strong>hyperparameters</strong> (<em>mleko.model.base_model.HyperparametersType</em><em> | </em><em>None</em>) – The hyperparameters to use for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the target feature is in the feature set.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The trained LightGBM model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[lightgbm.Booster, dict[str, dict[str, list[Any]]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._transform">
+<span class="sig-name descname"><span class="pre">_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><span class="pre">mleko.dataset.data_schema.DataSchema</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vaex.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">vaex.DataFrame</span></span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._transform" title="Permalink to this definition">#</a></dt>
+<dd><p>Transforms the given dataframe using the LightGBM model.</p>
+<p>Will return the predictions of the model applied to the given dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_schema</strong> (<a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><em>mleko.dataset.data_schema.DataSchema</em></a>) – The data schema of the dataframe.</p></li>
+<li><p><strong>dataframe</strong> (<em>vaex.DataFrame</em>) – The dataframe to transform.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed dataframe.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vaex.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._fingerprint">
+<span class="sig-name descname"><span class="pre">_fingerprint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Hashable</span></span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._fingerprint" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the fingerprint of the model.</p>
+<p>Appends the target feature and number of iterations to the fingerprint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The fingerprint of the model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hashable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._default_features">
+<span class="sig-name descname"><span class="pre">_default_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><span class="pre">mleko.dataset.data_schema.DataSchema</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._default_features" title="Permalink to this definition">#</a></dt>
+<dd><p>The default set of features to use for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_schema</strong> (<a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><em>mleko.dataset.data_schema.DataSchema</em></a>) – The data schema of the dataframes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The default set of features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, Ellipsis]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._load_lgb_dataset">
+<span class="sig-name descname"><span class="pre">_load_lgb_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><span class="pre">mleko.dataset.data_schema.DataSchema</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vaex.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lightgbm.Dataset</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._load_lgb_dataset" title="Permalink to this definition">#</a></dt>
+<dd><p>Loads the given dataframe into a LightGBM dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_schema</strong> (<a class="reference internal" href="../../dataset/data_schema/index.html#mleko.dataset.data_schema.DataSchema" title="mleko.dataset.data_schema.DataSchema"><em>mleko.dataset.data_schema.DataSchema</em></a>) – The data schema of the dataframe.</p></li>
+<li><p><strong>dataframe</strong> (<em>vaex.DataFrame</em>) – The dataframe to load.</p></li>
+<li><p><strong>reference_dataset</strong> (<em>lightgbm.Dataset</em><em> | </em><em>None</em>) – The reference dataset, required if the dataframe is a validation dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The LightGBM dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.model.lgbm_model.LGBMModel._pop_num_iterations">
+<span class="sig-name descname"><span class="pre">_pop_num_iterations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#mleko.model.lgbm_model.LGBMModel._pop_num_iterations" title="Permalink to this definition">#</a></dt>
+<dd><p>Extracts the number of iterations from the hyperparameters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>All aliases for the number of iterations are removed from the hyperparameters dictionary.
+This is an intentional side effect which is used to avoid passing the number of iterations
+to the LightGBM model twice.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hyperparameters</strong> (<em>dict</em>) – The hyperparameters dictionary.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of iterations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../../pipeline/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline</span></code></div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../base_model/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.base_model</span></code></div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Klarna Bank AB
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.lgbm_model</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMObjectiveType"><code class="docutils literal notranslate"><span class="pre">LGBMObjectiveType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMBoostingType"><code class="docutils literal notranslate"><span class="pre">LGBMBoostingType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMDataSampleStrategyType"><code class="docutils literal notranslate"><span class="pre">LGBMDataSampleStrategyType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMTreeLearnerType"><code class="docutils literal notranslate"><span class="pre">LGBMTreeLearnerType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMMetricType"><code class="docutils literal notranslate"><span class="pre">LGBMMetricType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMMonotoneConstraintsMethodType"><code class="docutils literal notranslate"><span class="pre">LGBMMonotoneConstraintsMethodType</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel"><code class="docutils literal notranslate"><span class="pre">LGBMModel</span></code></a><ul>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._fit"><code class="docutils literal notranslate"><span class="pre">LGBMModel._fit()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._transform"><code class="docutils literal notranslate"><span class="pre">LGBMModel._transform()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._fingerprint"><code class="docutils literal notranslate"><span class="pre">LGBMModel._fingerprint()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._default_features"><code class="docutils literal notranslate"><span class="pre">LGBMModel._default_features()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._load_lgb_dataset"><code class="docutils literal notranslate"><span class="pre">LGBMModel._load_lgb_dataset()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.model.lgbm_model.LGBMModel._pop_num_iterations"><code class="docutils literal notranslate"><span class="pre">LGBMModel._pop_num_iterations()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>
