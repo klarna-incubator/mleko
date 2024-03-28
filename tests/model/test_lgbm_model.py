@@ -54,7 +54,27 @@ class TestLGBMModel:
         example_vaex_dataframe_validate: vaex.DataFrame,
     ):
         """Should train the model successfully."""
-        lgbm_model = LGBMModel(cache_directory=temporary_directory, target="target", objective="binary")
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+        )
+        _, _, _, df_validate = lgbm_model._fit_transform(
+            example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate
+        )
+        assert df_validate["prediction"].tolist() == [0.0 for _ in range(10)]  # type: ignore
+        assert df_validate["probability_0"].tolist() == [0.5 for _ in range(10)]  # type: ignore
+        assert df_validate["probability_1"].tolist() == [0.5 for _ in range(10)]  # type: ignore
+
+    def test_fit_transform_regression(
+        self,
+        temporary_directory: Path,
+        example_data_schema: DataSchema,
+        example_vaex_dataframe_train: vaex.DataFrame,
+        example_vaex_dataframe_validate: vaex.DataFrame,
+    ):
+        """Should train the model successfully for regression."""
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMRegressor(objective="binary")
+        )
         _, _, _, df_validate = lgbm_model._fit_transform(
             example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate
         )
@@ -68,14 +88,16 @@ class TestLGBMModel:
         example_vaex_dataframe_validate: vaex.DataFrame,
     ):
         """Should train the model using fit_transform and use the cache once called again."""
-        LGBMModel(cache_directory=temporary_directory, target="target", objective="binary").fit_transform(
+        LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+        ).fit_transform(
             example_data_schema, example_vaex_dataframe_train.copy(), example_vaex_dataframe_validate.copy(), {}
         )
 
         with patch.object(LGBMModel, "_fit_transform") as mocked_fit_transform:
-            LGBMModel(cache_directory=temporary_directory, target="target", objective="binary").fit_transform(
-                example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
-            )
+            LGBMModel(
+                cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+            ).fit_transform(example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {})
             mocked_fit_transform.assert_not_called()
 
     def test_cache_fit_transform_no_validation(
@@ -86,15 +108,15 @@ class TestLGBMModel:
     ):
         """Should train the model using fit_transform and use the cache once called again with no validation data."""
         _, _, _, validation_df = LGBMModel(
-            cache_directory=temporary_directory, target="target", objective="binary"
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
         ).fit_transform(example_data_schema, example_vaex_dataframe_train.copy(), None, {})
 
         assert validation_df is None
 
         with patch.object(LGBMModel, "_fit_transform") as mocked_fit_transform:
-            LGBMModel(cache_directory=temporary_directory, target="target", objective="binary").fit_transform(
-                example_data_schema, example_vaex_dataframe_train, None, {}
-            )
+            LGBMModel(
+                cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+            ).fit_transform(example_data_schema, example_vaex_dataframe_train, None, {})
             mocked_fit_transform.assert_not_called()
 
     def test_cache_fit_and_transform(
@@ -105,14 +127,18 @@ class TestLGBMModel:
         example_vaex_dataframe_validate: vaex.DataFrame,
     ):
         """Should train the model using fit and transform and use the cache once called again."""
-        lgbm_model = LGBMModel(cache_directory=temporary_directory, target="target", objective="binary")
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+        )
         _, _ = lgbm_model.fit(
             example_data_schema, example_vaex_dataframe_train.copy(), example_vaex_dataframe_validate.copy(), {}
         )
         _ = lgbm_model.transform(example_data_schema, example_vaex_dataframe_validate.copy())
 
         with patch.object(LGBMModel, "_fit") as mocked_fit, patch.object(LGBMModel, "_transform") as mocked_transform:
-            lgbm_model = LGBMModel(cache_directory=temporary_directory, target="target", objective="binary")
+            lgbm_model = LGBMModel(
+                cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+            )
             _, _ = lgbm_model.fit(
                 example_data_schema, example_vaex_dataframe_train.copy(), example_vaex_dataframe_validate.copy(), {}
             )
@@ -130,13 +156,17 @@ class TestLGBMModel:
     ):
         """Should train the model successfully and track metrics."""
         lgbm_model = LGBMModel(
-            cache_directory=temporary_directory, target="target", objective="binary", num_iterations=3, metric=["auc"]
+            cache_directory=temporary_directory,
+            target="target",
+            model=lgb.LGBMClassifier(objective="binary", num_iterations=3),
+            eval_metric=["auc"],
         )
         _, metrics = lgbm_model.fit(
             example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
         )
 
-        assert metrics == {"train": {"auc": [0.5, 0.5, 0.5]}, "validation": {"auc": [0.5, 0.5, 0.5]}}
+        assert metrics["train"]["auc"] == [0.5, 0.5, 0.5]
+        assert metrics["validation"]["auc"] == [0.5, 0.5, 0.5]
 
     def test_custom_eval_metric(
         self,
@@ -147,8 +177,8 @@ class TestLGBMModel:
     ):
         """Should train the model successfully and track custom evaluation function."""
 
-        def f1_score_callback(preds: np.ndarray, eval_data: lgb.Dataset) -> tuple[str, float, bool]:
-            y_true = eval_data.get_label()
+        def f1_score_callback(labels: np.ndarray, preds: np.ndarray) -> tuple[str, float, bool]:
+            y_true = labels
             y_pred = np.round(preds)
             f1: float = f1_score(y_true, y_pred, average="micro")  # type: ignore
             return ("f1_score", f1, True)
@@ -156,19 +186,17 @@ class TestLGBMModel:
         lgbm_model = LGBMModel(
             cache_directory=temporary_directory,
             target="target",
-            objective="binary",
-            num_iterations=3,
-            metric="auc",
-            feval=f1_score_callback,
+            model=lgb.LGBMClassifier(objective="binary", num_iterations=3),
+            eval_metric=["auc", f1_score_callback],  # type: ignore
         )
         _, metrics = lgbm_model.fit(
             example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
         )
 
-        assert metrics == {
-            "train": {"auc": [0.5, 0.5, 0.5], "f1_score": [0.5, 0.5, 0.5]},
-            "validation": {"auc": [0.5, 0.5, 0.5], "f1_score": [0.5, 0.5, 0.5]},
-        }
+        assert metrics["train"]["f1_score"] == [0.5, 0.5, 0.5]
+        assert metrics["validation"]["f1_score"] == [0.5, 0.5, 0.5]
+        assert metrics["train"]["auc"] == [0.5, 0.5, 0.5]
+        assert metrics["validation"]["auc"] == [0.5, 0.5, 0.5]
 
     def test_error_target_in_features(
         self,
@@ -178,7 +206,9 @@ class TestLGBMModel:
         example_vaex_dataframe_validate: vaex.DataFrame,
     ):
         """Should raise error when target is in features."""
-        lgbm_model = LGBMModel(cache_directory=temporary_directory, target="target", features=["target"])
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(), features=["target"]
+        )
 
         with pytest.raises(ValueError):
             lgbm_model.fit(example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, {})

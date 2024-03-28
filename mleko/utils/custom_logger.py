@@ -251,6 +251,9 @@ class CustomLogger(logging.Logger):
         """
         target_stacklevel = stacklevel + 1
         if not isinstance(message, str):
+            if log_level < self.level:  # pragma: no cover
+                return
+
             self.log(
                 log_level,
                 message,
@@ -268,6 +271,9 @@ class CustomLogger(logging.Logger):
             level_str = match.group(1).upper()
             routed_level = getattr(logging, level_str)
             cleaned_msg = re.sub(rf"\[{level_str}\]\s?", "", message, flags=re.IGNORECASE, count=1)
+            if routed_level < self.level:  # pragma: no cover
+                return
+
             self.log(
                 routed_level,
                 cleaned_msg,
@@ -278,6 +284,9 @@ class CustomLogger(logging.Logger):
                 extra=extra,
             )
         else:
+            if log_level < self.level:  # pragma: no cover
+                return
+
             self.log(
                 log_level,
                 message,
