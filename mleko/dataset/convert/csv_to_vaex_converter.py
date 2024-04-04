@@ -350,9 +350,6 @@ class CSVToVaexConverter(BaseConverter):
                 logger.warning(f"Renaming column {column_name!r} to '_empty'")
                 df.rename(column_name, "_empty")
 
-        for column_name in df.get_column_names(dtype="bool"):
-            df[column_name] = get_column(df, column_name).astype("int8")
-
         for column_name in df.get_column_names(dtype=pa.null()):
             df[column_name] = get_column(df, column_name).astype("string")
 
@@ -367,6 +364,9 @@ class CSVToVaexConverter(BaseConverter):
             timedelta=df.get_column_names(dtype="timedelta"),
         )
         ds.drop_features(self._meta_columns)
+
+        for column_name in df.get_column_names(dtype="bool"):
+            df[column_name] = get_column(df, column_name).astype("int8")
 
         logger.info("Merging chunks into a single DataFrame.")
         return ds, df

@@ -127,7 +127,7 @@ class LGBMModel(BaseModel):
         train_dataframe: vaex.DataFrame,
         validation_dataframe: vaex.DataFrame | None = None,
         hyperparameters: HyperparametersType | None = None,
-    ) -> tuple[lgb.LGBMModel, dict[str, dict[str, list[Any]]]]:
+    ) -> tuple[lgb.LGBMClassifier | lgb.LGBMRegressor, dict[str, dict[str, list[Any]]]]:
         """Fits the LightGBM model to the given data with the given hyperparameters.
 
         Args:
