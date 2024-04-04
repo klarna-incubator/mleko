@@ -108,5 +108,6 @@ class TestCSVToVaexConverter:
         assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class", "_empty"]
         assert df.shape == (4, 8)
         assert df.Name.countna() == 1
+        assert ds.get_type("Is_Best") == "boolean"
         assert "Count" not in ds.get_features()
         df.close()
