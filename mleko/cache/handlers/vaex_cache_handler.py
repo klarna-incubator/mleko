@@ -33,15 +33,15 @@ def write_vaex_dataframe(cache_file_path: Path, output: vaex.DataFrame) -> None:
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", "invalid value encountered in cast")
         with tqdm(total=100, desc=f"Writing DataFrame to {cache_file_path.suffix} file") as pbar:
-            output.export_hdf5(
+            output.export_arrow(
                 cache_file_path,
                 progress=set_tqdm_percent_wrapper(pbar),
                 parallel=True,
-                chunk_size=100_000,
+                chunk_size=262_144,
             )
 
 
 VAEX_DATAFRAME_CACHE_HANDLER = CacheHandler(
-    writer=write_vaex_dataframe, reader=read_vaex_dataframe, suffix="hdf5", can_handle_none=False
+    writer=write_vaex_dataframe, reader=read_vaex_dataframe, suffix="arrow", can_handle_none=False
 )
 """A CacheHandler for `vaex` DataFrames."""

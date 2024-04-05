@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Hashable, Union
@@ -120,8 +119,14 @@ class BaseModel(LRUCacheMixin, ABC):
             lambda_func=lambda: self._fit(data_schema, train_dataframe, validation_dataframe, hyperparameters),
             cache_key_inputs=[
                 self._fingerprint(),
-                json.dumps(self._hyperparameters, sort_keys=True),
-                json.dumps(hyperparameters, sort_keys=True),
+                (
+                    (
+                        {**self._hyperparameters, **hyperparameters}
+                        if hyperparameters is not None
+                        else self._hyperparameters
+                    ),
+                    DictFingerprinter(),
+                ),
                 (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
@@ -166,7 +171,7 @@ class BaseModel(LRUCacheMixin, ABC):
             lambda_func=lambda: self._transform(data_schema, dataframe),
             cache_key_inputs=[
                 self._fingerprint(),
-                json.dumps(self._hyperparameters, sort_keys=True),
+                (self._hyperparameters, DictFingerprinter()),
                 (data_schema.to_dict(), DictFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
@@ -222,8 +227,14 @@ class BaseModel(LRUCacheMixin, ABC):
             ),
             cache_key_inputs=[
                 self._fingerprint(),
-                json.dumps(self._hyperparameters, sort_keys=True),
-                json.dumps(hyperparameters, sort_keys=True),
+                (
+                    (
+                        {**self._hyperparameters, **hyperparameters}
+                        if hyperparameters is not None
+                        else self._hyperparameters
+                    ),
+                    DictFingerprinter(),
+                ),
                 (data_schema.to_dict(), DictFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,

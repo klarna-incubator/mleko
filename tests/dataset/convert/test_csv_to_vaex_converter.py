@@ -57,7 +57,7 @@ class TestCSVToVaexConverter:
         assert df.Name.countna() == 0
         assert df.Is_Best.tolist() == [0, None, 1]
         assert len(glob.glob(str(temporary_directory / "df_chunk_*.arrow"))) == 0
-        assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 1
+        assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 1
 
         with patch.object(CSVToVaexConverter, "_convert") as patched_convert:
             new_csv_to_arrow_converter = CSVToVaexConverter(
@@ -88,7 +88,7 @@ class TestCSVToVaexConverter:
         )
         _, df_new = new_csv_to_arrow_converter.convert(file_paths, force_recompute=False)
 
-        assert len(glob.glob(str(temporary_directory / "*.hdf5"))) == 2
+        assert len(glob.glob(str(temporary_directory / "*.arrow"))) == 2
         df.close()
         df_new.close()
 
@@ -108,5 +108,6 @@ class TestCSVToVaexConverter:
         assert df.column_names == ["Time", "Date", "Count", "Name", "Is_Best", "Extra_Column", "_class", "_empty"]
         assert df.shape == (4, 8)
         assert df.Name.countna() == 1
+        assert ds.get_type("Is_Best") == "boolean"
         assert "Count" not in ds.get_features()
         df.close()

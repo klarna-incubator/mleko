@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -33,7 +34,7 @@ class ImblearnResamplingFilter(BaseFilter):
         sampler: BaseSampler,
         target_column: str,
         random_state: int | None = 42,
-        enable_logging: bool = True,
+        verbosity: int = logging.INFO,
         cache_directory: str | Path = "data/imblearn-sampling-filter",
         cache_size: int = 1,
     ) -> None:
@@ -48,7 +49,7 @@ class ImblearnResamplingFilter(BaseFilter):
             target_column: The target column to be used for sampling.
             random_state: The random state to be used for reproducibility, and will recursively set the random state
                 of the sampler and all nested objects if set.
-            enable_logging: If set to True, enables logging.
+            verbosity: The verbosity level of the logger.
             cache_directory: The target directory where the filtered dataframes are to be saved.
             cache_size: The maximum number of cache entries.
 
@@ -70,6 +71,7 @@ class ImblearnResamplingFilter(BaseFilter):
         self._target_column = target_column
         self._random_state = random_state
         self._reset_random_state()
+        logger.set_level(verbosity)
 
     def filter(
         self,
