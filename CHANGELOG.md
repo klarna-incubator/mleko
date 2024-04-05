@@ -1,5 +1,16 @@
 # Changelog
 
+## [v3.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.0.0) (2024-04-05)
+
+### ⛔️ BREAKING CHANGES
+
+- **model:** Update `LGBMModel` to use dependency injection, now expects a `lightgbm.LGBMModel` as argument. ([`7250f34`](https://github.com/klarna-incubator/mleko/commit/7250f344304eadc013ed54b40c7a1e017133833c))
+
+### 🐛 Bug Fixes
+
+- Switch `vaex` file format to `Arrow` instead of `HDF5` for better type support. ([`ac8e500`](https://github.com/klarna-incubator/mleko/commit/ac8e5008617ecc2185f9cb6927b578d24807265b))
+- **data cleaning:** Fix bug where boolean columns are stored as numerical in the data schema due to `int8` conversion. ([`da358d8`](https://github.com/klarna-incubator/mleko/commit/da358d850313fba116cb69fe554f727de0a19380))
+
 ## [v2.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v2.2.0) (2024-03-22)
 
 ### ✨ Features
