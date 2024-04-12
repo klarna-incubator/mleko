@@ -222,3 +222,39 @@ class TestLGBMModel:
             lgbm_model.fit(
                 DataSchema(numerical=["target"]), example_vaex_dataframe_train, example_vaex_dataframe_validate, {}
             )
+
+    def test_fit_twice_with_memoized_dataset(
+        self,
+        temporary_directory: Path,
+        example_data_schema: DataSchema,
+        example_vaex_dataframe_train: vaex.DataFrame,
+        example_vaex_dataframe_validate: vaex.DataFrame,
+    ):
+        """Should fit the model twice using the same dataset and verify memoization behavior."""
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory,
+            target="target",
+            model=lgb.LGBMClassifier(objective="binary"),
+            memoized_dataset_cache_size=2,
+        )
+
+        # First fitting
+        _, _ = lgbm_model.fit(
+            example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, disable_cache=True
+        )
+        assert lgbm_model._memoized_load_dataset.cache_info().misses == 2
+
+        # Second fitting
+        with patch.object(lgbm_model, "_load_dataset") as mock_load_dataset:
+            _, _ = lgbm_model.fit(
+                example_data_schema, example_vaex_dataframe_train, example_vaex_dataframe_validate, disable_cache=True
+            )
+            assert lgbm_model._memoized_load_dataset.cache_info().hits == 2
+            assert lgbm_model._memoized_load_dataset.cache_info().currsize == 2
+            mock_load_dataset.assert_not_called()
+
+        # Clear cache
+        lgbm_model.clear_load_dataset_cache()
+        assert lgbm_model._memoized_load_dataset.cache_info().currsize == 0
+        assert lgbm_model._memoized_load_dataset.cache_info().hits == 0
+        assert lgbm_model._memoized_load_dataset.cache_info().maxsize == 2

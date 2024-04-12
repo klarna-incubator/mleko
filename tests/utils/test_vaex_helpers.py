@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 import vaex
 
-from mleko.utils.vaex_helpers import get_column, get_columns, get_filtered_df, get_indices
+from mleko.utils.vaex_helpers import HashableVaexDataFrame, get_column, get_columns, get_filtered_df, get_indices
 
 
 @pytest.fixture(scope="module")
@@ -87,3 +87,22 @@ class TestGetIndices:
         assert result["column1"].tolist() == []  # type: ignore
         assert result["column2"].tolist() == []  # type: ignore
         assert result["column3"].tolist() == []  # type: ignore
+
+
+class TestHashableVaexDataFrame:
+    """Test suite for `utils.vaex_helpers.HashableVaexDataFrame`."""
+
+    def test_hashable_vaex_dataframe(self, example_vaex_dataframe: vaex.DataFrame):
+        """Identical DataFrames should have the same hash and be equal."""
+        hashable_df1 = HashableVaexDataFrame(example_vaex_dataframe)
+        hashable_df2 = HashableVaexDataFrame(example_vaex_dataframe)
+        assert hashable_df1 == hashable_df2
+        assert hash(hashable_df1) == hash(hashable_df2)
+
+    def test_inequality(self):
+        """Different DataFrames should have different hashes and not be equal."""
+        df1 = vaex.from_arrays(column1=[1, 2, 3], column2=[4, 5, 6], column3=[7, 8, 9])
+        df2 = vaex.from_arrays(column1=[1, 2, 3], column2=[4, 5, 6], column3=[7, 8, 10])
+        hashable_df1 = HashableVaexDataFrame(df1)
+        hashable_df2 = HashableVaexDataFrame(df2)
+        assert hashable_df1 != hashable_df2

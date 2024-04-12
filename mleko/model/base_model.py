@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Hashable, Union
 
+import pandas as pd
 import vaex
 
 from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
@@ -13,6 +15,7 @@ from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HAND
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
+from mleko.utils.vaex_helpers import HashableVaexDataFrame, get_columns
 
 
 logger = CustomLogger()
@@ -45,6 +48,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         features: list[str] | tuple[str, ...] | None,
         ignore_features: list[str] | tuple[str, ...] | None,
+        memoized_dataset_cache_size: int | None,
         cache_directory: str | Path,
         cache_size: int,
     ) -> None:
@@ -54,11 +58,22 @@ class BaseModel(LRUCacheMixin, ABC):
             The `features` and `ignore_features` arguments are mutually exclusive. If both are specified, a
             `ValueError` is raised.
 
+        Warning:
+            The `memoized_dataset_cache_size` parameter is experimental and should be used with caution. It refers to
+            the number of datasets to keep in memory for speeding up repeated training. This can be useful when
+            hyperparameter tuning or cross-validation is performed, as the dataset does not need to be loaded from disk
+            every time. However, this can lead to memory issues if the dataset is too large. Specify 0 to disable the
+            cache. When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to
+            clear the cache and free up memory.
+
         Args:
             features: List of feature names to be used by the model. If None, the default is all features
                 applicable to the model.
             ignore_features: List of feature names to be ignored by the model. If None, the default is to
                 ignore no features.
+            memoized_dataset_cache_size: The number of datasets to keep in memory for speeding up repeated training.
+                When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to clear
+                the cache and free up memory. Specify 0 to disable the cache.
             cache_directory: Directory where the cache will be stored locally.
             cache_size: The maximum number of entries to keep in the cache.
 
@@ -66,6 +81,8 @@ class BaseModel(LRUCacheMixin, ABC):
             ValueError: If both `features` and `ignore_features` are specified.
         """
         super().__init__(cache_directory, cache_size)
+        self._memoized_dataset_cache_size = memoized_dataset_cache_size
+
         if features is not None and ignore_features is not None:
             msg = "Both `features` and `ignore_features` have been specified. The arguments are mutually exclusive."
             logger.error(msg)
@@ -75,6 +92,8 @@ class BaseModel(LRUCacheMixin, ABC):
         self._hyperparameters: HyperparametersType = {}
         self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
+
+        self._memoized_load_dataset = lru_cache(maxsize=self._memoized_dataset_cache_size)(self._memoized_load_dataset)
 
     def fit(
         self,
@@ -252,6 +271,10 @@ class BaseModel(LRUCacheMixin, ABC):
         self._assign_model(model)
         return model, metrics, df_train, df_validation
 
+    def clear_load_dataset_cache(self) -> None:
+        """Clears the cache for the `_memoized_load_dataset` method."""
+        self._memoized_load_dataset.cache_clear()  # type: ignore
+
     def _fit_transform(
         self,
         data_schema: DataSchema,
@@ -306,6 +329,60 @@ class BaseModel(LRUCacheMixin, ABC):
             if self._features is None
             else self._features
         )
+
+    def _load_dataset(
+        self,
+        data_schema: DataSchema,
+        dataframe: vaex.DataFrame,
+        additional_features: list[str] | None = None,
+    ) -> pd.DataFrame:
+        """Load the dataset into memory.
+
+        Warning:
+            This method should be used with caution, as it loads the entire dataset into memory as a pandas DataFrame.
+
+        Args:
+            data_schema: The data schema of the dataframe.
+            dataframe: The dataframe to load.
+            additional_features: Additional features to load, such as the target feature.
+
+        Returns:
+            A pandas DataFrame with the loaded data.
+        """
+        feature_names = self._feature_set(data_schema)
+        df = get_columns(dataframe, feature_names + (additional_features if additional_features else [])).to_pandas_df()
+        return df  # type: ignore
+
+    def _memoized_load_dataset(
+        self,
+        data_schema: DataSchema,
+        dataframe: HashableVaexDataFrame,
+        additional_features: tuple[str, ...] | None = None,
+        name: str | None = None,
+    ) -> pd.DataFrame:
+        """Load the dataset into memory and memoize the result.
+
+        Warning:
+            This method should be used with caution, as it loads the entire dataset into memory as a pandas DataFrame.
+            The returned DataFrame will be memoized using the `functools.lru_cache` to avoid reloading the
+            dataset multiple times. The cache size is set to the `memoized_dataset_cache_size` attribute.
+
+        Args:
+            data_schema: The data schema of the dataframe.
+            dataframe: The dataframe to load, wrapped in a `HashableVaexDataFrame` object.
+            additional_features: Additional features to load, such as the target feature.
+            name: Name of the dataset to be used in the log message.
+
+        Returns:
+            A pandas DataFrame with the loaded data.
+        """
+        if name is not None:
+            name = f"{name.strip()} "
+        else:
+            name = ""
+
+        logger.info(f"Loading the {name}dataset into memory.")
+        return self._load_dataset(data_schema, dataframe.df, list(additional_features) if additional_features else None)
 
     @abstractmethod
     def _fit(
