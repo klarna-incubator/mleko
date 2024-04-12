@@ -273,7 +273,7 @@ class BaseModel(LRUCacheMixin, ABC):
 
     def clear_load_dataset_cache(self) -> None:
         """Clears the cache for the `_memoized_load_dataset` method."""
-        self._memoized_load_dataset.cache_clear()
+        self._memoized_load_dataset.cache_clear()  # type: ignore
 
     def _fit_transform(
         self,

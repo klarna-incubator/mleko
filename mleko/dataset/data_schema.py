@@ -54,11 +54,11 @@ class DataSchema:
             "timedelta": sorted(list(timedelta)),
         }
 
-    def __eq__(self, other: DataSchema) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check if two DataSchema objects are equal.
 
         Args:
-            other: DataSchema object to compare with.
+            other: Object to compare with.
 
         Returns:
             True if the two DataSchema objects are equal, False otherwise.
