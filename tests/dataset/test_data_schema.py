@@ -141,3 +141,47 @@ class TestDataSchema:
 
         with pytest.raises(ValueError):
             data_schema.get_type("non_existent_feature")
+
+    def test_hash_match(self):
+        """Should return the same hash for the same schema."""
+        data_schema1 = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1", "timedelta2"],
+        )
+        data_schema2 = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1", "timedelta2"],
+        )
+        assert hash(data_schema1) == hash(data_schema2)
+
+    def test_data_schema_equality_and_inequality(self):
+        """Should test equality and inequality of DataSchema instances."""
+        data_schema1 = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1", "timedelta2"],
+        )
+        data_schema2 = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1", "timedelta2"],
+        )
+        data_schema3 = DataSchema(
+            numerical=["numerical1", "numerical2"],
+            categorical=["categorical1", "categorical2"],
+            boolean=["boolean1", "boolean2"],
+            datetime=["datetime1", "datetime2"],
+            timedelta=["timedelta1"],
+        )
+        assert data_schema1 == data_schema2
+        assert data_schema1 != data_schema3

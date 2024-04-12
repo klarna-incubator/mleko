@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import vaex
 
 
@@ -88,3 +90,29 @@ def get_indices(df: vaex.DataFrame, indices: list[int]) -> vaex.DataFrame:
     selection = get_filtered_df(df, index.isin(indices))
     selection.delete_virtual_column(idx_name)
     return selection.extract()
+
+
+@dataclass(frozen=True)
+class HashableVaexDataFrame:
+    """An immutable hashable wrapper around a `vaex.DataFrame`."""
+
+    df: vaex.DataFrame
+
+    def __eq__(self, other) -> bool:
+        """Check if two `HashableVaexDataFrame` objects are equal.
+
+        Args:
+            other: `HashableVaexDataFrame` object to compare with.
+
+        Returns:
+            True if the two `HashableVaexDataFrame` objects are equal, False otherwise.
+        """
+        return isinstance(other, HashableVaexDataFrame) and self.df.fingerprint() == other.df.fingerprint()
+
+    def __hash__(self) -> int:
+        """Get the hash of the `HashableVaexDataFrame`.
+
+        Returns:
+            Hash of the `HashableVaexDataFrame`.
+        """
+        return hash(self.df.fingerprint())

@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 from typing import Literal
 
+from mleko.cache.fingerprinters.dict_fingerprinter import DictFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 
 
@@ -52,6 +53,32 @@ class DataSchema:
             "datetime": sorted(list(datetime)),
             "timedelta": sorted(list(timedelta)),
         }
+
+    def __eq__(self, other: DataSchema) -> bool:
+        """Check if two DataSchema objects are equal.
+
+        Args:
+            other: DataSchema object to compare with.
+
+        Returns:
+            True if the two DataSchema objects are equal, False otherwise.
+        """
+        return isinstance(other, DataSchema) and DictFingerprinter().fingerprint(
+            self.to_dict()
+        ) == DictFingerprinter().fingerprint(other.to_dict())
+
+    def __hash__(self) -> int:
+        """Get the hash of the DataSchema.
+
+        Warning:
+            This method is not intended to be used for stable hashing across runs. Please
+            refer to the `DictFingerprinter` class in the `mleko.utils.fingerprinter` module
+            for stable hashing of the DataSchema.
+
+        Returns:
+            Hash of the DataSchema.
+        """
+        return hash(DictFingerprinter().fingerprint(self.to_dict()))
 
     def __repr__(self) -> str:
         """Get the string representation of DataSchema.
