@@ -94,22 +94,6 @@ class BaseModel(LRUCacheMixin, ABC):
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
 
         self._memoized_load_dataset = lru_cache(maxsize=self._memoized_dataset_cache_size)(self._memoized_load_dataset)
-        """Load the dataset into memory and memoize the result.
-
-        Warning:
-            This method should be used with caution, as it loads the entire dataset into memory as a pandas DataFrame.
-            The returned DataFrame will be memoized using the `functools.lru_cache` to avoid reloading the
-            dataset multiple times. The cache size is set to the `memoized_dataset_cache_size` attribute.
-
-        Args:
-            data_schema: The data schema of the dataframe.
-            dataframe: The dataframe to load, wrapped in a `HashableVaexDataFrame` object.
-            additional_features: Additional features to load, such as the target feature.
-            name: Name of the dataset to be used in the log message.
-
-        Returns:
-            A pandas DataFrame with the loaded data.
-        """
 
     def fit(
         self,
@@ -287,6 +271,10 @@ class BaseModel(LRUCacheMixin, ABC):
         self._assign_model(model)
         return model, metrics, df_train, df_validation
 
+    def clear_load_dataset_cache(self) -> None:
+        """Clears the cache for the `_memoized_load_dataset` method."""
+        self._memoized_load_dataset.cache_clear()
+
     def _fit_transform(
         self,
         data_schema: DataSchema,
@@ -372,6 +360,22 @@ class BaseModel(LRUCacheMixin, ABC):
         additional_features: tuple[str, ...] | None = None,
         name: str | None = None,
     ) -> pd.DataFrame:
+        """Load the dataset into memory and memoize the result.
+
+        Warning:
+            This method should be used with caution, as it loads the entire dataset into memory as a pandas DataFrame.
+            The returned DataFrame will be memoized using the `functools.lru_cache` to avoid reloading the
+            dataset multiple times. The cache size is set to the `memoized_dataset_cache_size` attribute.
+
+        Args:
+            data_schema: The data schema of the dataframe.
+            dataframe: The dataframe to load, wrapped in a `HashableVaexDataFrame` object.
+            additional_features: Additional features to load, such as the target feature.
+            name: Name of the dataset to be used in the log message.
+
+        Returns:
+            A pandas DataFrame with the loaded data.
+        """
         if name is not None:
             name = f"{name.strip()} "
         else:
@@ -379,10 +383,6 @@ class BaseModel(LRUCacheMixin, ABC):
 
         logger.info(f"Loading the {name}dataset into memory.")
         return self._load_dataset(data_schema, dataframe.df, list(additional_features) if additional_features else None)
-
-    def clear_load_dataset_cache(self) -> None:
-        """Clears the cache for the `_memoized_load_dataset` method."""
-        self._memoized_load_dataset.cache_clear()
 
     @abstractmethod
     def _fit(
