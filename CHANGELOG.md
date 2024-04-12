@@ -1,5 +1,12 @@
 # Changelog
 
+## [v3.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.1.0) (2024-04-12)
+
+### ✨ Features
+
+- **model:** Add optional memoization to datasets during model training. (#209) ([`2ca4465`](https://github.com/klarna-incubator/mleko/commit/2ca44651b793ca0b2c9a38bf8ac99934da07760a))
+- **model:** Add optional memoization to datasets during model training. ([`6a955dc`](https://github.com/klarna-incubator/mleko/commit/6a955dca44bc1df139f5dde2e34bb97d12ae8de8))
+
 ## [v3.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.0.0) (2024-04-05)
 
 ### ⛔️ BREAKING CHANGES
