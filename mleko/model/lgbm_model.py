@@ -16,7 +16,7 @@ from lightgbm.sklearn import _LGBM_ScikitEvalMetricType
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
-from mleko.utils.vaex_helpers import get_columns
+from mleko.utils.vaex_helpers import HashableVaexDataFrame
 
 from .base_model import BaseModel, HyperparametersType
 
@@ -63,6 +63,7 @@ class LGBMModel(BaseModel):
         ignore_features: list[str] | tuple[str, ...] | None = None,
         random_state: int | None = 42,
         verbosity: int = logging.INFO,
+        memoized_dataset_cache_size: int | None = 0,
         cache_directory: str | Path = "data/lgbm-model",
         cache_size: int = 1,
     ) -> None:
@@ -73,6 +74,13 @@ class LGBMModel(BaseModel):
             By default, all features are used. If ignore_features is provided, all features except the ones in
             ignore_features will be used. If features is provided, only the features in features will be used.
 
+        Warning:
+            The `memoized_dataset_cache_size` parameter is experimental and should be used with caution. It refers to
+            the number of datasets to keep in memory for speeding up repeated training. This can be useful when
+            hyperparameter tuning or cross-validation is performed, as the dataset does not need to be loaded from disk
+            every time. However, this can lead to memory issues if the dataset is too large. Specify 0 to disable the
+            cache. When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to
+            clear the cache and free up memory.
 
         Args:
             target: The name of the target feature.
@@ -85,6 +93,9 @@ class LGBMModel(BaseModel):
             ignore_features: The names of the features to be ignored.
             random_state: The random state to be used for reproducibility.
             verbosity: The verbosity level of the logger, will be passed to the LightGBM model.
+            memoized_dataset_cache_size: The number of datasets to keep in memory for speeding up repeated training.
+                When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to clear
+                the cache and free up memory. Specify 0 to disable the cache.
             cache_directory: The target directory where the model will be saved.
             cache_size: The maximum number of entries to keep in the cache.
 
@@ -105,7 +116,7 @@ class LGBMModel(BaseModel):
             ... )
             >>> booster, df_train_pred, df_test_pred = model.fit_transform(data_schema, df_train, df_test, {})
         """
-        super().__init__(features, ignore_features, cache_directory, cache_size)
+        super().__init__(features, ignore_features, memoized_dataset_cache_size, cache_directory, cache_size)
         lgb.register_logger(logger)
 
         self._target = target
@@ -151,15 +162,23 @@ class LGBMModel(BaseModel):
             raise ValueError(msg)
 
         validation_datasets: list[tuple[str, pd.DataFrame, pd.Series]] = []
-        logger.info("Loading the training dataset into memory.")
-        train_df = self._load_dataset(data_schema, train_dataframe)
+        train_df = self._memoized_load_dataset(
+            data_schema,
+            HashableVaexDataFrame(train_dataframe),
+            (self._target,),
+            name="training",
+        )
         X_train = train_df[self._feature_set(data_schema)]
         y_train = train_df[self._target]
         validation_datasets.append(("train", X_train, y_train))
 
         if validation_dataframe is not None:
-            logger.info("Loading the validation dataset into memory.")
-            validation_df = self._load_dataset(data_schema, validation_dataframe)
+            validation_df = self._memoized_load_dataset(
+                data_schema,
+                HashableVaexDataFrame(validation_dataframe),
+                (self._target,),
+                name="validation",
+            )
             X_validation = validation_df[self._feature_set(data_schema)]
             y_validation = validation_df[self._target]
             validation_datasets.append(("validation", X_validation, y_validation))
@@ -204,9 +223,7 @@ class LGBMModel(BaseModel):
         Returns:
             The transformed dataframe.
         """
-        logger.info("Loading the dataset into memory.")
-        feature_names = self._feature_set(data_schema)
-        dataset = get_columns(dataframe, feature_names).to_pandas_df()
+        dataset = self._memoized_load_dataset(data_schema, HashableVaexDataFrame(dataframe))
         df = dataframe.copy()
 
         logger.info("Transforming the dataset.")
@@ -242,17 +259,3 @@ class LGBMModel(BaseModel):
         """
         features = data_schema.get_features(["numerical", "boolean", "categorical"])
         return tuple(str(feature) for feature in features)
-
-    def _load_dataset(self, data_schema: DataSchema, dataframe: vaex.DataFrame) -> pd.DataFrame:
-        """Load the dataset into memory.
-
-        Args:
-            data_schema: The data schema of the dataframe.
-            dataframe: The dataframe to load.
-
-        Returns:
-            A pandas DataFrame with the loaded data.
-        """
-        feature_names = self._feature_set(data_schema)
-        df: pd.DataFrame = get_columns(dataframe, feature_names + [self._target]).to_pandas_df()  # type: ignore
-        return df
