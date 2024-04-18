@@ -116,7 +116,7 @@ class LGBMModel(BaseModel):
             ... )
             >>> booster, df_train_pred, df_test_pred = model.fit_transform(data_schema, df_train, df_test, {})
         """
-        super().__init__(features, ignore_features, memoized_dataset_cache_size, cache_directory, cache_size)
+        super().__init__(features, ignore_features, verbosity, memoized_dataset_cache_size, cache_directory, cache_size)
         lgb.register_logger(logger)
 
         self._target = target

@@ -196,7 +196,7 @@ class TestOptunaTuner:
             cache_directory=temporary_directory,
             objective_function=objective_function,
             direction="maximize",
-            storage_name="test",
+            storage=f"sqlite:///{temporary_directory}/test.sqlite3",
             num_trials=10,
             random_state=42,
         )

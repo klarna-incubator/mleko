@@ -48,6 +48,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self,
         features: list[str] | tuple[str, ...] | None,
         ignore_features: list[str] | tuple[str, ...] | None,
+        verbosity: int,
         memoized_dataset_cache_size: int | None,
         cache_directory: str | Path,
         cache_size: int,
@@ -71,6 +72,7 @@ class BaseModel(LRUCacheMixin, ABC):
                 applicable to the model.
             ignore_features: List of feature names to be ignored by the model. If None, the default is to
                 ignore no features.
+            verbosity: The verbosity level of the logger, should be passed to the underlying model.
             memoized_dataset_cache_size: The number of datasets to keep in memory for speeding up repeated training.
                 When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to clear
                 the cache and free up memory. Specify 0 to disable the cache.
@@ -92,6 +94,7 @@ class BaseModel(LRUCacheMixin, ABC):
         self._hyperparameters: HyperparametersType = {}
         self._features: tuple[str, ...] | None = tuple(features) if features is not None else None
         self._ignore_features: tuple[str, ...] = tuple(ignore_features) if ignore_features is not None else tuple()
+        logger.set_level(verbosity)
 
         self._memoized_load_dataset = lru_cache(maxsize=self._memoized_dataset_cache_size)(self._memoized_load_dataset)
 

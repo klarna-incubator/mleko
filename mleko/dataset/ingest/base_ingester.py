@@ -99,6 +99,7 @@ class LocalManifestHandler:
         Args:
             manifest_data: Manifest data to write to the manifest file.
         """
+        self._manifest_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._manifest_path, "w") as manifest_file:
             json.dump(dataclasses.asdict(manifest_data), manifest_file, indent=2)
 

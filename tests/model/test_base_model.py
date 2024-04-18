@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -56,7 +57,7 @@ class TestBaseModel:
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
     ):
         """Should fit and transform dataframe."""
-        test_derived_model = self.DerivedModel(None, None, 0, temporary_directory, 1)
+        test_derived_model = self.DerivedModel(None, None, logging.INFO, 0, temporary_directory, 1)
 
         model, _ = test_derived_model.fit(example_data_schema, example_vaex_dataframe, example_vaex_dataframe, {})
         df = test_derived_model.transform(example_data_schema, example_vaex_dataframe)
@@ -76,7 +77,7 @@ class TestBaseModel:
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
     ):
         """Should return vaex dataframe from feature_select method."""
-        test_derived_model = self.DerivedModel(None, None, 0, temporary_directory, 1)
+        test_derived_model = self.DerivedModel(None, None, logging.INFO, 0, temporary_directory, 1)
 
         model, _, df, _ = test_derived_model.fit_transform(
             example_data_schema, example_vaex_dataframe, example_vaex_dataframe, {}
@@ -89,7 +90,7 @@ class TestBaseModel:
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
     ):
         """Should raise error when transform is called before fit."""
-        test_derived_model = self.DerivedModel(None, None, 0, temporary_directory, 1)
+        test_derived_model = self.DerivedModel(None, None, logging.INFO, 0, temporary_directory, 1)
 
         with pytest.raises(RuntimeError):
             test_derived_model.transform(example_data_schema, example_vaex_dataframe)
@@ -97,4 +98,4 @@ class TestBaseModel:
     def test_error_on_mutually_exclusive_arguments(self, temporary_directory: Path):
         """Should raise error when both `features` and `ignore_features` are passed."""
         with pytest.raises(ValueError):
-            self.DerivedModel([], [], 0, temporary_directory, 1)
+            self.DerivedModel([], [], logging.INFO, 0, temporary_directory, 1)

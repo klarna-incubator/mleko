@@ -6,6 +6,7 @@ import getpass
 import inspect
 import logging
 import platform
+import random
 from datetime import datetime
 from pathlib import Path
 from typing import Callable, Hashable, Literal
@@ -25,14 +26,17 @@ from optuna.samplers import (
     TPESampler,
 )
 from optuna.samplers.nsgaii._child_generation_strategy import NSGAIIChildGenerationStrategy
+from optuna.storages import RDBStorage
 from optuna_dashboard import save_note
 from tqdm.auto import tqdm
 
+from mleko import __version__ as mleko_version
 from mleko.cache.fingerprinters import (
     CallableSourceFingerprinter,
     OptunaPrunerFingerprinter,
     OptunaSamplerFingerprinter,
 )
+from mleko.cache.fingerprinters.dict_fingerprinter import DictFingerprinter
 from mleko.dataset.data_schema import DataSchema
 from mleko.model.base_model import HyperparametersType
 from mleko.utils.custom_logger import CustomLogger
@@ -68,7 +72,8 @@ class OptunaTuner(BaseTuner):
         sampler: BaseSampler | None = None,
         pruner: optuna.pruners.BasePruner | None = None,
         study_name: str | None = None,
-        storage_name: str | None = None,
+        storage: str | RDBStorage | None = None,
+        load_if_exists: bool = False,
         random_state: int | None = 42,
         cache_directory: str | Path = "data/optuna-tuner",
         cache_size: int = 1,
@@ -80,8 +85,10 @@ class OptunaTuner(BaseTuner):
 
         Note:
             To visualize the optimization process, you can use the `optuna-dashboard`
-            package. By specifying the `storage_name` parameter, the tuner will save
-            the study to the specified file, which can then be visualized using the
+            library. By specifying the `storage` parameter, the tuner will save
+            the study to the specified file or storage.
+
+            If a sqlite3 file path is defined, the optimization can be visualized using the
             `optuna-dashboard` command:
             ```bash
             optuna-dashboard sqlite:///PATH_TO_YOUR_OPTUNA_STORAGE.sqlite3
@@ -90,20 +97,21 @@ class OptunaTuner(BaseTuner):
             The `study_name` parameter can be used to specify the name of the study,
             which will be displayed in the `optuna-dashboard` interface. If the
             `study_name` is not specified, the current date and time will be used.
+            It is also referred to as the `study_id` in Optuna.
 
         Warning:
-            The caching functionality of the obective function is implemented by
+            The caching functionality of the objective function is implemented by
             serializing the function source code itself. Ensure that all dependencies
             of the objective function are defined within the function itself. Otherwise,
             the dependencies will not be included in the fingerprint of the tuner and
             the results of the hyperparameter tuning will be unpredictable. For example,
-            if the objective function depends on a global variable, the cahing
+            if the objective function depends on a global variable, the caching
             functionality will not detect changes to the value itself and will not
             recompute the result.
 
             In addition, the objective function should preferably not use any cached
             methods, such as `BaseModel.fit_transform`. Instead, the objective
-            function should use the underscored methods (`BaseModell._fit_transform`)
+            function should use the underscored methods (`BaseModel._fit_transform`)
             to avoid caching the results of each trial.
 
         Args:
@@ -129,11 +137,14 @@ class OptunaTuner(BaseTuner):
                 used.
             study_name: The name of the study. If None, the current date and time will
                 be used.
-            storage_name: The name of the storage to save the study to. If None, the
-                study will not be saved to disk. Specify the name of the file to save
-                the study to. The file will be saved to the `cache_directory` directory
-                withe the `.sqlite3` extension. E.g. `storage_name="my-study"` will
-                save the study to `cache_directory/my-study.sqlite3`.
+            storage: The name of the storage to save the study to. If None, the
+                study will not be saved to a persistent storage. Refer to the Optuna
+                documentation for more information on the storage options.
+            load_if_exists: Flag to control the behavior to handle a conflict of study
+                names. In the case where a study named `study_name` already exists in
+                the storage, a `DuplicatedStudyError` is raised if `load_if_exists`
+                is set to `False`. Otherwise, the creation of the study is
+                skipped, and the existing one is returned.
             random_state: The random state to use for the Optuna sampler. If None, the
                 default random state of the sampler is used. Setting this will override
                 the random state of the sampler.
@@ -183,10 +194,9 @@ class OptunaTuner(BaseTuner):
         self._sampler = sampler or (TPESampler() if isinstance(direction, list) else NSGAIISampler())
         self._pruner = pruner or optuna.pruners.MedianPruner()
         self._study_name = study_name if study_name is not None else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self._storage_name = (
-            f"sqlite:///{self._cache_directory}/{storage_name}.sqlite3" if storage_name is not None else None
-        )
-        self._using_optuna_dashboard = True if self._storage_name is not None else False
+        self._storage = storage
+        self._load_if_exists = load_if_exists
+        self._using_optuna_dashboard = True if self._storage is not None else False
         self._random_state = random_state
 
         self._reset_sampler_rng(self._sampler)
@@ -197,8 +207,11 @@ class OptunaTuner(BaseTuner):
         for handler in logger.handlers:
             optuna_logger.addHandler(handler)
 
-        if self._storage_name is not None:
-            logger.info(f"Optuna study is saved to {self._storage_name}, use optuna-dashboard to visualize it.")
+        if self._storage is not None:
+            storage_name = self._storage if isinstance(self._storage, str) else self._storage.url
+            logger.info(
+                f"Optuna study named {self._study_name!r} is stored in {storage_name}, use optuna-dashboard to view it."
+            )
 
     def _tune(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
@@ -213,24 +226,15 @@ class OptunaTuner(BaseTuner):
             Tuple containing the best hyperparameters, the best score, and a the Optuna study.
         """
         self._reset_sampler_rng(self._sampler)
-
-        if isinstance(self._direction, list):
-            study = optuna.create_study(
-                sampler=self._sampler,
-                pruner=self._pruner,
-                directions=self._direction,
-                study_name=self._study_name,
-                storage=self._storage_name,
-            )
-        else:
-            study = optuna.create_study(
-                sampler=self._sampler,
-                pruner=self._pruner,
-                direction=self._direction,
-                study_name=self._study_name,
-                storage=self._storage_name,
-            )
-
+        study = optuna.create_study(
+            storage=self._storage,
+            sampler=self._sampler,
+            pruner=self._pruner,
+            study_name=self._study_name,
+            direction=self._direction if isinstance(self._direction, str) else None,
+            directions=self._direction if isinstance(self._direction, list) else None,
+            load_if_exists=self._load_if_exists,
+        )
         if self._using_optuna_dashboard:
             direction_str = (
                 self._direction if isinstance(self._direction, str) else ", ".join(self._direction)
@@ -243,6 +247,7 @@ class OptunaTuner(BaseTuner):
 | | |
 |---|---|
 | **Study Name** | {self._study_name} |
+| **Load If Exists** | `{self._load_if_exists}` |
 | **Creation Date** | {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} |
 | **Creator** | {getpass.getuser()} |
 ---
@@ -255,8 +260,8 @@ class OptunaTuner(BaseTuner):
 |---|---|
 | **Python Version** | `{platform.python_version()}` |
 | **Optuna Version** | `{optuna.__version__}` |
+| **Mleko Version** | `{mleko_version}` |
 | **Random State** | `{self._random_state}` |
-| **Number of Trials** | `{self._num_trials}` |
 | **Sampler** | `{self._sampler.__class__.__name__}` |
 | **Pruner** | `{self._pruner.__class__.__name__}` |
 | **Optimization Direction** | {direction_str} |
@@ -269,6 +274,10 @@ class OptunaTuner(BaseTuner):
 ```python
 {inspect.getsource(self._objective_function)}
 ```
+{"### Cross-Validation Folds Function" if self._cv_folds is not None else ""}
+{"```python" if self._cv_folds is not None else ""}
+{inspect.getsource(self._cv_folds) if self._cv_folds is not None else ""}
+{"```" if self._cv_folds is not None else ""}
                 """,
             )
 
@@ -316,6 +325,10 @@ class OptunaTuner(BaseTuner):
         Returns:
             The fingerprint of the tuner.
         """
+        if self._load_if_exists and self._storage is not None:  # pragma: no cover
+            logger.warning("The load_if_exists parameter is set to True, the caching functionality will be disabled.")
+            return random.random()
+
         return (
             super()._fingerprint(),
             CallableSourceFingerprinter().fingerprint(self._objective_function),
@@ -325,7 +338,16 @@ class OptunaTuner(BaseTuner):
             OptunaSamplerFingerprinter().fingerprint(self._sampler),
             OptunaPrunerFingerprinter().fingerprint(self._pruner),
             self._random_state,
-            self._storage_name,
+            (
+                self._storage
+                if isinstance(self._storage, str)
+                else (
+                    self._storage.url + DictFingerprinter().fingerprint(self._storage.engine_kwargs)
+                    if self._storage is not None
+                    else None
+                )
+            ),
+            self._load_if_exists,
         )
 
     def _reset_sampler_rng(self, sampler: BaseSampler) -> None:

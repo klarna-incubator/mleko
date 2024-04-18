@@ -6,13 +6,7 @@ import hashlib
 import json
 from typing import Any
 
-from mleko.utils.custom_logger import CustomLogger
-
 from .base_fingerprinter import BaseFingerprinter
-
-
-logger = CustomLogger()
-"""The logger for the module."""
 
 
 class DictFingerprinter(BaseFingerprinter):
