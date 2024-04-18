@@ -1,5 +1,16 @@
 # Changelog
 
+## [v3.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.2.0) (2024-04-18)
+
+### ✨ Features
+
+- **tuning:** Add support for `RDSStorage` using the `OptunaTuner` ([`cc06ddd`](https://github.com/klarna-incubator/mleko/commit/cc06dddd3e9c6e0ac8968319ef64881039a1fec4))
+
+### 🐛 Bug Fixes
+
+- **data source:** Fix bug where `dataset_id` consisting of path components would break local metadata file creation ([`17c4866`](https://github.com/klarna-incubator/mleko/commit/17c48669f22ff449fad28528340ad8f5221361bb))
+- **model:** Add `verbosity` parameter to `BaseModel` to set log level in the base class. ([`0a3828f`](https://github.com/klarna-incubator/mleko/commit/0a3828f246c82ba1f8257da53de0743d9b92c3fa))
+
 ## [v3.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.1.0) (2024-04-12)
 
 ### ✨ Features
