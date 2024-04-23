@@ -57,13 +57,13 @@ class TestFeatureSelectStep:
             },
             cache_group=None,
         )
-        result = feature_select_step.execute(data_container, force_recompute=False)
+        result = feature_select_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
         feature_selector.fit_transform.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_execute_fit_and_transform(self):
@@ -91,7 +91,9 @@ class TestFeatureSelectStep:
             },
             cache_group=None,
         )
-        feature_select_step_fit_result = feature_select_step_fit.execute(data_container, force_recompute=False)
+        feature_select_step_fit_result = feature_select_step_fit.execute(
+            data_container, force_recompute=False, disable_cache=False
+        )
         assert isinstance(feature_select_step_fit_result, DataContainer)
         assert feature_select_step_fit_result.data["feature_selector"] == "feature_selector"
 
@@ -106,20 +108,20 @@ class TestFeatureSelectStep:
             cache_group=None,
         )
         feature_select_step_transform_result = feature_select_step_transform.execute(
-            data_container, force_recompute=False
+            data_container, force_recompute=False, disable_cache=False
         )
         assert isinstance(feature_select_step_transform_result, DataContainer)
         assert feature_select_step_transform_result.data["df_clean_selected"] == df
 
         feature_selector.fit.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
         feature_selector.transform.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_wrong_data_type_dataframe(self):
-        """Should throw ValueError if not recieving a vaex dataframe."""
+        """Should throw ValueError if not receiving a vaex dataframe."""
         file_paths = [str]
         data_container = DataContainer(
             data={"data_schema": DataSchema(numerical=["col1", "col2"]), "df_clean": file_paths}  # type: ignore
@@ -138,10 +140,10 @@ class TestFeatureSelectStep:
         )
 
         with pytest.raises(ValueError):
-            feature_select_step.execute(data_container, force_recompute=False)
+            feature_select_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_data_type_schema(self):
-        """Should throw ValueError if not recieving a vaex dataframe."""
+        """Should throw ValueError if not receiving a vaex dataframe."""
         data_container = DataContainer(
             data={"data_schema": {}, "df_clean": vaex.from_dict({"col1": [1, None, None]})}  # type: ignore
         )
@@ -159,7 +161,7 @@ class TestFeatureSelectStep:
         )
 
         with pytest.raises(ValueError):
-            feature_select_step.execute(data_container, force_recompute=False)
+            feature_select_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""

@@ -86,7 +86,7 @@ class PipelineStep(ABC):
         self._validate_outputs()
 
     @abstractmethod
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Execute the data processing operation associated with this pipeline step.
 
         The `execute` method is the main entry point for the data processing operation associated with this step.
@@ -96,6 +96,7 @@ class PipelineStep(ABC):
         Args:
             data_container: Input data for this step's processing operation.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             NotImplementedError: Must be implemented by subclass.

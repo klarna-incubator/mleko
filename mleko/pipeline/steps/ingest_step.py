@@ -51,12 +51,13 @@ class IngestStep(PipelineStep):
         super().__init__(inputs, outputs, None)
         self._ingester = ingester
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Fetch data from the configured data source and return a DataContainer with fetched files.
 
         Args:
             data_container: Input data for this step's processing operation.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: Not used for ingestion steps.
 
         Returns:
             A DataContainer containing the result.

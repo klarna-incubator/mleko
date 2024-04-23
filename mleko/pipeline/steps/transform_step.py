@@ -84,12 +84,13 @@ class TransformStep(FitTransformPipelineStep):
         super().__init__(action, inputs, outputs, cache_group)
         self._transformer = transformer
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform transformation using the configured transformer.
 
         Args:
             data_container: Contains the input DataFrame.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A DataContainer containing the result depending on the action.
@@ -99,18 +100,22 @@ class TransformStep(FitTransformPipelineStep):
 
         if self._action == "fit":
             self._outputs = cast(TransformStepOutputFitType, self._outputs)
-            ds, transformer = self._transformer.fit(data_schema, dataframe, self._cache_group, force_recompute)
+            ds, transformer = self._transformer.fit(
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
+            )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["transformer"]] = transformer
         elif self._action == "transform":
             self._outputs = cast(TransformStepOutputTransformType, self._outputs)
-            ds, df = self._transformer.transform(data_schema, dataframe, self._cache_group, force_recompute)
+            ds, df = self._transformer.transform(
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
+            )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["dataframe"]] = df
         elif self._action == "fit_transform":
             self._outputs = cast(TransformStepOutputFitTransformType, self._outputs)
             ds, transformer, df = self._transformer.fit_transform(
-                data_schema, dataframe, self._cache_group, force_recompute
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
             )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["transformer"]] = transformer

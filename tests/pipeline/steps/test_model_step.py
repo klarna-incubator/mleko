@@ -81,7 +81,7 @@ class TestModelStep:
             },
             cache_group=None,
         )
-        result = model_step.execute(data_container, force_recompute=False)
+        result = model_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["model"] == "model"
@@ -92,6 +92,7 @@ class TestModelStep:
             data_container.data["df_validate"],
             None,
             None,
+            False,
             False,
         )
 
@@ -122,7 +123,7 @@ class TestModelStep:
             outputs={"model": "model", "metrics": "metrics"},
             cache_group=None,
         )
-        model_step_fit_result = model_step_fit.execute(data_container, force_recompute=False)
+        model_step_fit_result = model_step_fit.execute(data_container, force_recompute=False, disable_cache=False)
         assert isinstance(model_step_fit_result, DataContainer)
         assert model_step_fit_result.data["model"] == "model"
 
@@ -136,7 +137,9 @@ class TestModelStep:
             outputs={"dataframe": "df"},
             cache_group=None,
         )
-        model_step_transform_result = model_step_transform.execute(data_container, force_recompute=False)
+        model_step_transform_result = model_step_transform.execute(
+            data_container, force_recompute=False, disable_cache=False
+        )
         assert isinstance(model_step_transform_result, DataContainer)
         assert model_step_transform_result.data["df"] == "df"
 
@@ -147,13 +150,14 @@ class TestModelStep:
             data_container.data["hyperparameters"],
             None,
             False,
+            False,
         )
         model.transform.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_train"], None, False
+            data_container.data["data_schema"], data_container.data["df_train"], None, False, False
         )
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving correct inputs."""
+        """Should throw ValueError if not receiving correct inputs."""
         file_paths = [str]
         data_container = DataContainer(data={"data_schema": file_paths})  # type: ignore
 
@@ -171,10 +175,10 @@ class TestModelStep:
         )
 
         with pytest.raises(ValueError):
-            model_step.execute(data_container, force_recompute=False)
+            model_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_none_on_required_input(self, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame):
-        """Should throw ValueError if not recieving correct inputs."""
+        """Should throw ValueError if not receiving correct inputs."""
         data_container = DataContainer(
             data={
                 "data_schema": example_data_schema,
@@ -197,7 +201,7 @@ class TestModelStep:
         )
 
         with pytest.raises(ValueError):
-            model_step.execute(data_container, force_recompute=False)
+            model_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         model_step = ModelStep(
             model=model,
@@ -212,7 +216,7 @@ class TestModelStep:
         )
 
         with pytest.raises(ValueError):
-            model_step.execute(data_container, force_recompute=False)
+            model_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""

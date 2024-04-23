@@ -67,12 +67,13 @@ class ConvertStep(PipelineStep):
         super().__init__(inputs, outputs, cache_group)
         self._converter = converter
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform data format conversion using the configured converter.
 
         Args:
             data_container: Contains a list of file Paths to be converted.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Raises:
             ValueError: If the input data types are invalid.
@@ -86,7 +87,7 @@ class ConvertStep(PipelineStep):
             logger.error(msg)
             raise ValueError(msg)
 
-        data_schema, dataframe = self._converter.convert(file_paths, self._cache_group, force_recompute)
+        data_schema, dataframe = self._converter.convert(file_paths, self._cache_group, force_recompute, disable_cache)
         data_container.data[self._outputs["data_schema"]] = data_schema
         data_container.data[self._outputs["dataframe"]] = dataframe
         return data_container

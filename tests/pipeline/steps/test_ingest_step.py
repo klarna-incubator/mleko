@@ -30,7 +30,7 @@ class TestIngestStep:
         ds_mock.fetch_data.return_value = [Path("file_1.txt"), Path("file_2.txt")]
 
         ingest_step = IngestStep(ingester=ds_mock, inputs={}, outputs={"file_paths": "raw_data"})
-        result = ingest_step.execute(DataContainer(), force_recompute=False)
+        result = ingest_step.execute(DataContainer(), force_recompute=False, disable_cache=False)
 
         ds_mock.fetch_data.assert_called_once()
         assert isinstance(result, DataContainer)

@@ -63,7 +63,7 @@ class TestTuneStep:
             outputs={"hyperparameters": "hyperparameters", "score": "best_score", "metadata": "metadata"},
             cache_group=None,
         )
-        result = tune_step.execute(data_container, force_recompute=False)
+        result = tune_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["hyperparameters"] == {}
@@ -71,11 +71,11 @@ class TestTuneStep:
         assert result.data["metadata"] is None
 
         tuner.tune.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["dataframe"], None, False
+            data_container.data["data_schema"], data_container.data["dataframe"], None, False, False
         )
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving a data schema or vaex DataFrame."""
+        """Should throw ValueError if not receiving a data schema or vaex DataFrame."""
         tuner = MagicMock(spec=BaseTuner)
         with pytest.raises(ValueError):
             TuneStep(

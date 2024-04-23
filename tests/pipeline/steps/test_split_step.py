@@ -40,13 +40,13 @@ class TestSplitStep:
             outputs={"dataframe_1": "df_train", "dataframe_2": "df_test"},
             cache_group=None,
         )
-        result = split_step.execute(data_container, force_recompute=False)
+        result = split_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_train"] == df_train
         assert result.data["df_test"] == df_test
 
-        splitter.split.assert_called_once_with(data_container.data["df_clean"], None, False)
+        splitter.split.assert_called_once_with(data_container.data["df_clean"], None, False, False)
 
     def test_send_raw_data(self):
         """Should send the raw data to the splitter."""
@@ -62,16 +62,16 @@ class TestSplitStep:
             outputs={"dataframe_1": "df_train", "dataframe_2": "df_test"},
             cache_group=None,
         )
-        result = split_step.execute(data_container, force_recompute=False)
+        result = split_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_train"] == df_train
         assert result.data["df_test"] == df_test
 
-        splitter.split.assert_called_once_with(data_container.data["df_clean"], None, False)
+        splitter.split.assert_called_once_with(data_container.data["df_clean"], None, False, False)
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving a vaex dataframe."""
+        """Should throw ValueError if not receiving a vaex dataframe."""
         file_paths = [str]
         data_container = DataContainer(data={"df_clean": file_paths})  # type: ignore
 
@@ -83,7 +83,7 @@ class TestSplitStep:
         )
 
         with pytest.raises(ValueError):
-            split_step.execute(data_container, force_recompute=False)
+            split_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""

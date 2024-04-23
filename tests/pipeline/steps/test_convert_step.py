@@ -43,12 +43,12 @@ class TestConvertStep:
             outputs={"data_schema": "data_schema", "dataframe": "converted_data"},
             cache_group=None,
         )
-        result = convert_step.execute(data_container, force_recompute=False)
+        result = convert_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["converted_data"] == df
 
-        converter.convert.assert_called_once_with(file_paths, None, False)
+        converter.convert.assert_called_once_with(file_paths, None, False, False)
 
     def test_send_raw_data(self):
         """Should send the raw data to the converter."""
@@ -65,12 +65,12 @@ class TestConvertStep:
             outputs={"data_schema": "data_schema", "dataframe": "converted_data"},
             cache_group=None,
         )
-        convert_step.execute(data_container, force_recompute=False)
+        convert_step.execute(data_container, force_recompute=False, disable_cache=False)
 
-        converter.convert.assert_called_once_with(file_paths, None, False)
+        converter.convert.assert_called_once_with(file_paths, None, False, False)
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving list[Path]."""
+        """Should throw ValueError if not receiving list[Path]."""
         file_paths = ["path1", "path2", "path3"]
         data_container = DataContainer(data={"raw_data": file_paths})  # type: ignore
 
@@ -82,7 +82,7 @@ class TestConvertStep:
         )
 
         with pytest.raises(ValueError):
-            convert_step.execute(data_container, force_recompute=False)
+            convert_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""
@@ -102,7 +102,7 @@ class TestConvertStep:
             )
 
     def test_submit_list_of_integer(self):
-        """Should throw ValueError if not recieving list[Path]."""
+        """Should throw ValueError if not receiving list[Path]."""
         file_paths = [1, 2, 3]
         data_container = DataContainer(data={"raw_data": file_paths})
 
@@ -114,4 +114,4 @@ class TestConvertStep:
         )
 
         with pytest.raises(ValueError):
-            convert_step.execute(data_container, force_recompute=False)
+            convert_step.execute(data_container, force_recompute=False, disable_cache=False)
