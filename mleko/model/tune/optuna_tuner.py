@@ -207,12 +207,6 @@ class OptunaTuner(BaseTuner):
         for handler in logger.handlers:
             optuna_logger.addHandler(handler)
 
-        if self._storage is not None:
-            storage_name = self._storage if isinstance(self._storage, str) else self._storage.url
-            logger.info(
-                f"Optuna study named {self._study_name!r} is stored in {storage_name}, use optuna-dashboard to view it."
-            )
-
     def _tune(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
     ) -> tuple[HyperparametersType, float | list[float] | tuple[float, ...], optuna.study.Study]:
