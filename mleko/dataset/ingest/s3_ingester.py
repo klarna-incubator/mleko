@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from concurrent import futures
 from dataclasses import dataclass
@@ -58,6 +59,7 @@ class S3Ingester(BaseIngester):
         aws_profile_name: str | None = None,
         aws_region_name: str = "eu-west-1",
         num_workers: int = 64,
+        manifest_file_name: str | None = None,
         check_s3_timestamps: bool = True,
     ) -> None:
         """Initializes the S3 bucket client, configures the cache directory, and sets client-related parameters.
@@ -80,6 +82,8 @@ class S3Ingester(BaseIngester):
             aws_profile_name: AWS profile name to use.
             aws_region_name: AWS region name where the S3 bucket is located.
             num_workers: Number of workers to use for concurrent downloads.
+            manifest_file_name: Name of the manifest file located on S3. If not provided, the manifest from S3 will
+                be used to determine the files to include, before applying the file pattern.
             check_s3_timestamps: Whether to check if all S3 files have the same timestamp.
 
         Examples:
@@ -113,6 +117,7 @@ class S3Ingester(BaseIngester):
         self._aws_region_name = aws_region_name
         self._s3_client = self._get_s3_client(self._aws_profile_name, self._aws_region_name)
         self._num_workers = num_workers
+        self._manifest_file_name = manifest_file_name
         self._check_s3_timestamps = check_s3_timestamps
 
         if isinstance(file_pattern, str):
@@ -141,7 +146,7 @@ class S3Ingester(BaseIngester):
         if self._check_s3_timestamps:
             modification_dates = {key.last_modified for key in s3_manifest}
             if len(modification_dates) > 1:
-                error_msg = "Files in S3 are from muliples dates. This might mean the data is corrupted/duplicated."
+                error_msg = "Files in S3 are from multiple dates. This might mean the data is corrupted/duplicated."
                 logger.error(error_msg)
                 raise Exception(error_msg)
 
@@ -201,18 +206,42 @@ class S3Ingester(BaseIngester):
             A list of `S3FileManifest` objects containing the S3 keys, sizes, and last modified dates of the files in
             the S3 bucket.
         """
-        resp = self._s3_client.list_objects(
-            Bucket=self._s3_bucket_name,
-            Prefix=self._s3_key_prefix,
-        )
+        s3_contents = [
+            entry
+            for entry in self._s3_client.list_objects(
+                Bucket=self._s3_bucket_name,
+                Prefix=self._s3_key_prefix,
+            ).get("Contents", [])
+            if "LastModified" in entry and "Key" in entry and "Size" in entry
+        ]
+
+        if self._manifest_file_name is not None:
+            manifest_file_key = next(
+                entry["Key"] for entry in s3_contents if entry["Key"].endswith(self._manifest_file_name)
+            )
+
+            if manifest_file_key:
+                self._s3_fetch_file(manifest_file_key)
+                with open(self._cache_directory / self._manifest_file_name) as f:
+                    manifest: set[str] = {
+                        entry["url"].split(self._s3_key_prefix)[-1].lstrip("/")
+                        for entry in json.load(f).get("entries", [])
+                        if "url" in entry
+                    }
+
+                s3_contents = [
+                    entry
+                    for entry in s3_contents
+                    if entry["Key"].split(self._s3_key_prefix)[-1].lstrip("/") in manifest
+                ]
 
         s3_manifest: list[S3FileManifest] = [
-            S3FileManifest(key=Path(key["Key"]), size=key["Size"], last_modified=key["LastModified"].date())
-            for key in resp.get("Contents", [])
-            if "LastModified" in key
-            and "Key" in key
-            and "Size" in key
-            and any(fnmatch(Path(key["Key"]).name, pattern) for pattern in self._file_pattern)
+            S3FileManifest(key=Path(entry["Key"]), size=entry["Size"], last_modified=entry["LastModified"].date())
+            for entry in s3_contents
+            if any(
+                fnmatch(entry["Key"].split(self._s3_key_prefix)[-1].lstrip("/"), pattern)
+                for pattern in self._file_pattern
+            )
         ]
 
         if len(s3_manifest) == 0:

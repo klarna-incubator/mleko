@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -114,7 +115,7 @@ class TestS3Ingester:
             test_data.fetch_data()
 
     def test_is_outdated_cache(self, s3_bucket, temporary_directory: Path):
-        """Should not use cached files if manifest does not matche with local files in temp dir."""
+        """Should not use cached files if manifest does not match with local files in temp dir."""
         s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO1")
         test_data = S3Ingester(
             cache_directory=temporary_directory,
@@ -217,3 +218,74 @@ class TestS3Ingester:
                 )
 
             mocked_get_credentials.assert_called_once()
+
+    def test_is_cached_nested(self, s3_bucket, temporary_directory: Path):
+        """Should use cached files if manifest matches with local files in temp dir."""
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO")
+        s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO1")
+        s3_bucket.Object("test-prefix/nested/test-file2.csv").put(Body="MLEKO2")
+        s3_bucket.Object("test-prefix/nested/test-file3.csv").put(Body="MLEKO3")
+        test_data = S3Ingester(
+            cache_directory=temporary_directory,
+            s3_bucket_name="test-bucket",
+            s3_key_prefix="test-prefix",
+            aws_region_name="us-east-1",
+            num_workers=1,
+            check_s3_timestamps=True,
+        )
+        test_data.fetch_data(
+            force_recompute=True,
+        )
+
+        with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
+            test_data = S3Ingester(
+                cache_directory=temporary_directory,
+                s3_bucket_name="test-bucket",
+                s3_key_prefix="test-prefix",
+                aws_region_name="us-east-1",
+                file_pattern="*test-file2.csv",
+                num_workers=1,
+                check_s3_timestamps=False,
+            )
+            test_data.fetch_data(
+                force_recompute=False,
+            )
+            mocked_s3_fetch_all.assert_not_called()
+
+    def test_s3_manifest(self, s3_bucket, temporary_directory: Path):
+        """Should use cached files if manifest matches with local files in temp dir."""
+        s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO")
+        s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO1")
+        s3_bucket.Object("test-prefix/old-file.csv").put(Body="TEST")
+        s3_bucket.Object("test-prefix/manifest").put(
+            Body=json.dumps(
+                {
+                    "entries": [
+                        {
+                            "url": "s3://test-bucket/test-prefix/test-file1.csv",
+                            "meta": {"content_length": 5},
+                        },
+                        {
+                            "url": "s3://test-bucket/test-prefix/test-file2.csv",
+                            "meta": {"content_length": 6},
+                        },
+                    ]
+                }
+            )
+        )
+        test_data = S3Ingester(
+            cache_directory=temporary_directory,
+            s3_bucket_name="test-bucket",
+            s3_key_prefix="test-prefix",
+            aws_region_name="us-east-1",
+            manifest_file_name="manifest",
+            dataset_id="test-dataset",
+            num_workers=1,
+            check_s3_timestamps=True,
+        )
+        file_paths = test_data.fetch_data(
+            force_recompute=True,
+        )
+        assert len(file_paths) == 2
+        assert (temporary_directory / "test-dataset" / "test-file1.csv").read_text() == "MLEKO"
+        assert (temporary_directory / "test-dataset" / "test-file2.csv").read_text() == "MLEKO1"
