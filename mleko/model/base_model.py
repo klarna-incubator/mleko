@@ -10,7 +10,7 @@ from typing import Any, Dict, Hashable, Union
 import pandas as pd
 import vaex
 
-from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
+from mleko.cache.fingerprinters import JsonFingerprinter, VaexFingerprinter
 from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
@@ -147,9 +147,9 @@ class BaseModel(LRUCacheMixin, ABC):
                         if hyperparameters is not None
                         else self._hyperparameters
                     ),
-                    DictFingerprinter(),
+                    JsonFingerprinter(),
                 ),
-                (data_schema.to_dict(), DictFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else "None",
             ],
@@ -193,8 +193,8 @@ class BaseModel(LRUCacheMixin, ABC):
             lambda_func=lambda: self._transform(data_schema, dataframe),
             cache_key_inputs=[
                 self._fingerprint(),
-                (self._hyperparameters, DictFingerprinter()),
-                (data_schema.to_dict(), DictFingerprinter()),
+                (self._hyperparameters, JsonFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
@@ -255,9 +255,9 @@ class BaseModel(LRUCacheMixin, ABC):
                         if hyperparameters is not None
                         else self._hyperparameters
                     ),
-                    DictFingerprinter(),
+                    JsonFingerprinter(),
                 ),
-                (data_schema.to_dict(), DictFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (train_dataframe, VaexFingerprinter()),
                 (validation_dataframe, VaexFingerprinter()) if validation_dataframe is not None else None,
             ],

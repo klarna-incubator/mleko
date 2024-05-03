@@ -32,7 +32,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
 
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -43,7 +43,7 @@ class TestS3Ingester:
             force_recompute=True,
         )
 
-        assert (test_data._cache_directory / "test-file.csv").read_text() == "test-file-data"
+        assert (test_data._destination_directory / "test-file.csv").read_text() == "test-file-data"
 
     def test_different_timestamps(self, s3_bucket, temporary_directory: Path):
         """Should throw exception due to different timestamps of files."""
@@ -54,7 +54,7 @@ class TestS3Ingester:
         ].last_modified = datetime.datetime(2000, 1, 1)
 
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -71,7 +71,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO")
         s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO1")
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -84,7 +84,7 @@ class TestS3Ingester:
 
         with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3Ingester(
-                cache_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -102,7 +102,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO1")
         s3_bucket.Object("test-prefix/test-file2.csv").put(Body="MLEKO2")
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -118,7 +118,7 @@ class TestS3Ingester:
         """Should not use cached files if manifest does not match with local files in temp dir."""
         s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO1")
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -132,7 +132,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/test-file1.csv").put(Body="MLEKO_NEW")
         with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all, patch("os.path.getsize", return_value=3):
             test_data = S3Ingester(
-                cache_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -165,7 +165,7 @@ class TestS3Ingester:
             mocked_get_credentials.return_value = credentials
 
             S3Ingester(
-                cache_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_profile_name="custom-profile-name",
@@ -208,7 +208,7 @@ class TestS3Ingester:
 
             with pytest.raises(ValueError):
                 S3Ingester(
-                    cache_directory=temporary_directory,
+                    destination_directory=temporary_directory,
                     s3_bucket_name="test-bucket",
                     s3_key_prefix="test-prefix",
                     aws_profile_name="custom-profile-name",
@@ -226,7 +226,7 @@ class TestS3Ingester:
         s3_bucket.Object("test-prefix/nested/test-file2.csv").put(Body="MLEKO2")
         s3_bucket.Object("test-prefix/nested/test-file3.csv").put(Body="MLEKO3")
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
@@ -239,7 +239,7 @@ class TestS3Ingester:
 
         with patch.object(S3Ingester, "_s3_fetch_all") as mocked_s3_fetch_all:
             test_data = S3Ingester(
-                cache_directory=temporary_directory,
+                destination_directory=temporary_directory,
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
@@ -274,7 +274,7 @@ class TestS3Ingester:
             )
         )
         test_data = S3Ingester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",

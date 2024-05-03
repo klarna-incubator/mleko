@@ -55,7 +55,7 @@ class S3Ingester(BaseIngester):
         s3_key_prefix: str,
         file_pattern: str | list[str] = "*",
         dataset_id: str | None = None,
-        cache_directory: str | Path = "data/s3-ingester",
+        destination_directory: str | Path = "data/s3-ingester",
         aws_profile_name: str | None = None,
         aws_region_name: str = "eu-west-1",
         num_workers: int = 64,
@@ -78,7 +78,7 @@ class S3Ingester(BaseIngester):
             dataset_id: Id of the dataset to be used instead of the default fingerprint (MD5 hash of the bucket
                 name, key prefix, and region name). Note that this will overwrite any existing dataset with the same
                 name in the cache directory, so make sure to use a unique name.
-            cache_directory: Directory to store the fetched data locally.
+            destination_directory: Directory to store the fetched data locally.
             aws_profile_name: AWS profile name to use.
             aws_region_name: AWS region name where the S3 bucket is located.
             num_workers: Number of workers to use for concurrent downloads.
@@ -107,9 +107,9 @@ class S3Ingester(BaseIngester):
             if dataset_id is not None
             else hashlib.md5((s3_bucket_name + s3_key_prefix + aws_region_name).encode()).hexdigest()
         )
-        super().__init__(cache_directory, dataset_id)
+        super().__init__(destination_directory, dataset_id)
         self._local_manifest_handler = LocalManifestHandler(
-            self._cache_directory / f"{self._fingerprint}.manifest.json"
+            self._destination_directory / f"{self._fingerprint}.manifest.json"
         )
         self._s3_bucket_name = s3_bucket_name
         self._s3_key_prefix = s3_key_prefix
@@ -125,9 +125,9 @@ class S3Ingester(BaseIngester):
         self._file_pattern = file_pattern
 
     def fetch_data(self, force_recompute: bool = False) -> list[Path]:
-        """Downloads the data from the S3 bucket and stores it in the 'cache_directory'.
+        """Downloads the data from the S3 bucket and stores it in the 'destination_directory'.
 
-        If 'force_recompute' is False, verifies whether the data in the local 'cache_directory' is current
+        If 'force_recompute' is False, verifies whether the data in the local 'destination_directory' is current
         with the S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
 
         Args:
@@ -153,7 +153,7 @@ class S3Ingester(BaseIngester):
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading files matching {self._file_pattern} from "
-                f"{self._s3_bucket_name}/{self._s3_key_prefix} to {self._cache_directory} from S3."
+                f"{self._s3_bucket_name}/{self._s3_key_prefix} to {self._destination_directory} from S3."
             )
         else:
             if self._is_local_dataset_fresh(s3_manifest):
@@ -168,7 +168,7 @@ class S3Ingester(BaseIngester):
                 if len(files_to_delete) > 0:
                     logger.info(
                         f"Deleting {len(files_to_delete)} files from "
-                        f"{self._cache_directory} that are no longer present in S3 or filtered out."
+                        f"{self._destination_directory} that are no longer present in S3 or filtered out."
                     )
 
                 self._delete_local_files(files_to_delete)
@@ -177,7 +177,7 @@ class S3Ingester(BaseIngester):
 
             logger.info(
                 f"\033[31mCache Miss\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                f"{self._cache_directory} from S3."
+                f"{self._destination_directory} from S3."
             )
 
         self._delete_local_files(self._local_manifest_handler.get_file_names())
@@ -186,7 +186,9 @@ class S3Ingester(BaseIngester):
             self._s3_fetch_all(keys_to_download)
             self._local_manifest_handler.set_files(
                 [
-                    LocalFileEntry(name=Path(key).name, size=os.path.getsize(self._cache_directory / Path(key).name))
+                    LocalFileEntry(
+                        name=Path(key).name, size=os.path.getsize(self._destination_directory / Path(key).name)
+                    )
                     for key in keys_to_download
                 ]
             )
@@ -222,7 +224,7 @@ class S3Ingester(BaseIngester):
 
             if manifest_file_key:
                 self._s3_fetch_file(manifest_file_key)
-                with open(self._cache_directory / self._manifest_file_name) as f:
+                with open(self._destination_directory / self._manifest_file_name) as f:
                     manifest: set[str] = {
                         entry["url"].split(self._s3_key_prefix)[-1].lstrip("/")
                         for entry in json.load(f).get("entries", [])
@@ -300,7 +302,7 @@ class S3Ingester(BaseIngester):
             use_threads=False,
             multipart_threshold=int(0.5 * gb),  # Multipart transfer if file > 500MB
         )
-        file_path = self._cache_directory / Path(key).name
+        file_path = self._destination_directory / Path(key).name
         with open(file_path, "wb") as data:
             self._s3_client.download_fileobj(
                 Bucket=self._s3_bucket_name,
@@ -333,7 +335,7 @@ class S3Ingester(BaseIngester):
             True if the local dataset is up-to-date, False otherwise.
         """
         for s3_file in s3_manifest:
-            local_file_path = self._cache_directory / s3_file.key.name
+            local_file_path = self._destination_directory / s3_file.key.name
             if not local_file_path.exists() or s3_file.size != os.path.getsize(local_file_path):
                 return False
         return True

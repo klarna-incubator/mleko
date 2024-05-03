@@ -9,7 +9,7 @@ from typing import Hashable
 import vaex
 import vaex.array_types
 
-from mleko.cache.fingerprinters import DictFingerprinter
+from mleko.cache.fingerprinters import JsonFingerprinter
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
 from mleko.utils.decorators import auto_repr
@@ -195,7 +195,7 @@ class LabelEncoderTransformer(BaseTransformer):
             super()._fingerprint(),
             self._allow_unseen,
             self._encode_null,
-            DictFingerprinter().fingerprint(self._label_dict),
+            JsonFingerprinter().fingerprint(self._label_dict),
         )
 
     def _fit_using_label_dict(self, feature: str, observed_labels: list[str]) -> bool:

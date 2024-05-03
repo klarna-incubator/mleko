@@ -1,4 +1,4 @@
-"""The module contains a fingerprinter for dictionaries."""
+"""The module contains a fingerprinter for JSON data."""
 
 from __future__ import annotations
 
@@ -9,17 +9,17 @@ from typing import Any
 from .base_fingerprinter import BaseFingerprinter
 
 
-class DictFingerprinter(BaseFingerprinter):
-    """Class to generate unique fingerprints for dictionaries."""
+class JsonFingerprinter(BaseFingerprinter):
+    """Class to generate unique fingerprints for valid JSON data."""
 
-    def fingerprint(self, data: dict[str, Any] | None) -> str:
-        """Generate a fingerprint string for a given dictionary.
+    def fingerprint(self, data: dict[str, Any] | list[Any] | None) -> str:
+        """Generate a fingerprint string for a given JSON.
 
         Args:
-            data: The dictionary to dump.
+            data: The JSON data to generate a fingerprint for.
 
         Returns:
-            A fingerprint that uniquely identifies the dictionary.
+            A fingerprint that uniquely identifies the JSON data.
         """
 
         def deep_sort(obj: dict | Any):

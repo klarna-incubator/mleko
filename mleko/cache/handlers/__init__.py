@@ -9,11 +9,15 @@ The following cache handlers are provided by the subpackage:
     - `JOBLIB_CACHE_HANDLER`: A cache handler for Python objects using joblib
     - `PICKLE_CACHE_HANDLER`: A cache handler for pickling Python objects.
     - `VAEX_DATAFRAME_CACHE_HANDLER`: A cache handler for `vaex` DataFrames.
+    - `JSON_CACHE_HANDLER`: A cache handler for serializing and deserializing data using JSON.
+    - `STRING_CACHE_HANDLER`: A cache handler for serializing and deserializing string data.
 """
 
 from .base_cache_handler import CacheHandler
 from .joblib_cache_handler import JOBLIB_CACHE_HANDLER, read_joblib, write_joblib
+from .json_cache_handler import JSON_CACHE_HANDLER, read_json, write_json
 from .pickle_cache_handler import PICKLE_CACHE_HANDLER, read_pickle, write_pickle
+from .string_cache_handler import STRING_CACHE_HANDLER, read_string, write_string
 from .vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER, read_vaex_dataframe, write_vaex_dataframe
 
 
@@ -22,10 +26,16 @@ __all__ = [
     "JOBLIB_CACHE_HANDLER",
     "PICKLE_CACHE_HANDLER",
     "VAEX_DATAFRAME_CACHE_HANDLER",
+    "JSON_CACHE_HANDLER",
+    "STRING_CACHE_HANDLER",
     "read_joblib",
     "write_joblib",
     "read_pickle",
     "write_pickle",
     "read_vaex_dataframe",
     "write_vaex_dataframe",
+    "read_json",
+    "write_json",
+    "read_string",
+    "write_string",
 ]

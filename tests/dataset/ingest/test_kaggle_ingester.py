@@ -140,10 +140,10 @@ class TestKaggleIngester:
         sample_kaggle_credentials: KaggleCredentials,
         temporary_directory: Path,
     ):
-        """Should successfullt initialize."""
+        """Should successfully initialize."""
         mock_get_credentials.return_value = sample_kaggle_credentials
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
         )
@@ -164,7 +164,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -179,11 +179,11 @@ class TestKaggleIngester:
             fdate = datetime.strptime(file["creationDate"], "%Y-%m-%dT%H:%M:%S.%fZ")
             fsize = file["totalBytes"]
 
-            with open(ingester._cache_directory / fname, "w") as file:
+            with open(ingester._destination_directory / fname, "w") as file:
                 file.seek(fsize - 1)
                 file.write("\0")
 
-            os.utime(ingester._cache_directory / fname, (fdate.timestamp(), fdate.timestamp()))
+            os.utime(ingester._destination_directory / fname, (fdate.timestamp(), fdate.timestamp()))
         ingester._local_manifest_handler.set_files(
             [LocalFileEntry(name=file["name"], size=file["totalBytes"]) for file in files]
         )
@@ -196,7 +196,7 @@ class TestKaggleIngester:
             files = ingester.fetch_data()
 
         assert len(files) == 1
-        assert files == [ingester._cache_directory / "file1.csv"]
+        assert files == [ingester._destination_directory / "file1.csv"]
         mock_kaggle_fetch_files.assert_not_called()
 
     @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
@@ -210,7 +210,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -236,7 +236,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -266,7 +266,7 @@ class TestKaggleIngester:
         mock_get_credentials.return_value = sample_kaggle_credentials
 
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",
@@ -282,11 +282,11 @@ class TestKaggleIngester:
             fdate = datetime.strptime(file["creationDate"], "%Y-%m-%dT%H:%M:%S.%fZ")
             fsize = file["totalBytes"] + 1  # Make files different in size
 
-            with open(ingester._cache_directory / fname, "w") as file:
+            with open(ingester._destination_directory / fname, "w") as file:
                 file.seek(fsize - 1)
                 file.write("\0")
 
-            os.utime(ingester._cache_directory / fname, (fdate.timestamp(), fdate.timestamp()))
+            os.utime(ingester._destination_directory / fname, (fdate.timestamp(), fdate.timestamp()))
         ingester._local_manifest_handler.set_files(
             [LocalFileEntry(name=file["name"], size=file["totalBytes"] + 1) for file in files]
         )
@@ -317,7 +317,7 @@ class TestKaggleIngester:
             files = ingester.fetch_data(force_recompute=force_recompute)
 
         assert len(files) == 1
-        assert files == [ingester._cache_directory / "file1.csv"]  # the zip file should be ignored
+        assert files == [ingester._destination_directory / "file1.csv"]  # the zip file should be ignored
         assert mock_unpack_archive.call_count == 1
 
     @patch("mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager.get_kaggle_credentials")
@@ -346,7 +346,7 @@ class TestKaggleIngester:
             os.utime(temporary_directory / fname, (fdate.timestamp(), fdate.timestamp()))
 
         ingester = KaggleIngester(
-            cache_directory=temporary_directory,
+            destination_directory=temporary_directory,
             owner_slug="dummy_owner",
             dataset_slug="dummy_dataset",
             dataset_version="dummy_version",

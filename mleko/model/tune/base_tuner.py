@@ -8,8 +8,8 @@ from typing import Any, Hashable
 
 import vaex
 
-from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
-from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER
+from mleko.cache.fingerprinters import JsonFingerprinter, VaexFingerprinter
+from mleko.cache.handlers import JOBLIB_CACHE_HANDLER, JSON_CACHE_HANDLER, PICKLE_CACHE_HANDLER
 from mleko.cache.lru_cache_mixin import LRUCacheMixin
 from mleko.dataset.data_schema import DataSchema
 from mleko.model.base_model import HyperparametersType
@@ -58,12 +58,12 @@ class BaseTuner(LRUCacheMixin, ABC):
             lambda_func=lambda: self._tune(data_schema, dataframe),
             cache_key_inputs=[
                 self._fingerprint(),
-                (data_schema.to_dict(), DictFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,
             force_recompute=force_recompute,
-            cache_handlers=[JOBLIB_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER],
+            cache_handlers=[JSON_CACHE_HANDLER, JOBLIB_CACHE_HANDLER, PICKLE_CACHE_HANDLER],
             disable_cache=disable_cache,
         )
 
