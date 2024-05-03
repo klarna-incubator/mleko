@@ -1,0 +1,12 @@
+# Safety Security and License Configuration file
+# We recommend checking this file into your source control in the root of your Python project
+# If this file is named .safety-policy.yml and is in the same directory where you run `safety check` it will be used by default.
+# Otherwise, you can use the flag `safety check --policy-file <path-to-this-file>` to specify a custom location and name for the file.
+# To validate and review your policy file, run the validate command: `safety validate policy_file --path <path-to-this-file>`
+security:
+  ignore-cvss-severity-below: 4
+  ignore-cvss-unknown-severity: False
+  ignore-vulnerabilities:
+    66947:
+      reason: Not used
+  continue-on-vulnerability-error: False
