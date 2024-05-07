@@ -13,13 +13,13 @@ import pytest
 import requests
 from pytest import fixture, raises
 
-from mleko.dataset.ingest.base_ingester import LocalFileEntry
 from mleko.dataset.ingest.kaggle_ingester import (
     KaggleCredentials,
     KaggleCredentialsManager,
     KaggleFileManifest,
     KaggleIngester,
 )
+from mleko.utils import LocalFileEntry
 
 
 class TestKaggleCredentials:

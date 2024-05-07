@@ -21,10 +21,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 from tqdm.auto import tqdm
 
-from mleko.utils.custom_logger import CustomLogger
-from mleko.utils.decorators import auto_repr
+from mleko.utils import CustomLogger, LocalFileEntry, LocalManifestHandler, auto_repr
 
-from .base_ingester import BaseIngester, LocalFileEntry, LocalManifestHandler
+from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()

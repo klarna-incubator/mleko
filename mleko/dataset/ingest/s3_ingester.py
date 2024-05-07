@@ -11,15 +11,12 @@ from datetime import date
 from fnmatch import fnmatch
 from pathlib import Path
 
-import boto3
 from boto3.s3.transfer import TransferConfig as BotoTransferConfig
-from botocore.config import Config as BotoConfig
 from tqdm.auto import tqdm
 
-from mleko.utils.custom_logger import CustomLogger
-from mleko.utils.decorators import auto_repr
+from mleko.utils import CustomLogger, LocalFileEntry, LocalManifestHandler, auto_repr, get_s3_client
 
-from .base_ingester import BaseIngester, LocalFileEntry, LocalManifestHandler
+from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
@@ -115,7 +112,7 @@ class S3Ingester(BaseIngester):
         self._s3_key_prefix = s3_key_prefix
         self._aws_profile_name = aws_profile_name
         self._aws_region_name = aws_region_name
-        self._s3_client = self._get_s3_client(self._aws_profile_name, self._aws_region_name)
+        self._s3_client = get_s3_client(self._aws_profile_name, self._aws_region_name)
         self._num_workers = num_workers
         self._manifest_file_name = manifest_file_name
         self._check_s3_timestamps = check_s3_timestamps
@@ -140,7 +137,7 @@ class S3Ingester(BaseIngester):
         Returns:
             A list of Path objects pointing to the downloaded data files.
         """
-        self._s3_client = self._get_s3_client(self._aws_profile_name, self._aws_region_name)
+        self._s3_client = get_s3_client(self._aws_profile_name, self._aws_region_name)
         s3_manifest = self._build_s3_manifest()
 
         if self._check_s3_timestamps:
@@ -256,40 +253,6 @@ class S3Ingester(BaseIngester):
         logger.info(f"Found {len(s3_manifest)} file(s) matching any of {self._file_pattern} in S3 bucket.")
 
         return s3_manifest
-
-    def _get_s3_client(
-        self,
-        aws_profile_name: str | None,
-        aws_region_name: str,
-    ):
-        """Creates an S3 client using the provided AWS profile and region.
-
-        Args:
-            aws_profile_name: AWS profile name to use.
-            aws_region_name: AWS region name where the S3 bucket is located.
-
-        Returns:
-            An S3 client configured with the specified profile and region.
-        """
-        credentials = boto3.Session(
-            region_name=aws_region_name,
-            profile_name=aws_profile_name,
-        ).get_credentials()
-
-        if credentials is None:
-            msg = "AWS credentials not found. Please ensure that your AWS credentials are correctly set up."
-            logger.error(msg)
-            raise ValueError(msg)
-
-        client_config = BotoConfig(max_pool_connections=100)
-        return boto3.client(
-            "s3",  # type: ignore
-            aws_access_key_id=credentials.access_key,
-            aws_secret_access_key=credentials.secret_key,
-            aws_session_token=credentials.token,
-            region_name=aws_region_name,
-            config=client_config,
-        )
 
     def _s3_fetch_file(self, key: str) -> None:
         """Downloads a single file from the S3 bucket to the destination specified in the constructor.

@@ -7,13 +7,13 @@ import pickle
 from pathlib import Path
 from typing import Any, Callable, Literal, Union
 
+from tqdm.auto import tqdm
 from typing_extensions import TypedDict
 
 from mleko.cache.fingerprinters.json_fingerprinter import JsonFingerprinter
 from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
 from mleko.cache.handlers import write_joblib, write_json, write_pickle, write_string, write_vaex_dataframe
-from mleko.utils.custom_logger import CustomLogger
-from mleko.utils.decorators import auto_repr
+from mleko.utils import CustomLogger, LocalFileEntry, LocalManifestHandler, auto_repr
 
 from .base_exporter import BaseExporter
 
@@ -28,10 +28,10 @@ ExportType = Literal["vaex", "json", "pickle", "joblib", "string"]
 class LocalExporterConfig(TypedDict):
     """Configuration for the LocalExporter."""
 
-    export_destination: Union[str, Path]
+    destination: Union[str, Path]
     """The path of the file to which the data will be exported."""
 
-    export_type: Literal["vaex", "json", "pickle", "joblib", "string"]
+    type: Literal["vaex", "json", "pickle", "joblib", "string"]
     """The type of export to perform. Supported types are 'vaex', 'json', 'pickle', 'joblib', and 'string'.
 
     Note:
@@ -53,9 +53,24 @@ class LocalExporter(BaseExporter):
     """
 
     @auto_repr
-    def __init__(self) -> None:
-        """Initializes the LocalExporter."""
+    def __init__(self, manifest_file_path: str | Path, delete_old_files: bool = False) -> None:
+        """Initializes the `LocalExporter`.
+
+        Note:
+            The manifest is intended to be used to keep track of the exported file names and sizes. It should
+            reflect the current state of the local dataset. In case a new set of files is exported and
+            `delete_old_files` is set to True, the old files will be deleted unless they are present in the
+            new data export.
+
+        Args:
+            manifest_file_path: Path to the manifest file to use for tracking exported files. If the file does
+                not exist, it will be created.
+            delete_old_files: Whether to delete the old files from the local dataset before exporting the new ones
+                based on the manifest.
+        """
         super().__init__()
+        self._manifest_handler = LocalManifestHandler(manifest_file_path)
+        self._delete_old_files = delete_old_files
         self._exporters: dict[ExportType, Callable[[Path, Any], None]] = {
             "vaex": write_vaex_dataframe,
             "json": write_json,
@@ -80,7 +95,7 @@ class LocalExporter(BaseExporter):
         Examples:
             >>> from mleko.dataset.export import LocalExporter
             >>> exporter = LocalExporter()
-            >>> exporter.export("test data", {"export_destination": "test.txt", "export_type": "string"})
+            >>> exporter.export("test data", {"destination": "test.txt", "type": "string"})
             Path('test.txt')
         """
         if isinstance(config, list) and not isinstance(data, list):
@@ -93,7 +108,7 @@ class LocalExporter(BaseExporter):
             logger.error(msg)
             raise ValueError(msg)
 
-        if not isinstance(config, list) and isinstance(data, list) and config["export_type"] != "json":
+        if not isinstance(config, list) and isinstance(data, list) and config["type"] != "json":
             msg = (
                 "Data is a list, but the export type is not 'json'. Please provide a list of configs for a "
                 "list of data items."
@@ -105,9 +120,17 @@ class LocalExporter(BaseExporter):
             data = [data]
             config = [config]
 
+        previous_files = self._manifest_handler.get_file_names()
         results: list[Path] = []
-        for d, c in zip(data, config):
+        for d, c in tqdm(zip(data, config), desc="Exporting data", total=len(data)):
             results.append(self._export_single(d, c, force_recompute))
+
+        if self._delete_old_files:
+            untouched_files = list(set(previous_files) - set(map(str, results)))
+            self._manifest_handler.remove_files(untouched_files)
+            for file_name in map(Path, untouched_files):
+                logger.warning(f"Removing old file: {file_name}")
+                file_name.unlink()
 
         return results
 
@@ -122,20 +145,23 @@ class LocalExporter(BaseExporter):
         Returns:
             The path to the exported file.
         """
-        export_type = config["export_type"]
-        destination = config["export_destination"]
-        if isinstance(destination, str):
-            destination = Path(destination)
-
+        export_type = config["type"]
+        destination = Path(config["destination"])
         self._ensure_path_exists(destination)
-        suffix = destination.suffix
 
-        hash_destination = destination.with_suffix(suffix + ".hash")
-        data_hash = self._hash_data(data, export_type)
+        current_file_entry = LocalFileEntry(
+            name=str(destination),
+            size=destination.stat().st_size if destination.exists() else 0,
+            hash=self._hash_data(data, export_type),
+        )
+        manifest = self._manifest_handler._read_manifest()
+
+        existing_entry = next((f for f in manifest.files if f.name == current_file_entry.name), None)
+
         if (
             not force_recompute
-            and hash_destination.exists()
-            and hash_destination.read_text() == data_hash
+            and existing_entry is not None
+            and existing_entry.hash == current_file_entry.hash
             and destination.exists()
         ):
             logger.info(f"\033[32mCache Hit\033[0m: Data already exported to {str(destination)!r}, skipping export.")
@@ -147,7 +173,9 @@ class LocalExporter(BaseExporter):
             logger.info(f"\033[31mCache Miss\033[0m: Exporting data to {str(destination)!r}.")
 
         self._run_export_function(data, destination, export_type)
-        hash_destination.write_text(data_hash)
+        current_file_entry.size = destination.stat().st_size
+        self._manifest_handler.remove_files([current_file_entry.name])
+        self._manifest_handler.add_files([current_file_entry])
 
         return destination
 
