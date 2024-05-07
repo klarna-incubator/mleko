@@ -5,9 +5,8 @@ from __future__ import annotations
 import hashlib
 import pickle
 from pathlib import Path
-from typing import Any, Literal, Union
+from typing import Any, Callable, Literal, Union
 
-import vaex
 from typing_extensions import TypedDict
 
 from mleko.cache.fingerprinters.json_fingerprinter import JsonFingerprinter
@@ -21,6 +20,9 @@ from .base_exporter import BaseExporter
 
 logger = CustomLogger()
 """A module-level logger instance."""
+
+ExportType = Literal["vaex", "json", "pickle", "joblib", "string"]
+"""Type alias for the supported export types."""
 
 
 class LocalExporterConfig(TypedDict):
@@ -54,15 +56,25 @@ class LocalExporter(BaseExporter):
     def __init__(self) -> None:
         """Initializes the LocalExporter."""
         super().__init__()
+        self._exporters: dict[ExportType, Callable[[Path, Any], None]] = {
+            "vaex": write_vaex_dataframe,
+            "json": write_json,
+            "pickle": write_pickle,
+            "joblib": write_joblib,
+            "string": write_string,
+        }
 
     def export(  # pyright: ignore [reportIncompatibleMethodOverride]
-        self, data: Any, exporter_config: LocalExporterConfig, force_recompute: bool = False
-    ) -> Path:
+        self,
+        data: Any | list[Any],
+        config: LocalExporterConfig | list[LocalExporterConfig],
+        force_recompute: bool = False,
+    ) -> list[Path]:
         """Exports the data to a local file.
 
         Args:
             data: Data to be exported.
-            exporter_config: Configuration for the export destination following the `LocalExporterConfig` schema.
+            config: Configuration for the export destination following the `LocalExporterConfig` schema.
             force_recompute: If set to True, forces the data to be exported even if it already exists on disk.
 
         Examples:
@@ -71,8 +83,47 @@ class LocalExporter(BaseExporter):
             >>> exporter.export("test data", {"export_destination": "test.txt", "export_type": "string"})
             Path('test.txt')
         """
-        export_type = exporter_config["export_type"]
-        destination = exporter_config["export_destination"]
+        if isinstance(config, list) and not isinstance(data, list):
+            msg = "Data is not a list, but the config is a list. Please provide a single config for a single data item."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        if isinstance(config, list) and isinstance(data, list) and len(config) != len(data):
+            msg = "Number of data items and number of configs do not match."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        if not isinstance(config, list) and isinstance(data, list) and config["export_type"] != "json":
+            msg = (
+                "Data is a list, but the export type is not 'json'. Please provide a list of configs for a "
+                "list of data items."
+            )
+            logger.error(msg)
+            raise ValueError(msg)
+
+        if not isinstance(config, list):
+            data = [data]
+            config = [config]
+
+        results: list[Path] = []
+        for d, c in zip(data, config):
+            results.append(self._export_single(d, c, force_recompute))
+
+        return results
+
+    def _export_single(self, data: Any, config: LocalExporterConfig, force_recompute: bool) -> Path:
+        """Exports a single data item to a local file.
+
+        Args:
+            data: Data to be exported.
+            config: Configuration for the export destination following the `LocalExporterConfig` schema.
+            force_recompute: If set to True, forces the data to be exported even if it already exists on disk.
+
+        Returns:
+            The path to the exported file.
+        """
+        export_type = config["export_type"]
+        destination = config["export_destination"]
         if isinstance(destination, str):
             destination = Path(destination)
 
@@ -80,7 +131,7 @@ class LocalExporter(BaseExporter):
         suffix = destination.suffix
 
         hash_destination = destination.with_suffix(suffix + ".hash")
-        data_hash = self._hash_data(data)
+        data_hash = self._hash_data(data, export_type)
         if (
             not force_recompute
             and hash_destination.exists()
@@ -95,21 +146,7 @@ class LocalExporter(BaseExporter):
         else:
             logger.info(f"\033[31mCache Miss\033[0m: Exporting data to {str(destination)!r}.")
 
-        if export_type == "vaex" and isinstance(data, vaex.DataFrame):
-            write_vaex_dataframe(destination, data)
-        elif export_type == "json" and (isinstance(data, dict) or isinstance(data, list)):
-            write_json(destination, data)
-        elif export_type == "pickle":
-            write_pickle(destination, data)
-        elif export_type == "joblib":
-            write_joblib(destination, data)
-        elif export_type == "string" and isinstance(data, str):
-            write_string(destination, data)
-        else:
-            msg = f"Unsupported data type: {type(data)} for the export type: {export_type}."
-            logger.error(msg)
-            raise ValueError(msg)
-
+        self._run_export_function(data, destination, export_type)
         hash_destination.write_text(data_hash)
 
         return destination
@@ -122,7 +159,16 @@ class LocalExporter(BaseExporter):
         """
         path.parent.mkdir(parents=True, exist_ok=True)
 
-    def _hash_data(self, data: Any) -> str:
+    def _run_export_function(self, data: Any, destination: Path, export_type: ExportType) -> None:
+        exporter = self._exporters.get(export_type)
+        if exporter is None:
+            msg = f"Unsupported data type: {type(data)} for the export type: {export_type}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        exporter(destination, data)
+
+    def _hash_data(self, data: Any, export_type: ExportType) -> str:
         """Generates a hash for the given data.
 
         Args:
@@ -131,10 +177,10 @@ class LocalExporter(BaseExporter):
         Returns:
             A hash of the data.
         """
-        if isinstance(data, vaex.DataFrame):
+        if export_type == "vaex":
             return VaexFingerprinter().fingerprint(data)
-        if isinstance(data, (dict, list)):
+        if export_type == "json":
             return JsonFingerprinter().fingerprint(data)
-        if isinstance(data, str):
-            return hashlib.md5((data).encode()).hexdigest()
+        if export_type == "string":
+            return hashlib.md5(str(data).encode()).hexdigest()
         return hashlib.md5(pickle.dumps(data)).hexdigest()
