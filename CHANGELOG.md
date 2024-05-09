@@ -1,5 +1,28 @@
 # Changelog
 
+## [v4.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.0.0) (2024-05-09)
+
+### ⛔️ BREAKING CHANGES
+
+- **exporter:** Add `S3Exporter` that implements cached S3 exporting of files from the local disk. ([`d17b2d2`](https://github.com/klarna-incubator/mleko/commit/d17b2d20e93d0542f25e2142e4dc61c104f7e0b8))
+- **exporter:** Add `BaseExporter` and `LocalExporter` implementations that support exporting data to disk, along with corresponding `Pipeline` steps. ([`6ce13cf`](https://github.com/klarna-incubator/mleko/commit/6ce13cf5bff65c2da429f1db80fc9612f1f9c223))
+
+### ✨ Features
+
+- **exporter:** Add `LocalManifest` support for `LocalExporter` which simplifies caching logic and enables S3 manifest translations. ([`2199ff0`](https://github.com/klarna-incubator/mleko/commit/2199ff0a5d2bf347ef25898c28f94c59ec4b210e))
+- **exporter:** Add support for multiple data export using `LocalExporter`. ([`ff988b6`](https://github.com/klarna-incubator/mleko/commit/ff988b683ca59782212d34f915e9e55587f6a9e8))
+- **data source:** Add support for reading manifest files from S3 buckets in `S3Ingester`. ([`9c68a9b`](https://github.com/klarna-incubator/mleko/commit/9c68a9b107a0436cbdace8cdbd41f839783f9369))
+- **pipeline:** Add `disable_cache` parameter to `Pipeline` execution. ([`da1e31a`](https://github.com/klarna-incubator/mleko/commit/da1e31a90a2e1de58f15dd0df91309bc81f10427))
+
+### 🐛 Bug Fixes
+
+- **data cleaning:** Fix newline characters breaking CSV reading using Arrow. ([`3a7e594`](https://github.com/klarna-incubator/mleko/commit/3a7e59426ff8575f4ece679fd1468edec3173cfe))
+- **tuning:** Delete logging of storage URI to minimize risk of accidentally logging credentials. ([`054692d`](https://github.com/klarna-incubator/mleko/commit/054692d5508018fd77ea82c05fe27a2dd2f229b3))
+
+### 🛠️ Code Refactoring
+
+- **data source:** Extract shared S3 logic to `utils` which can be then used by `S3Exporter`. ([`97a7974`](https://github.com/klarna-incubator/mleko/commit/97a79748996aede230507fa88d09839d00d2029e))
+
 ## [v3.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v3.2.0) (2024-04-18)
 
 ### ✨ Features
