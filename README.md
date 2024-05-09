@@ -20,8 +20,10 @@ Simplify and accelerate your machine learning development with `mleko`. Designed
 `mleko` is engineered to address the end-to-end needs of machine learning pipelines, providing robust, scalable solutions for data science challenges:
 
 - Ingest: Seamlessly integrates with data sources like AWS S3 and Kaggle, offering hassle-free data ingestion and compatibility.
+- Export: Supports exporting data to various formats and platforms, locally or in the cloud, to ensure that your data is accessible and shareable.
 - Convert: Specializes in data format transformations, prominently featuring high-performance conversions from `CSV` to `Vaex DataFrame`, to make your data pipeline-ready.
 - Split: Employs sophisticated data partitioning algorithms, allowing you to segment DataFrames into train, test, and validation sets for effective model training and evaluation.
+  -Filter: Provides a suite of filtering techniques such as resampling or simple expression-based filtering, enabling you to focus on the most relevant data.
 - Feature Selection: Equipped with a suite of feature selection techniques, `mleko` enables model performance by focusing on the most impactful variables.
 - Transformation: Facilitates data manipulations such as Frequency Encoding and Standardization, ensuring that your data conforms to the prerequisites of the machine learning algorithms.
 - Model: Provides a core set of functionalities for machine learning models, including in-built support for hyperparameter tuning, thereby streamlining the path from data to deployable model.
@@ -56,7 +58,7 @@ See our [changelog](https://github.com/klarna-incubator/mleko/tree/main/CHANGELO
 
 ## Acknowledgements
 
-The development of `mleko` was significantly influenced by existing work of the following individuals:
+The development of `mleko` was influenced by existing work of the following individuals:
 
 - **Felipe Breve Siola** ([fsiola](https://github.com/fsiola))
 - **Sai Ma** ([metanouvelle](https://github.com/metanouvelle))

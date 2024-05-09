@@ -16,7 +16,7 @@ class BaseExporter(ABC):
         data: Any | list[Any],
         config: dict[str, Any] | list[dict[str, Any]],
         force_recompute: bool = False,
-    ) -> str | Path:
+    ) -> str | Path | list[str] | list[Path] | None:
         """Exports the data to a destination.
 
         Args:
