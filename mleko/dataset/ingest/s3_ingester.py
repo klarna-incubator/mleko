@@ -3,38 +3,20 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 from concurrent import futures
-from dataclasses import dataclass
-from datetime import date
-from fnmatch import fnmatch
+from itertools import repeat
 from pathlib import Path
 
-from boto3.s3.transfer import TransferConfig as BotoTransferConfig
 from tqdm.auto import tqdm
 
-from mleko.utils import CustomLogger, LocalFileEntry, LocalManifestHandler, auto_repr, get_s3_client
+from mleko.utils import CustomLogger, LocalFileEntry, LocalManifestHandler, S3Client, auto_repr
 
 from .base_ingester import BaseIngester
 
 
 logger = CustomLogger()
 """A module-level custom logger."""
-
-
-@dataclass
-class S3FileManifest:
-    """Manifest entry for a single S3 file."""
-
-    key: Path
-    """Key of the file, the full path of the file in the S3 bucket including the key prefix."""
-
-    size: int
-    """Size of the file in bytes."""
-
-    last_modified: date
-    """Last modified date of the file."""
 
 
 class S3Ingester(BaseIngester):
@@ -55,9 +37,10 @@ class S3Ingester(BaseIngester):
         destination_directory: str | Path = "data/s3-ingester",
         aws_profile_name: str | None = None,
         aws_region_name: str = "eu-west-1",
-        num_workers: int = 64,
-        manifest_file_name: str | None = None,
-        check_s3_timestamps: bool = True,
+        max_concurrent_files: int = 64,
+        workers_per_file: int = 1,
+        manifest_file_name: str | None = "manifest",
+        s3_timestamp_tolerance: int = -1,
     ) -> None:
         """Initializes the S3 bucket client, configures the cache directory, and sets client-related parameters.
 
@@ -66,6 +49,13 @@ class S3Ingester(BaseIngester):
             the default profile will be used. If no region is provided, the default region will be used.
 
             The profile and region is read from the AWS credentials file located at '~/.aws/credentials'.
+
+        Warning:
+            The `max_concurrent_files` and `workers_per_file` parameters are used to control the
+            number of concurrent downloads and parts downloaded per file, respectively. These parameters should be
+            set based on the available system resources and the S3 bucket's performance limits. The total number of
+            concurrent threads is the product of these two parameters
+            (i.e., `max_concurrent_files * workers_per_file`).
 
         Args:
             s3_bucket_name: Name of the S3 bucket containing the data.
@@ -78,10 +68,14 @@ class S3Ingester(BaseIngester):
             destination_directory: Directory to store the fetched data locally.
             aws_profile_name: AWS profile name to use.
             aws_region_name: AWS region name where the S3 bucket is located.
-            num_workers: Number of workers to use for concurrent downloads.
-            manifest_file_name: Name of the manifest file located on S3. If not provided, the manifest from S3 will
+            max_concurrent_files: Maximum number of files to download concurrently.
+            workers_per_file: Number of parts to download concurrently for each file. This is useful for
+                downloading large files faster, as it allows for parallel downloads of different parts of the file.
+            manifest_file_name: Name of the manifest file located on S3. If provided, the manifest from S3 will
                 be used to determine the files to include, before applying the file pattern.
-            check_s3_timestamps: Whether to check if all S3 files have the same timestamp.
+            s3_timestamp_tolerance: Tolerance in hours for the difference in last modified timestamps of files in the S3
+                bucket. If the difference is greater than this value, an exception will be raised. If set to -1, no
+                check will be performed.
 
         Examples:
             >>> from mleko.dataset.sources import S3Ingester
@@ -93,8 +87,7 @@ class S3Ingester(BaseIngester):
             ...                               # "./data/<fingerprint>/".
             ...     aws_profile_name="mleko",
             ...     aws_region_name="eu-west-1",
-            ...     num_workers=64,
-            ...     check_s3_timestamps=True,
+            ...     s3_timestamp_tolerance=2,
             ... )
             >>> s3_ingester.fetch_data()
             [PosixPath('data/indian_food/indian_food.csv')]
@@ -112,10 +105,11 @@ class S3Ingester(BaseIngester):
         self._s3_key_prefix = s3_key_prefix
         self._aws_profile_name = aws_profile_name
         self._aws_region_name = aws_region_name
-        self._s3_client = get_s3_client(self._aws_profile_name, self._aws_region_name)
-        self._num_workers = num_workers
+        self._s3_client = S3Client(self._aws_profile_name, self._aws_region_name)
+        self._max_concurrent_files = max_concurrent_files
+        self._workers_per_file = workers_per_file
         self._manifest_file_name = manifest_file_name
-        self._check_s3_timestamps = check_s3_timestamps
+        self._s3_timestamp_tolerance = s3_timestamp_tolerance
 
         if isinstance(file_pattern, str):
             file_pattern = [file_pattern]
@@ -133,27 +127,47 @@ class S3Ingester(BaseIngester):
         Raises:
             Exception: If files in the S3 bucket have different last modified dates, indicating potential corruption
                        or duplication.
+            FileNotFoundError: If no files matching the file pattern are found in the S3 bucket.
 
         Returns:
             A list of Path objects pointing to the downloaded data files.
         """
-        self._s3_client = get_s3_client(self._aws_profile_name, self._aws_region_name)
-        s3_manifest = self._build_s3_manifest()
+        self._s3_client.refresh_client()
+        s3_manifest = self._s3_client.get_s3_manifest(
+            bucket_name=self._s3_bucket_name,
+            key_prefix=self._s3_key_prefix,
+            manifest_file_name=self._manifest_file_name,
+            file_pattern=self._file_pattern,
+        )
+        if len(s3_manifest) == 0:
+            msg = (
+                f"No files matching {self._file_pattern} found in S3 bucket "
+                f"{self._s3_bucket_name}/{self._s3_key_prefix}."
+            )
+            logger.error(msg)
+            raise FileNotFoundError(msg)
+        logger.info(f"Found {len(s3_manifest)} file(s) matching any of {self._file_pattern} in S3 bucket.")
 
-        if self._check_s3_timestamps:
-            modification_dates = {key.last_modified for key in s3_manifest}
-            if len(modification_dates) > 1:
-                error_msg = "Files in S3 are from multiple dates. This might mean the data is corrupted/duplicated."
+        s3_path_string = f"s3://{Path(self._s3_bucket_name) / self._s3_key_prefix}/"
+        if self._s3_timestamp_tolerance >= 0:
+            modification_datetimes = [key.last_modified for key in s3_manifest]
+            diff_modification_datetimes = max(modification_datetimes) - min(modification_datetimes)
+            if diff_modification_datetimes.total_seconds() > self._s3_timestamp_tolerance * 3600:
+                error_msg = (
+                    f"Files in S3 bucket {s3_path_string} have last modified "
+                    f"timestamps differing by more than {self._s3_timestamp_tolerance} hours. "
+                    f"Potential corruption or duplication detected."
+                )
                 logger.error(error_msg)
                 raise Exception(error_msg)
 
         if force_recompute:
             logger.info(
                 f"\033[33mForce Cache Refresh\033[0m: Downloading files matching {self._file_pattern} from "
-                f"{self._s3_bucket_name}/{self._s3_key_prefix} to {self._destination_directory} from S3."
+                f"{s3_path_string} to {self._destination_directory}."
             )
         else:
-            if self._is_local_dataset_fresh(s3_manifest):
+            if self._s3_client.is_local_dataset_up_to_date(self._destination_directory, s3_manifest):
                 logger.info(
                     "\033[32mCache Hit\033[0m: Local dataset is up to date with S3 bucket contents, "
                     "skipping download."
@@ -173,8 +187,8 @@ class S3Ingester(BaseIngester):
                 return self._get_full_file_paths(self._local_manifest_handler.get_file_names())
 
             logger.info(
-                f"\033[31mCache Miss\033[0m: Downloading {self._s3_bucket_name}/{self._s3_key_prefix} to "
-                f"{self._destination_directory} from S3."
+                f"\033[31mCache Miss\033[0m: Downloading files matching {self._file_pattern} from "
+                f"{s3_path_string} to {self._destination_directory}."
             )
 
         self._delete_local_files(self._local_manifest_handler.get_file_names())
@@ -193,87 +207,6 @@ class S3Ingester(BaseIngester):
 
         return self._get_full_file_paths(self._local_manifest_handler.get_file_names())
 
-    def _build_s3_manifest(self) -> list[S3FileManifest]:
-        """Builds a manifest from the S3 response.
-
-        The manifest contains the S3 keys, sizes, and last modified dates of the files in the S3 bucket.
-
-        Raises:
-            FileNotFoundError: If no files matching the file pattern are found in the S3 bucket.
-
-        Returns:
-            A list of `S3FileManifest` objects containing the S3 keys, sizes, and last modified dates of the files in
-            the S3 bucket.
-        """
-        s3_contents = [
-            entry
-            for entry in self._s3_client.list_objects(
-                Bucket=self._s3_bucket_name,
-                Prefix=self._s3_key_prefix,
-            ).get("Contents", [])
-            if "LastModified" in entry and "Key" in entry and "Size" in entry
-        ]
-
-        if self._manifest_file_name is not None:
-            manifest_file_key = next(
-                entry["Key"] for entry in s3_contents if entry["Key"].endswith(self._manifest_file_name)
-            )
-
-            if manifest_file_key:
-                self._s3_fetch_file(manifest_file_key)
-                with open(self._destination_directory / self._manifest_file_name) as f:
-                    manifest: set[str] = {
-                        entry["url"].split(self._s3_key_prefix)[-1].lstrip("/")
-                        for entry in json.load(f).get("entries", [])
-                        if "url" in entry
-                    }
-
-                s3_contents = [
-                    entry
-                    for entry in s3_contents
-                    if entry["Key"].split(self._s3_key_prefix)[-1].lstrip("/") in manifest
-                ]
-
-        s3_manifest: list[S3FileManifest] = [
-            S3FileManifest(key=Path(entry["Key"]), size=entry["Size"], last_modified=entry["LastModified"].date())
-            for entry in s3_contents
-            if any(
-                fnmatch(entry["Key"].split(self._s3_key_prefix)[-1].lstrip("/"), pattern)
-                for pattern in self._file_pattern
-            )
-        ]
-
-        if len(s3_manifest) == 0:
-            msg = (
-                f"No files matching {self._file_pattern} found in S3 bucket "
-                f"{self._s3_bucket_name}/{self._s3_key_prefix}."
-            )
-            logger.error(msg)
-            raise FileNotFoundError(msg)
-        logger.info(f"Found {len(s3_manifest)} file(s) matching any of {self._file_pattern} in S3 bucket.")
-
-        return s3_manifest
-
-    def _s3_fetch_file(self, key: str) -> None:
-        """Downloads a single file from the S3 bucket to the destination specified in the constructor.
-
-        Args:
-            key: S3 key of the file to download.
-        """
-        gb = 1024**3
-        transfer_config = BotoTransferConfig(
-            use_threads=False,
-            multipart_threshold=int(0.5 * gb),  # Multipart transfer if file > 500MB
-        )
-        file_path = self._destination_directory / Path(key).name
-        with open(file_path, "wb") as data:
-            self._s3_client.download_fileobj(
-                Bucket=self._s3_bucket_name,
-                Key=key,
-                Fileobj=data,
-                Config=transfer_config,
-            )
-
     def _s3_fetch_all(self, keys: list[str]) -> None:
         """Downloads all specified files from the S3 bucket to the local directory concurrently.
 
@@ -281,24 +214,12 @@ class S3Ingester(BaseIngester):
             keys: List of S3 keys for the files to download.
         """
         with tqdm(total=len(keys), desc="Downloading files from S3") as pbar:
-            with futures.ThreadPoolExecutor(max_workers=self._num_workers) as executor:
+            with futures.ThreadPoolExecutor(max_workers=min(len(keys), self._max_concurrent_files)) as executor:
                 for _ in executor.map(
-                    self._s3_fetch_file,
+                    self._s3_client.download_file,
+                    repeat(self._destination_directory),
+                    repeat(self._s3_bucket_name),
                     keys,
+                    repeat(self._workers_per_file),
                 ):
                     pbar.update(1)
-
-    def _is_local_dataset_fresh(self, s3_manifest: list[S3FileManifest]) -> bool:
-        """Checks if the local dataset is up-to-date with the S3 manifest.
-
-        Args:
-            s3_manifest: Manifest built from S3 response.
-
-        Returns:
-            True if the local dataset is up-to-date, False otherwise.
-        """
-        for s3_file in s3_manifest:
-            local_file_path = self._destination_directory / s3_file.key.name
-            if not local_file_path.exists() or s3_file.size != os.path.getsize(local_file_path):
-                return False
-        return True

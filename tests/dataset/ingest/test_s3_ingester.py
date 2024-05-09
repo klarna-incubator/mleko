@@ -36,8 +36,7 @@ class TestS3Ingester:
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
-            num_workers=1,
-            check_s3_timestamps=False,
+            max_concurrent_files=1,
         )
         test_data.fetch_data(
             force_recompute=True,
@@ -47,10 +46,20 @@ class TestS3Ingester:
 
     def test_different_timestamps(self, s3_bucket, temporary_directory: Path):
         """Should throw exception due to different timestamps of files."""
-        s3_bucket.Object("test-prefix/manifest").put(Body='{"entries": []}')
+        s3_bucket.Object("test-prefix/manifest").put(
+            Body=json.dumps(
+                {
+                    "entries": [
+                        {"url": "s3://test-bucket/test-prefix/test-file.csv", "meta": {"content_length": 14}},
+                        {"url": "s3://test-bucket/test-prefix/test-file-2.csv", "meta": {"content_length": 14}},
+                    ]
+                }
+            )
+        )
         s3_bucket.Object("test-prefix/test-file.csv").put(Body="test-file-data")
+        s3_bucket.Object("test-prefix/test-file-2.csv").put(Body="test-file-data")
         s3_backends["123456789012"]["global"].buckets["test-bucket"].keys[  # type: ignore
-            "test-prefix/test-file.csv"
+            "test-prefix/test-file-2.csv"
         ].last_modified = datetime.datetime(2000, 1, 1)
 
         test_data = S3Ingester(
@@ -58,8 +67,8 @@ class TestS3Ingester:
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
+            s3_timestamp_tolerance=1,
         )
         with pytest.raises(Exception, match="Files in S3"):
             test_data.fetch_data(
@@ -75,8 +84,7 @@ class TestS3Ingester:
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
         )
         test_data.fetch_data(
             force_recompute=True,
@@ -89,8 +97,7 @@ class TestS3Ingester:
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
                 file_pattern="test-file1.csv",
-                num_workers=1,
-                check_s3_timestamps=False,
+                max_concurrent_files=1,
             )
             test_data.fetch_data(
                 force_recompute=False,
@@ -107,8 +114,7 @@ class TestS3Ingester:
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
             file_pattern="test-file3.csv",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
         )
 
         with pytest.raises(FileNotFoundError):
@@ -122,8 +128,7 @@ class TestS3Ingester:
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
         )
         test_data.fetch_data(
             force_recompute=True,
@@ -136,8 +141,7 @@ class TestS3Ingester:
                 s3_bucket_name="test-bucket",
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
-                num_workers=1,
-                check_s3_timestamps=False,
+                max_concurrent_files=1,
             )
             test_data.fetch_data(
                 force_recompute=False,
@@ -170,8 +174,7 @@ class TestS3Ingester:
                 s3_key_prefix="test-prefix",
                 aws_profile_name="custom-profile-name",
                 aws_region_name="us-west-2",
-                num_workers=1,
-                check_s3_timestamps=True,
+                max_concurrent_files=1,
             )
 
             mocked_get_credentials.assert_called_once()
@@ -213,8 +216,7 @@ class TestS3Ingester:
                     s3_key_prefix="test-prefix",
                     aws_profile_name="custom-profile-name",
                     aws_region_name="us-west-2",
-                    num_workers=1,
-                    check_s3_timestamps=True,
+                    max_concurrent_files=1,
                 )
 
             mocked_get_credentials.assert_called_once()
@@ -230,8 +232,7 @@ class TestS3Ingester:
             s3_bucket_name="test-bucket",
             s3_key_prefix="test-prefix",
             aws_region_name="us-east-1",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
         )
         test_data.fetch_data(
             force_recompute=True,
@@ -244,8 +245,7 @@ class TestS3Ingester:
                 s3_key_prefix="test-prefix",
                 aws_region_name="us-east-1",
                 file_pattern="*test-file2.csv",
-                num_workers=1,
-                check_s3_timestamps=False,
+                max_concurrent_files=1,
             )
             test_data.fetch_data(
                 force_recompute=False,
@@ -280,8 +280,7 @@ class TestS3Ingester:
             aws_region_name="us-east-1",
             manifest_file_name="manifest",
             dataset_id="test-dataset",
-            num_workers=1,
-            check_s3_timestamps=True,
+            max_concurrent_files=1,
         )
         file_paths = test_data.fetch_data(
             force_recompute=True,
