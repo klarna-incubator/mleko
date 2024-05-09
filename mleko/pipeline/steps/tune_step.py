@@ -62,12 +62,13 @@ class TuneStep(PipelineStep):
         super().__init__(inputs, outputs, cache_group)
         self._tuner = tuner
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform hyperparameter tuning.
 
         Args:
             data_container: Contains the input.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A DataContainer containing the output of the tuning step. It contains the best hyperparameters, the best
@@ -76,7 +77,9 @@ class TuneStep(PipelineStep):
         data_schema = self._validate_and_get_input(self._inputs["data_schema"], DataSchema, data_container)
         dataframe = self._validate_and_get_input(self._inputs["dataframe"], DataFrame, data_container)
 
-        hyperparameters, score, metadata = self._tuner.tune(data_schema, dataframe, self._cache_group, force_recompute)
+        hyperparameters, score, metadata = self._tuner.tune(
+            data_schema, dataframe, self._cache_group, force_recompute, disable_cache
+        )
         data_container.data[self._outputs["hyperparameters"]] = hyperparameters
         data_container.data[self._outputs["score"]] = score
         data_container.data[self._outputs["metadata"]] = metadata

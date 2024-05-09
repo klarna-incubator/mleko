@@ -285,6 +285,7 @@ class CSVToVaexConverter(BaseConverter):
         df_chunk = vaex.from_csv_arrow(
             file_path,
             read_options=arrow_csv.ReadOptions(use_threads=True),
+            parse_options=arrow_csv.ParseOptions(newlines_in_values=True),
             convert_options=arrow_csv.ConvertOptions(
                 column_types=dtypes,
                 null_values=na_values,

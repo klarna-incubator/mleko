@@ -6,7 +6,7 @@ from pathlib import Path
 
 import vaex
 
-from mleko.cache.fingerprinters import DictFingerprinter, VaexFingerprinter
+from mleko.cache.fingerprinters import JsonFingerprinter, VaexFingerprinter
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -81,7 +81,7 @@ class ExpressionFilter(BaseFilter):
             lambda_func=lambda: self._filter(data_schema, dataframe),
             cache_key_inputs=[
                 self._expression,
-                (data_schema.to_dict(), DictFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,

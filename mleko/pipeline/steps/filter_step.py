@@ -56,12 +56,13 @@ class FilterStep(PipelineStep):
         super().__init__(inputs, outputs, cache_group)
         self._filter = filter
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform data filtering using the configured filter.
 
         Args:
             data_container: Contains the DataFrame to be filtered.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A DataContainer containing the result.
@@ -69,7 +70,9 @@ class FilterStep(PipelineStep):
         data_schema = self._validate_and_get_input(self._inputs["data_schema"], DataSchema, data_container)
         dataframe = self._validate_and_get_input(self._inputs["dataframe"], DataFrame, data_container)
 
-        filtered_dataframe = self._filter.filter(data_schema, dataframe, self._cache_group, force_recompute)
+        filtered_dataframe = self._filter.filter(
+            data_schema, dataframe, self._cache_group, force_recompute, disable_cache
+        )
         data_container.data[self._outputs["dataframe"]] = filtered_dataframe
         return data_container
 

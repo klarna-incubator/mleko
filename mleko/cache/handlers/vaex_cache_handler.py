@@ -33,12 +33,25 @@ def write_vaex_dataframe(cache_file_path: Path, output: vaex.DataFrame) -> None:
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", "invalid value encountered in cast")
         with tqdm(total=100, desc=f"Writing DataFrame to {cache_file_path.suffix} file") as pbar:
-            output.export_arrow(
-                cache_file_path,
-                progress=set_tqdm_percent_wrapper(pbar),
-                parallel=True,
-                chunk_size=262_144,
-            )
+            progress_bar = set_tqdm_percent_wrapper(pbar)
+            parallel = True
+            chunk_size = 262_144
+
+            if cache_file_path.suffix == ".csv":
+                output.export_csv(
+                    cache_file_path,
+                    progress=progress_bar,
+                    parallel=parallel,
+                    chunk_size=chunk_size,
+                    backend="arrow",
+                )
+            else:
+                output.export(
+                    cache_file_path,
+                    progress=progress_bar,
+                    parallel=parallel,
+                    chunk_size=chunk_size,
+                )
 
 
 VAEX_DATAFRAME_CACHE_HANDLER = CacheHandler(

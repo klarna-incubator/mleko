@@ -107,12 +107,13 @@ class ModelStep(FitTransformPipelineStep):
         super().__init__(action, inputs, outputs, cache_group)
         self._model = model
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform actions using the configured model.
 
         Args:
             data_container: Contains the input.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A DataContainer containing the output of the action performed by the step, either the fitted model,
@@ -134,18 +135,30 @@ class ModelStep(FitTransformPipelineStep):
         if self._action == "fit":
             self._outputs = cast(ModelStepOutputFitType, self._outputs)
             model, metrics = self._model.fit(
-                data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
+                data_schema,
+                dataframe,
+                df_validation,
+                hyperparameters,
+                self._cache_group,
+                force_recompute,
+                disable_cache,
             )
             data_container.data[self._outputs["model"]] = model
             data_container.data[self._outputs["metrics"]] = metrics
         elif self._action == "transform":
             self._outputs = cast(ModelStepOutputTransformType, self._outputs)
-            df = self._model.transform(data_schema, dataframe, self._cache_group, force_recompute)
+            df = self._model.transform(data_schema, dataframe, self._cache_group, force_recompute, disable_cache)
             data_container.data[self._outputs["dataframe"]] = df
         elif self._action == "fit_transform":
             self._outputs = cast(ModelStepOutputFitTransformType, self._outputs)
             model, metrics, df, df_validation = self._model.fit_transform(
-                data_schema, dataframe, df_validation, hyperparameters, self._cache_group, force_recompute
+                data_schema,
+                dataframe,
+                df_validation,
+                hyperparameters,
+                self._cache_group,
+                force_recompute,
+                disable_cache,
             )
             data_container.data[self._outputs["model"]] = model
             data_container.data[self._outputs["metrics"]] = metrics

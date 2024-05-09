@@ -52,13 +52,13 @@ class TestTransformStep:
             },
             cache_group=None,
         )
-        result = transform_step.execute(data_container, force_recompute=False)
+        result = transform_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_clean_selected"] == df
 
         transformer.fit_transform.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_execute_fit_and_transform(self):
@@ -82,7 +82,9 @@ class TestTransformStep:
             outputs={"data_schema": "transformed_data_schema", "transformer": "transformer"},
             cache_group=None,
         )
-        transform_step_fit_result = transform_step_fit.execute(data_container, force_recompute=False)
+        transform_step_fit_result = transform_step_fit.execute(
+            data_container, force_recompute=False, disable_cache=False
+        )
         assert isinstance(transform_step_fit_result, DataContainer)
         assert transform_step_fit_result.data["transformer"] == "transformer"
 
@@ -93,19 +95,21 @@ class TestTransformStep:
             outputs={"data_schema": "transformed_data_schema", "dataframe": "df_clean_selected"},
             cache_group=None,
         )
-        transform_step_transform_result = transform_step_transform.execute(data_container, force_recompute=False)
+        transform_step_transform_result = transform_step_transform.execute(
+            data_container, force_recompute=False, disable_cache=False
+        )
         assert isinstance(transform_step_transform_result, DataContainer)
         assert transform_step_transform_result.data["df_clean_selected"] == df
 
         transformer.fit.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
         transformer.transform.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving a vaex dataframe."""
+        """Should throw ValueError if not receiving a vaex dataframe."""
         file_paths = [str]
         data_container = DataContainer(data={"df_clean": file_paths})  # type: ignore
 
@@ -118,7 +122,7 @@ class TestTransformStep:
         )
 
         with pytest.raises(ValueError):
-            transformer_step.execute(data_container, force_recompute=False)
+            transformer_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""

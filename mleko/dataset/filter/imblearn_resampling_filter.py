@@ -10,8 +10,7 @@ import pyarrow as pa
 import vaex
 from imblearn.under_sampling.base import BaseSampler
 
-from mleko.cache.fingerprinters.dict_fingerprinter import DictFingerprinter
-from mleko.cache.fingerprinters.vaex_fingerprinter import VaexFingerprinter
+from mleko.cache.fingerprinters import JsonFingerprinter, VaexFingerprinter
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -97,9 +96,9 @@ class ImblearnResamplingFilter(BaseFilter):
             lambda_func=lambda: self._filter(data_schema, dataframe),
             cache_key_inputs=[
                 self._sampler.__class__.__qualname__,
-                (self._sampler.get_params(deep=True), DictFingerprinter()),
+                (self._sampler.get_params(deep=True), JsonFingerprinter()),
                 self._target_column,
-                (data_schema.to_dict(), DictFingerprinter()),
+                (data_schema.to_dict(), JsonFingerprinter()),
                 (dataframe, VaexFingerprinter()),
             ],
             cache_group=cache_group,

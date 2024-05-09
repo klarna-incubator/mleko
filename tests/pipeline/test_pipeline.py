@@ -27,14 +27,14 @@ class TestPipeline:
 
             raw_data: str
 
-        def execute(self, _data_container: DataContainer, _force_recompute: bool) -> DataContainer:
+        def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
             """Execute the step."""
             return DataContainer(data={"raw_data": [Path()]})
 
-        def _get_input_model(self) -> type[TypedDict]:
+        def _get_input_model(self):
             return self.InputType
 
-        def _get_output_model(self) -> type[TypedDict]:
+        def _get_output_model(self):
             return self.OutputType
 
     class AppendStep(PipelineStep):
@@ -50,7 +50,7 @@ class TestPipeline:
 
             appended_data: str
 
-        def execute(self, data_container: DataContainer, _force_recompute: bool) -> DataContainer:
+        def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
             """Execute the step."""
             file_paths = data_container.data["raw_data"]
             if not isinstance(file_paths, list) or not all(isinstance(e, Path) for e in file_paths):
@@ -58,10 +58,10 @@ class TestPipeline:
             data_container.data["appended_data"] = file_paths + [Path()]
             return data_container
 
-        def _get_input_model(self) -> type[TypedDict]:
+        def _get_input_model(self):
             return self.InputType
 
-        def _get_output_model(self) -> type[TypedDict]:
+        def _get_output_model(self):
             return self.OutputType
 
     def test_init(self):

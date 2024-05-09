@@ -12,6 +12,7 @@
     "model",
     "tuning",
     "logging",
-    "filter"
+    "filter",
+    "exporter"
   ]
 }

@@ -46,13 +46,13 @@ class TestFilterStep:
             outputs={"dataframe": "df_filter"},
             cache_group=None,
         )
-        result = split_step.execute(data_container, force_recompute=False)
+        result = split_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_filter"] == df_filter
 
         filter.filter.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_send_raw_data(self):
@@ -74,17 +74,17 @@ class TestFilterStep:
             outputs={"dataframe": "df_filter"},
             cache_group=None,
         )
-        result = filter_step.execute(data_container, force_recompute=False)
+        result = filter_step.execute(data_container, force_recompute=False, disable_cache=False)
 
         assert isinstance(result, DataContainer)
         assert result.data["df_filter"] == df_filter
 
         filter.filter.assert_called_once_with(
-            data_container.data["data_schema"], data_container.data["df_clean"], None, False
+            data_container.data["data_schema"], data_container.data["df_clean"], None, False, False
         )
 
     def test_wrong_data_type(self):
-        """Should throw ValueError if not recieving a vaex dataframe."""
+        """Should throw ValueError if not receiving a vaex dataframe."""
         file_paths = [str]
         data_container = DataContainer(data={"df_clean": file_paths})  # type: ignore
 
@@ -96,7 +96,7 @@ class TestFilterStep:
         )
 
         with pytest.raises(ValueError):
-            filter_step.execute(data_container, force_recompute=False)
+            filter_step.execute(data_container, force_recompute=False, disable_cache=False)
 
     def test_wrong_number_inputs_outputs(self):
         """Should throw ValueError inputs or outputs number is incorrect."""

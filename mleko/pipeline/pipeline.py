@@ -40,7 +40,7 @@ class Pipeline:
         """Returns a string representation of the Pipeline, including the ordered list of steps.
 
         Returns:
-            String representaition of Pipeline that includes the class name and each step in the order they appear
+            String representation of Pipeline that includes the class name and each step in the order they appear
             in the pipeline, numbered for easier identification.
         """
         cls_name = type(self).__name__
@@ -58,7 +58,9 @@ class Pipeline:
         """
         self._steps.append(step)
 
-    def run(self, data_container: DataContainer | None = None, force_recompute: bool = False) -> DataContainer:
+    def run(
+        self, data_container: DataContainer | None = None, force_recompute: bool = False, disable_cache: bool = False
+    ) -> DataContainer:
         """Executes the pipeline steps in the order they were added, passing output from one to the next.
 
         Processes the initial given data or an empty data container through each step in the pipeline.
@@ -70,6 +72,7 @@ class Pipeline:
                             first step in the pipeline. If not provided, an empty DataContainer instance will be
                             created automatically, and the first step's execute method must handle it.
             force_recompute: Whether to force the pipeline to recompute its output, even if it already exists.
+            disable_cache: Whether to disable the `mleko` caching mechanism for the pipeline execution.
 
         Returns:
             The output as a DataContainer instance from the last step in the pipeline after processing the data.
@@ -80,6 +83,6 @@ class Pipeline:
 
         for i, step in enumerate(self._steps):
             logger.info(f"Executing step {i+1}/{len(self._steps)}: {step.__class__.__name__}.")
-            data_container = step.execute(data_container, force_recompute)
+            data_container = step.execute(data_container, force_recompute, disable_cache)
             logger.info(f"Finished step {i+1}/{len(self._steps)} execution.")
         return data_container

@@ -33,10 +33,10 @@ from tqdm.auto import tqdm
 from mleko import __version__ as mleko_version
 from mleko.cache.fingerprinters import (
     CallableSourceFingerprinter,
+    JsonFingerprinter,
     OptunaPrunerFingerprinter,
     OptunaSamplerFingerprinter,
 )
-from mleko.cache.fingerprinters.dict_fingerprinter import DictFingerprinter
 from mleko.dataset.data_schema import DataSchema
 from mleko.model.base_model import HyperparametersType
 from mleko.utils.custom_logger import CustomLogger
@@ -207,12 +207,6 @@ class OptunaTuner(BaseTuner):
         for handler in logger.handlers:
             optuna_logger.addHandler(handler)
 
-        if self._storage is not None:
-            storage_name = self._storage if isinstance(self._storage, str) else self._storage.url
-            logger.info(
-                f"Optuna study named {self._study_name!r} is stored in {storage_name}, use optuna-dashboard to view it."
-            )
-
     def _tune(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
     ) -> tuple[HyperparametersType, float | list[float] | tuple[float, ...], optuna.study.Study]:
@@ -342,7 +336,7 @@ class OptunaTuner(BaseTuner):
                 self._storage
                 if isinstance(self._storage, str)
                 else (
-                    self._storage.url + DictFingerprinter().fingerprint(self._storage.engine_kwargs)
+                    self._storage.url + JsonFingerprinter().fingerprint(self._storage.engine_kwargs)
                     if self._storage is not None
                     else None
                 )

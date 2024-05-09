@@ -89,12 +89,13 @@ class FeatureSelectStep(FitTransformPipelineStep):
         super().__init__(action, inputs, outputs, cache_group)
         self._feature_selector = feature_selector
 
-    def execute(self, data_container: DataContainer, force_recompute: bool) -> DataContainer:
+    def execute(self, data_container: DataContainer, force_recompute: bool, disable_cache: bool) -> DataContainer:
         """Perform feature selection using the configured feature selector.
 
         Args:
             data_container: Contains the input DataFrame.
             force_recompute: Whether to force the step to recompute its output, even if it already exists.
+            disable_cache: If set to True, disables the cache.
 
         Returns:
             A DataContainer containing the result depending on the action.
@@ -105,19 +106,21 @@ class FeatureSelectStep(FitTransformPipelineStep):
         if self._action == "fit":
             self._outputs = cast(FeatureSelectStepOutputFitType, self._outputs)
             ds, feature_selector = self._feature_selector.fit(
-                data_schema, dataframe, self._cache_group, force_recompute
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
             )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["feature_selector"]] = feature_selector
         elif self._action == "transform":
             self._outputs = cast(FeatureSelectStepOutputTransformType, self._outputs)
-            ds, df = self._feature_selector.transform(data_schema, dataframe, self._cache_group, force_recompute)
+            ds, df = self._feature_selector.transform(
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
+            )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["dataframe"]] = df
         elif self._action == "fit_transform":
             self._outputs = cast(FeatureSelectStepOutputFitTransformType, self._outputs)
             ds, feature_selector, df = self._feature_selector.fit_transform(
-                data_schema, dataframe, self._cache_group, force_recompute
+                data_schema, dataframe, self._cache_group, force_recompute, disable_cache
             )
             data_container.data[self._outputs["data_schema"]] = ds
             data_container.data[self._outputs["feature_selector"]] = feature_selector

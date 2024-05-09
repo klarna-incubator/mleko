@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 from typing import Literal
 
-from mleko.cache.fingerprinters.dict_fingerprinter import DictFingerprinter
+from mleko.cache.fingerprinters import JsonFingerprinter
 from mleko.utils.custom_logger import CustomLogger
 
 
@@ -63,22 +63,22 @@ class DataSchema:
         Returns:
             True if the two DataSchema objects are equal, False otherwise.
         """
-        return isinstance(other, DataSchema) and DictFingerprinter().fingerprint(
+        return isinstance(other, DataSchema) and JsonFingerprinter().fingerprint(
             self.to_dict()
-        ) == DictFingerprinter().fingerprint(other.to_dict())
+        ) == JsonFingerprinter().fingerprint(other.to_dict())
 
     def __hash__(self) -> int:
         """Get the hash of the DataSchema.
 
         Warning:
             This method is not intended to be used for stable hashing across runs. Please
-            refer to the `DictFingerprinter` class in the `mleko.utils.fingerprinter` module
+            refer to the `JsonFingerprinter` class in the `mleko.utils.fingerprinter` module
             for stable hashing of the DataSchema.
 
         Returns:
             Hash of the DataSchema.
         """
-        return hash(DictFingerprinter().fingerprint(self.to_dict()))
+        return hash(JsonFingerprinter().fingerprint(self.to_dict()))
 
     def __repr__(self) -> str:
         """Get the string representation of DataSchema.

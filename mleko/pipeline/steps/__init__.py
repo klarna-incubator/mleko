@@ -8,6 +8,7 @@ complete data processing workflow within the pipeline.
 from __future__ import annotations
 
 from .convert_step import ConvertStep
+from .export_step import ExportStep
 from .feature_select_step import FeatureSelectStep
 from .filter_step import FilterStep
 from .ingest_step import IngestStep
@@ -26,4 +27,5 @@ __all__ = [
     "ModelStep",
     "TuneStep",
     "FilterStep",
+    "ExportStep",
 ]
