@@ -8,14 +8,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 import vaex
 from sklearn.model_selection import train_test_split
 
 from mleko.cache.fingerprinters import VaexFingerprinter
 from mleko.cache.handlers.vaex_cache_handler import VAEX_DATAFRAME_CACHE_HANDLER
+from mleko.utils import auto_repr, get_column, get_columns, get_filtered_df
 from mleko.utils.custom_logger import CustomLogger
-from mleko.utils.decorators import auto_repr
-from mleko.utils.vaex_helpers import get_column, get_filtered_df
 
 from .base_splitter import BaseSplitter
 
@@ -36,7 +36,7 @@ class RandomSplitter(BaseSplitter):
         self,
         data_split: tuple[float, float] = (0.80, 0.20),
         shuffle: bool = True,
-        stratify: str | None = None,
+        stratify: str | tuple[str, ...] | list[str] | None = None,
         random_state: int | None = 42,
         cache_directory: str | Path = "data/random-splitter",
         cache_size: int = 1,
@@ -44,22 +44,23 @@ class RandomSplitter(BaseSplitter):
         """Initializes the `RandomSplitter` with the given parameters.
 
         Note:
-            The stratification is performed before the split, meaning that the split will be performed on the stratified
-            data. For example, if the data is split into 80% train and 20% test, and the stratification column contains
-            80% of the rows with value 0 and 20% of the rows with value 1, the resulting split will contain 80% of the
-            rows with value 0 and 20% of the rows with value 1.
+            If `stratify` is not None and the type of the data is string/categorical the feature (s) must not have
+            any missing values. Please make sure to handle missing values before using this splitter by either
+            dropping the rows with missing values, imputing the missing values, or transforming the target to
+            numeric or boolean.
 
-        Warning:
-            If `stratify` is not None and the target column is a string/categorical, the target feature must not have
-            any missing values. Please make sure to handle missing values before using this splitter by either dropping
-            the rows with missing values, imputing the missing values, or transforming the target to numeric or boolean.
+            If multiple features are provided for stratification, there must be at least one row for each unique
+            combination of the feature values. Otherwise, the splitter will raise an error.
 
         Args:
             data_split: A tuple containing the desired split percentages or weights for the train and test dataframes.
                 If the sum of the values is not equal to 1, the values will be normalized. Meaning, if the values are
                 (0.90, 0.20), the resulting split will be (0.818, 0.182).
             shuffle: Whether to shuffle the data before splitting.
-            stratify: The name of the column to use for stratification. If None, stratification will not be performed.
+            stratify: Name of the feature(s) to use for stratification. If None, the data will be split without
+                stratification. If a list of features is provided, the data will be stratified based on the unique
+                combinations of the features, i.e., the data will be split such that each unique combination of the
+                features is present in both splits in the same proportion as in the original data.
             random_state: The seed to use for random number generation.
             cache_directory: The target directory where the split dataframes are to be saved.
             cache_size: The maximum number of entries to keep in the cache.
@@ -82,7 +83,7 @@ class RandomSplitter(BaseSplitter):
         super().__init__(cache_directory, cache_size)
         self._idx2_size = [split / sum(data_split) for split in data_split][1]
         self._shuffle = shuffle
-        self._stratify = stratify
+        self._stratify = tuple(stratify) if isinstance(stratify, (list, tuple)) else (stratify,) if stratify else None
         self._random_state = random_state
 
     def split(
@@ -135,21 +136,23 @@ class RandomSplitter(BaseSplitter):
         df = dataframe.copy()
         df[index_name] = vaex.vrange(0, df.shape[0])
         index = get_column(df, index_name)
-        target = get_column(df, self._stratify).to_numpy() if self._stratify else None
+        stratification: pd.DataFrame | None = (
+            get_columns(df, list(self._stratify)).to_pandas_df() if self._stratify else None  # type: ignore
+        )
 
         if self._shuffle:
             logger.info("Shuffling data before splitting.")
-        if target is None:
+        if stratification is None:
             logger.info("Splitting data without stratification.")
         else:
-            logger.info(f"Splitting data with stratification on column {self._stratify!r}.")
+            logger.info(f"Splitting data with stratification on feature(s) {self._stratify!r}.")
 
         idx1, idx2 = train_test_split(
             index.values,
             test_size=self._idx2_size,
             random_state=self._random_state,
             shuffle=self._shuffle,
-            stratify=target,
+            stratify=stratification,
         )
 
         df1 = get_filtered_df(df, index.isin(idx1)).extract()
