@@ -9,7 +9,7 @@ import platform
 import random
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Hashable, Literal
+from typing import Any, Callable, Hashable, Literal
 
 import optuna
 import vaex
@@ -69,6 +69,7 @@ class OptunaTuner(BaseTuner):
         direction: OptimizeDirection | list[OptimizeDirection],
         num_trials: int,
         cv_folds: Callable[[DataSchema, vaex.DataFrame], list[tuple[vaex.DataFrame, vaex.DataFrame]]] | None = None,
+        enqueue_trials: list[dict[str, Any]] | None = None,
         sampler: BaseSampler | None = None,
         pruner: optuna.pruners.BasePruner | None = None,
         study_name: str | None = None,
@@ -129,6 +130,10 @@ class OptunaTuner(BaseTuner):
                 the data schema and the DataFrame to be tuned on and return a list of
                 tuples containing the training and validation DataFrames. The length
                 of the list must match the number of folds to perform.
+            enqueue_trials: A list of dictionaries containing the parameters configurations
+                to enqueue trials. The keys of the dictionary must match the parameter
+                names of the objective function. The tuner will enqueue the trials
+                with the specified configurations before starting the optimization.
             num_trials: The number of trials to perform.
             sampler: The Optuna sampler to use, if None `TPESampler` is
                 used for single-objective optimization and `NSGAIISampler`
@@ -191,6 +196,7 @@ class OptunaTuner(BaseTuner):
         self._direction = direction
         self._num_trials = num_trials
         self._cv_folds = cv_folds
+        self._enqueue_trials = enqueue_trials
         self._sampler = sampler or (TPESampler() if isinstance(direction, list) else NSGAIISampler())
         self._pruner = pruner or optuna.pruners.MedianPruner()
         self._study_name = study_name if study_name is not None else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -229,6 +235,11 @@ class OptunaTuner(BaseTuner):
             directions=self._direction if isinstance(self._direction, list) else None,
             load_if_exists=self._load_if_exists,
         )
+
+        if self._enqueue_trials is not None:
+            for trial in self._enqueue_trials:
+                study.enqueue_trial(params=trial, skip_if_exists=True)
+
         if self._using_optuna_dashboard:
             direction_str = (
                 self._direction if isinstance(self._direction, str) else ", ".join(self._direction)

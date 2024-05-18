@@ -75,7 +75,10 @@ class TestRandomSplitter:
     def test_split(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes without shuffling and stratification."""
         test_random_splitter = RandomSplitter(
-            cache_directory=temporary_directory, data_split=(0.5, 0.5), shuffle=False, random_state=1337
+            cache_directory=temporary_directory,
+            data_split=(0.5, 0.5),
+            shuffle=False,
+            random_state=1337,
         )
 
         df_train, df_test = test_random_splitter._split(example_vaex_dataframe)
@@ -89,7 +92,10 @@ class TestRandomSplitter:
     def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should test the cache of the random splitter."""
         test_random_splitter = RandomSplitter(
-            cache_directory=temporary_directory, data_split=(0.5, 0.5), shuffle=False, random_state=1337
+            cache_directory=temporary_directory,
+            data_split=(0.5, 0.5),
+            shuffle=False,
+            random_state=1337,
         )
 
         test_random_splitter.split(example_vaex_dataframe)
