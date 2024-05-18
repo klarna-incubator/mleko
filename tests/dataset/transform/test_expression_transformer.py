@@ -35,8 +35,9 @@ class TestExpressionTransformer:
         """Should correctly frequency encode the specified features."""
         expression_transformer = ExpressionTransformer(
             {
-                "sum": ("astype(a + b + c, 'int32')", "numerical"),
-                "product": ("astype(a * b * c, 'int32')", "numerical"),
+                "sum": ("astype(a + b + c, 'int32')", "numerical", False),
+                "product": ("astype(a * b * c, 'int32')", "numerical", False),
+                "all_positive": ("(a >= 0) & (b >= 0) & (c >= 0)", "boolean", True),
             },
             cache_directory=temporary_directory,
         )
@@ -45,8 +46,10 @@ class TestExpressionTransformer:
 
         assert df["sum"].tolist() == [9, 2, 6, 2]  # type: ignore
         assert df["product"].tolist() == [15, -2, 0, 0]  # type: ignore
+        assert df["all_positive"].tolist() == [True, False, False, True]  # type: ignore
         assert ds.get_type("sum") == "numerical"
         assert ds.get_type("product") == "numerical"
+        assert "all_positive" not in ds.get_features()
 
     def test_cache(
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
@@ -54,8 +57,8 @@ class TestExpressionTransformer:
         """Should correctly frequency encode features and use cache if possible."""
         ExpressionTransformer(
             {
-                "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical"),
-                "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical"),
+                "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical", False),
+                "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical", False),
             },
             cache_directory=temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
@@ -63,8 +66,8 @@ class TestExpressionTransformer:
         with patch.object(ExpressionTransformer, "_fit_transform") as mocked_fit_transform:
             ExpressionTransformer(
                 {
-                    "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical"),
-                    "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical"),
+                    "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical", False),
+                    "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical", False),
                 },
                 cache_directory=temporary_directory,
             ).fit_transform(example_data_schema, example_vaex_dataframe)
