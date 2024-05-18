@@ -1,5 +1,14 @@
 # Changelog
 
+## [v4.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.1.0) (2024-05-18)
+
+### ✨ Features
+
+- **tuning:** Add support for enqueuing trials in `OptunaTuner`. ([`9e0b6b2`](https://github.com/klarna-incubator/mleko/commit/9e0b6b2a04d0345bdc930017fd72a1f58122014e))
+- **data splitting:** Add support for stratification on multiple features in the `RandomSplitter`. ([`d745434`](https://github.com/klarna-incubator/mleko/commit/d74543457405f37a5eb45de4a7a324464a3ef90f))
+- **transformer:** Add `metadata` option for the `ExpressionTransformer` that allows for creation of meta features not tracked in the `DataSchema`. ([`f16ea8b`](https://github.com/klarna-incubator/mleko/commit/f16ea8b81ed57a63889db9120fef7c018085af62))
+- **transformer:** Add `ExpressionTransformer` for creating features using the `vaex` expression system. ([`c0faf74`](https://github.com/klarna-incubator/mleko/commit/c0faf7488ccaf5eba40c2e1d9c8e901e99498752))
+
 ## [v4.0.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.0.0) (2024-05-09)
 
 ### ⛔️ BREAKING CHANGES
