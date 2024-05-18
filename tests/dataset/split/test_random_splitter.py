@@ -28,6 +28,7 @@ def example_vaex_dataframe() -> vaex.DataFrame:
             "2020-09-01 00:00:00",
             "2020-10-01 00:00:00",
         ],
+        is_meta_target=["no", "yes", "yes", "yes", "yes", "yes", "yes", "no", "no", "no"],
         target=[0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
     )
     df["date"] = df.b.astype("datetime64[ns]")
@@ -48,31 +49,53 @@ class TestRandomSplitter:
         )
 
         df_train, df_test = test_random_splitter._split(example_vaex_dataframe)
-        assert df_train.shape == (5, 4)
-        assert df_train.column_names == ["a", "b", "target", "date"]
+        assert df_train.shape == (5, 5)
+        assert df_train.column_names == ["a", "b", "is_meta_target", "target", "date"]
         assert df_train["target"].tolist() == [0, 0, 0, 1, 1]  # type: ignore
-        assert df_test.shape == (5, 4)
-        assert df_test.column_names == ["a", "b", "target", "date"]
+        assert df_test.shape == (5, 5)
+        assert df_test.column_names == ["a", "b", "is_meta_target", "target", "date"]
         assert df_test["target"].tolist() == [0, 0, 1, 1, 0]  # type: ignore
+
+    def test_split_shuffle_stratify_multiple(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
+        """Should split the dataframe into train and test dataframes with shuffling and stratification."""
+        test_random_splitter = RandomSplitter(
+            cache_directory=temporary_directory,
+            data_split=(0.5, 0.5),
+            shuffle=True,
+            stratify=["target", "is_meta_target"],
+            random_state=1337,
+        )
+
+        df_train, _ = test_random_splitter._split(example_vaex_dataframe)
+        assert df_train.shape == (5, 5)
+        assert df_train.column_names == ["a", "b", "is_meta_target", "target", "date"]
+        assert df_train["target"].tolist() == [0, 0, 0, 1, 1]  # type: ignore
+        assert df_train["is_meta_target"].tolist() == ["no", "yes", "yes", "yes", "no"]  # type: ignore
 
     def test_split(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should split the dataframe into train and test dataframes without shuffling and stratification."""
         test_random_splitter = RandomSplitter(
-            cache_directory=temporary_directory, data_split=(0.5, 0.5), shuffle=False, random_state=1337
+            cache_directory=temporary_directory,
+            data_split=(0.5, 0.5),
+            shuffle=False,
+            random_state=1337,
         )
 
         df_train, df_test = test_random_splitter._split(example_vaex_dataframe)
-        assert df_train.shape == (5, 4)
-        assert df_train.column_names == ["a", "b", "target", "date"]
+        assert df_train.shape == (5, 5)
+        assert df_train.column_names == ["a", "b", "is_meta_target", "target", "date"]
         assert df_train["target"].tolist() == [0, 0, 0, 0, 0]  # type: ignore
-        assert df_test.shape == (5, 4)
-        assert df_test.column_names == ["a", "b", "target", "date"]
+        assert df_test.shape == (5, 5)
+        assert df_test.column_names == ["a", "b", "is_meta_target", "target", "date"]
         assert df_test["target"].tolist() == [1, 1, 1, 1, 0]  # type: ignore
 
     def test_split_cache(self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame):
         """Should test the cache of the random splitter."""
         test_random_splitter = RandomSplitter(
-            cache_directory=temporary_directory, data_split=(0.5, 0.5), shuffle=False, random_state=1337
+            cache_directory=temporary_directory,
+            data_split=(0.5, 0.5),
+            shuffle=False,
+            random_state=1337,
         )
 
         test_random_splitter.split(example_vaex_dataframe)

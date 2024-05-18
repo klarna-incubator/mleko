@@ -75,6 +75,35 @@ class TestOptunaTuner:
             test_tuner.tune(example_data_schema, example_vaex_dataframe)
             mocked_tune.assert_not_called()
 
+    def test_tune_single_objective_with_enqueued_trials(
+        self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
+    ):
+        """Should run hyperparameter tuning with `Optuna` towards a single objective with enqueued trials."""
+
+        def objective_function(trial, _data_schema, _dataframe):
+            hyperparameters = {
+                "x": trial.suggest_float("x", 1e-8, 10.0, log=True),
+            }
+
+            return len(example_vaex_dataframe["a"].tolist()) * hyperparameters["x"]  # type: ignore
+
+        test_tuner = OptunaTuner(
+            cache_directory=temporary_directory,
+            objective_function=objective_function,
+            direction="maximize",
+            num_trials=10,
+            random_state=42,
+            enqueue_trials=[{"x": 11.0}, {"x": 12.0}],
+        )
+
+        params, score, study = test_tuner.tune(example_data_schema, example_vaex_dataframe)
+        assert params == {"x": 12}
+        assert score == 48.0
+        assert isinstance(study, optuna.study.Study)
+
+        assert study.trials[0].params == {"x": 11.0}
+        assert study.trials[1].params == {"x": 12.0}
+
     def test_tune_single_objective_with_cv(
         self, temporary_directory: Path, example_vaex_dataframe: vaex.DataFrame, example_data_schema: DataSchema
     ):

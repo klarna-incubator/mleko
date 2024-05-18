@@ -28,12 +28,12 @@ def example_data_schema() -> DataSchema:
 
 
 class TestFrequencyEncoderTransformer:
-    """Test suite for `dataset.feature_select.invariance_feature_selector.InvarianceFeatureSelector`."""
+    """Test suite for `dataset.transform.frequency_encoder_transformer.FrequencyEncoderTransformer`."""
 
     def test_frequency_encoding(
         self, temporary_directory: Path, example_data_schema: DataSchema, example_vaex_dataframe: vaex.DataFrame
     ):
-        """Should drop invariant categorical and boolean columns."""
+        """Should correctly frequency encode the specified features."""
         invariance_feature_selector = FrequencyEncoderTransformer(
             cache_directory=temporary_directory, features=["a", "b", "c"]
         )
