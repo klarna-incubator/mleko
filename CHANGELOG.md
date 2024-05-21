@@ -1,5 +1,11 @@
 # Changelog
 
+## [v4.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.2.0) (2024-05-21)
+
+### ✨ Features
+
+- **transformer:** Update `ExpressionTransformer` to use `TypedDict` instead of tuples. ([`3950abd`](https://github.com/klarna-incubator/mleko/commit/3950abd1330bd7542d3c1af0a5533857b2c07c03))
+
 ## [v4.1.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.1.0) (2024-05-18)
 
 ### ✨ Features
