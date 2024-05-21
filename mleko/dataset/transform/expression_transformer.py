@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Hashable
 
 import vaex
+from typing_extensions import TypedDict
 
 from mleko.cache.fingerprinters.json_fingerprinter import JsonFingerprinter
 from mleko.dataset.data_schema import DataSchema, DataType
@@ -18,13 +19,26 @@ logger = CustomLogger()
 """A module-level logger for the module."""
 
 
+class ExpressionTransformerConfig(TypedDict):
+    """A type alias for the configuration of the expression transformer."""
+
+    expression: str
+    """The `vaex` expression used to create the new feature."""
+
+    type: DataType
+    """The data type of the new feature."""
+
+    is_meta: bool
+    """A boolean indicating if the new feature is a metadata feature."""
+
+
 class ExpressionTransformer(BaseTransformer):
     """Creates new features using `vaex` expressions."""
 
     @auto_repr
     def __init__(
         self,
-        expressions: dict[str, tuple[str, DataType, bool]],
+        expressions: dict[str, ExpressionTransformerConfig],
         cache_directory: str | Path = "data/expression-transformer",
         cache_size: int = 1,
     ) -> None:
@@ -39,8 +53,9 @@ class ExpressionTransformer(BaseTransformer):
             For example, the expression of `df["a"] + df["b"]` can be extracted using `(df["a"] + df["b"]).expression`.
 
         Args:
-            expressions: A dictionary where the key is the name of the new feature and the value is a tuple containing
-                the expression, the data type and a boolean indicating if the feature is a metadata feature. In
+            expressions: A dictionary where the key is the name of the new feature and the value is a dictionary
+                containing the expression, the data type and a boolean indicating if the feaature is a metadata feature.
+                The expression must be a valid `vaex` expression that can be evaluated on the DataFrame.
             cache_directory: The directory where the cache will be stored locally.
             cache_size: The maximum number of cache entries to keep in the cache.
 
@@ -49,9 +64,9 @@ class ExpressionTransformer(BaseTransformer):
             >>> from mleko.dataset.transform import ExpressionTransformer
             >>> transformer = ExpressionTransformer(
             ...     expressions={
-            ...         "sum": ("a + b", "numerical", False),
-            ...         "product": ("a * b", "numerical", False),
-            ...         "both_positive": ("(a > 0) & (b > 0)", "boolean", True),
+            ...         "sum": {"expression": "a + b", "type": "numerical", "is_meta": False},
+            ...         "product": {"expression": "a * b", "type": "numerical", "is_meta": False},
+            ...         "both_positive": {"expression": "(a > 0) & (b > 0)", "type": "boolean", "is_meta": True},
             ...     }
             ... )
             >>> df = vaex.from_dict({"a": [1, 2, 3], "b": [4, 5, 6]})
@@ -70,7 +85,7 @@ class ExpressionTransformer(BaseTransformer):
 
     def _fit(
         self, data_schema: DataSchema, dataframe: vaex.DataFrame
-    ) -> tuple[DataSchema, dict[str, tuple[str, DataType, bool]]]:
+    ) -> tuple[DataSchema, dict[str, ExpressionTransformerConfig]]:
         """No fitting is required for the expression transformer.
 
         Args:
@@ -94,11 +109,13 @@ class ExpressionTransformer(BaseTransformer):
         """
         df = dataframe.copy()
         ds = data_schema.copy()
-        for feature, (expression, data_type, is_meta) in self._transformer.items():
-            logger.info(f"Creating new {data_type!r} feature {feature!r} using expression {expression!r}.")
-            df[feature] = get_column(df, expression).as_arrow()
-            if not is_meta:
-                ds.add_feature(feature, data_type)
+        for feature, config in self._transformer.items():
+            logger.info(
+                f"Creating new {config['type']!r} feature {feature!r} using expression {config['expression']!r}."
+            )
+            df[feature] = get_column(df, config["expression"]).as_arrow()
+            if not config["is_meta"]:
+                ds.add_feature(feature, config["type"])
         return ds, df
 
     def _fingerprint(self) -> Hashable:
