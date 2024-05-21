@@ -35,9 +35,9 @@ class TestExpressionTransformer:
         """Should correctly frequency encode the specified features."""
         expression_transformer = ExpressionTransformer(
             {
-                "sum": ("astype(a + b + c, 'int32')", "numerical", False),
-                "product": ("astype(a * b * c, 'int32')", "numerical", False),
-                "all_positive": ("(a >= 0) & (b >= 0) & (c >= 0)", "boolean", True),
+                "sum": {"expression": "astype(a + b + c, 'int32')", "type": "numerical", "is_meta": False},
+                "product": {"expression": "astype(a * b * c, 'int32')", "type": "numerical", "is_meta": False},
+                "all_positive": {"expression": "(a >= 0) & (b >= 0) & (c >= 0)", "type": "boolean", "is_meta": True},
             },
             cache_directory=temporary_directory,
         )
@@ -57,8 +57,8 @@ class TestExpressionTransformer:
         """Should correctly frequency encode features and use cache if possible."""
         ExpressionTransformer(
             {
-                "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical", False),
-                "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical", False),
+                "sum": {"expression": "astype(a + b + c, 'int32')", "type": "numerical", "is_meta": False},
+                "product": {"expression": "astype(a * b * c, 'int32')", "type": "numerical", "is_meta": False},
             },
             cache_directory=temporary_directory,
         ).fit_transform(example_data_schema, example_vaex_dataframe)
@@ -66,8 +66,8 @@ class TestExpressionTransformer:
         with patch.object(ExpressionTransformer, "_fit_transform") as mocked_fit_transform:
             ExpressionTransformer(
                 {
-                    "sum": ("astype(a + b + where(isna(c), 0, c), 'int32')", "numerical", False),
-                    "product": ("astype(a * b * where(isna(c), 1, c), 'int32')", "numerical", False),
+                    "sum": {"expression": "astype(a + b + c, 'int32')", "type": "numerical", "is_meta": False},
+                    "product": {"expression": "astype(a * b * c, 'int32')", "type": "numerical", "is_meta": False},
                 },
                 cache_directory=temporary_directory,
             ).fit_transform(example_data_schema, example_vaex_dataframe)
