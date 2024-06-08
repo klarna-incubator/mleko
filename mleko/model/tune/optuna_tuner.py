@@ -339,6 +339,7 @@ class OptunaTuner(BaseTuner):
             CallableSourceFingerprinter().fingerprint(self._objective_function),
             self._direction,
             self._num_trials,
+            JsonFingerprinter().fingerprint(self._enqueue_trials) if self._enqueue_trials is not None else None,
             CallableSourceFingerprinter().fingerprint(self._cv_folds) if self._cv_folds is not None else None,
             OptunaSamplerFingerprinter().fingerprint(self._sampler),
             OptunaPrunerFingerprinter().fingerprint(self._pruner),
