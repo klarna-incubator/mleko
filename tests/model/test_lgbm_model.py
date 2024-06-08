@@ -119,6 +119,24 @@ class TestLGBMModel:
             ).fit_transform(example_data_schema, example_vaex_dataframe_train, None, {})
             mocked_fit_transform.assert_not_called()
 
+    def test_chache_fit_transform_with_refit(
+        self,
+        temporary_directory: Path,
+        example_data_schema: DataSchema,
+        example_vaex_dataframe_train: vaex.DataFrame,
+    ):
+        """Should train the model using fit_transform and use the cache once called again with refit."""
+        lgbm_model = LGBMModel(
+            cache_directory=temporary_directory, target="target", model=lgb.LGBMClassifier(objective="binary")
+        )
+        lgbm_model.fit(example_data_schema, example_vaex_dataframe_train.copy())
+        lgbm_model.transform(example_data_schema, example_vaex_dataframe_train.copy())
+        lgbm_model.fit(example_data_schema, example_vaex_dataframe_train.copy(), hyperparameters={"num_leaves": 10})
+
+        with patch.object(LGBMModel, "_transform") as mocked_transform:
+            lgbm_model.transform(example_data_schema, example_vaex_dataframe_train.copy())
+            mocked_transform.assert_called()
+
     def test_cache_fit_and_transform(
         self,
         temporary_directory: Path,
