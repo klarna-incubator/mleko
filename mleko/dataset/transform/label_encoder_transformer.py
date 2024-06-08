@@ -145,7 +145,12 @@ class LabelEncoderTransformer(BaseTransformer):
         logger.info(f"Fitting label encoder transformer ({len(self._features)}): {self._features}.")
         for feature in self._features:
             self._ensure_valid_feature_type(feature, data_schema, dataframe)
-            labels: list[str] = get_column(dataframe, feature).unique(dropna=True)  # type: ignore
+            labels: list[str] = [
+                label
+                for label in get_column(dataframe, feature).to_arrow().unique().to_pylist()  # type: ignore
+                if label is not None
+            ]
+
             if not self._fit_using_label_dict(feature, labels):
                 logger.info(f"Assigning mappings for feature {feature!r}: {labels}.")
                 self._transformer[feature] = {label: i for i, label in enumerate(labels)}

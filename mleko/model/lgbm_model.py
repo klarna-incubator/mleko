@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import vaex
 from lightgbm.sklearn import _LGBM_ScikitEvalMetricType
+from sklearn.utils.validation import NotFittedError, check_is_fitted
 
 from mleko.dataset.data_schema import DataSchema
 from mleko.utils.custom_logger import CustomLogger
@@ -246,7 +247,18 @@ class LGBMModel(BaseModel):
         Returns:
             The fingerprint of the model.
         """
-        return (super()._fingerprint(), self._target, self._model.__class__.__qualname__)
+        is_fitted = True
+        try:
+            check_is_fitted(self._model)  # type: ignore
+        except NotFittedError:
+            is_fitted = False
+
+        return (
+            super()._fingerprint(),
+            self._target,
+            self._model.__class__.__qualname__,
+            self._model.booster_.model_to_string() if is_fitted else None,
+        )
 
     def _default_features(self, data_schema: DataSchema) -> tuple[str, ...]:
         """The default set of features to use for training.

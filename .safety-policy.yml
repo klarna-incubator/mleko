@@ -9,4 +9,6 @@ security:
   ignore-vulnerabilities:
     66947:
       reason: Not used
+    70612:
+      reason: Only used during documentation generation
   continue-on-vulnerability-error: False
