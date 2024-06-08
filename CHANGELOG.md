@@ -1,5 +1,16 @@
 # Changelog
 
+## [v4.3.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.3.0) (2024-06-08)
+
+### ✨ Features
+
+- **model:** Add check for fitted model in LGBMModel fingerprint. ([`f6a0933`](https://github.com/klarna-incubator/mleko/commit/f6a09337af6743d6686d9078a01ed22e29630086))
+
+### 🐛 Bug Fixes
+
+- **tuning:** Optional `enqueue_trials` parameter added to fingerprint of `OptunaTuner`. ([`80fa374`](https://github.com/klarna-incubator/mleko/commit/80fa37408ee5df2be0de23f08358c45932970686))
+- **transformer:** Update `LabelEncoder` to use `PyArrow` implementation of `unique` to prevent `vaex` bug from crashing the transformer. ([`85059d7`](https://github.com/klarna-incubator/mleko/commit/85059d791d44e49a4b2cf9438389f8033ddcbf8b))
+
 ## [v4.2.0](https://github.com/klarna-incubator/mleko/releases/tag/v4.2.0) (2024-05-21)
 
 ### ✨ Features
