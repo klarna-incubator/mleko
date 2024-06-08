@@ -1,0 +1,42 @@
+:py:mod:`mleko.dataset.export.base_exporter`
+============================================
+
+.. py:module:: mleko.dataset.export.base_exporter
+
+.. autoapi-nested-parse::
+
+   Abstract base class module for data exporter implementations to store data to various destinations.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.export.base_exporter.BaseExporter
+
+
+
+
+.. py:class:: BaseExporter
+
+   Bases: :py:obj:`abc.ABC`
+
+   `BaseExporter` is an abstract base class for data exporters.
+
+   .. py:method:: export(data: Any | list[Any], config: dict[str, Any] | list[dict[str, Any]], force_recompute: bool = False) -> str | pathlib.Path | list[str] | list[pathlib.Path] | None
+      :abstractmethod:
+
+      Exports the data to a destination.
+
+      :param data: Data to be exported.
+      :param config: Configuration for the export destination.
+      :param force_recompute: If set to True, forces the data to be exported even if it already exists
+                              at the destination.
+
+
+

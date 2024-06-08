@@ -1,0 +1,79 @@
+:py:mod:`mleko.dataset.ingest.base_ingester`
+============================================
+
+.. py:module:: mleko.dataset.ingest.base_ingester
+
+.. autoapi-nested-parse::
+
+   Abstract base class module for data source implementations to fetch and store data from various sources.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.base_ingester.BaseIngester
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.base_ingester.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: BaseIngester(destination_directory: str | pathlib.Path, fingerprint: str | None)
+
+   Bases: :py:obj:`abc.ABC`
+
+   `BaseIngester` is an abstract base class for data source classes that interact with various external sources.
+
+   This class provides the basic structure and methods necessary for derived data source classes, facilitating data
+   fetching from various sources.
+
+   Initializes the data source and ensures the destination directory exists.
+
+   :param destination_directory: Directory where the fetched data will be stored locally.
+   :param fingerprint: Optional fingerprint to append to the destination directory.
+
+   .. py:method:: fetch_data(force_recompute: bool = False) -> list[pathlib.Path]
+      :abstractmethod:
+
+      Downloads and stores data in the 'destination_directory' using the specific data source implementation.
+
+      :param force_recompute: Whether to force the data source to recompute its output, even if it already exists.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseIngester`.
+
+
+   .. py:method:: _get_full_file_paths(file_names: list[str]) -> list[pathlib.Path]
+
+      Gets the full file paths for the specified file names.
+
+      Note that this method only returns the file paths for files that exist locally.
+
+      :param file_names: List of file names to get the full file paths for.
+
+      :returns: List of full file paths for the specified file names.
+
+
+   .. py:method:: _delete_local_files(file_names: list[str]) -> None
+
+      Deletes the specified files from the local dataset.
+
+      :param file_names: List of file names to delete from the local dataset.
+
+
+

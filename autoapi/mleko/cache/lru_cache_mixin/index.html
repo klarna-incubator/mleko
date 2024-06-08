@@ -1,0 +1,706 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="mleko.dataset" href="../../dataset/index.html" /><link rel="prev" title="mleko.cache.cache_mixin" href="../cache_mixin/index.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.09.10 -->
+        <title>mleko.cache.lru_cache_mixin - mleko documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">mleko  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">mleko  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of mleko</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of mleko.cache</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4 has-children"><a class="reference internal" href="../fingerprinters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of mleko.cache.fingerprinters</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/base_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.base_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/callable_source_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.callable_source_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/csv_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.csv_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/json_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.json_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/optuna_pruner_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_pruner_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/optuna_sampler_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_sampler_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../fingerprinters/vaex_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.vaex_fingerprinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../handlers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of mleko.cache.handlers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/base_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.base_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/joblib_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.joblib_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/json_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.json_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/pickle_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.pickle_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/string_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.string_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../handlers/vaex_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.vaex_cache_handler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../cache_mixin/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.cache_mixin</span></code></a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.lru_cache_mixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../dataset/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of mleko.dataset</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/convert/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of mleko.dataset.convert</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/convert/base_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.base_converter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/convert/csv_to_vaex_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.csv_to_vaex_converter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/export/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of mleko.dataset.export</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/export/base_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.base_exporter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/export/local_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.local_exporter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/export/s3_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.s3_exporter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/feature_select/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of mleko.dataset.feature_select</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/base_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.base_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/composite_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.composite_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/invariance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.invariance_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/missing_rate_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.missing_rate_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/pearson_correlation_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.pearson_correlation_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/feature_select/variance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.variance_feature_selector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of mleko.dataset.filter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/base_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.base_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/expression_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.expression_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/filter/imblearn_resampling_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.imblearn_resampling_filter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/ingest/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of mleko.dataset.ingest</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/base_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.base_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/kaggle_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.kaggle_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/ingest/s3_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.s3_ingester</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/split/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of mleko.dataset.split</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/base_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.base_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/expression_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.expression_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/split/random_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.random_splitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../dataset/transform/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of mleko.dataset.transform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/base_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.base_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/composite_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.composite_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/expression_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.expression_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/frequency_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.frequency_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/label_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.label_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/max_abs_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.max_abs_scaler_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../dataset/transform/min_max_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.min_max_scaler_transformer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../dataset/data_schema/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.data_schema</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of mleko.model</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../model/tune/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of mleko.model.tune</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../model/tune/base_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.base_tuner</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../model/tune/optuna_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.optuna_tuner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../model/base_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.base_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../model/lgbm_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.lgbm_model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of mleko.pipeline</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../pipeline/steps/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of mleko.pipeline.steps</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/convert_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.convert_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/export_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.export_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/feature_select_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.feature_select_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/filter_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.filter_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/ingest_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.ingest_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/model_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.model_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/split_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.split_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/transform_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.transform_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../pipeline/steps/tune_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.tune_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/data_container/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.data_container</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pipeline/pipeline_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of mleko.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/custom_logger/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.custom_logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/decorators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.decorators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/file_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.file_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/s3_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.s3_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/tqdm_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.tqdm_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/vaex_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.vaex_helpers</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">Contributor Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-mleko.cache.lru_cache_mixin">
+<span id="mleko-cache-lru-cache-mixin"></span><h1><a class="reference internal" href="#module-mleko.cache.lru_cache_mixin" title="mleko.cache.lru_cache_mixin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.lru_cache_mixin</span></code></a><a class="headerlink" href="#module-mleko.cache.lru_cache_mixin" title="Permalink to this heading">#</a></h1>
+<p>This module contains a LRU cache mixin that can be used by the cache classes.</p>
+<p>The <cite>LRUCacheMixin</cite> can be used to add Least Recently Used (LRU) cache functionality to the cached classes.
+It evicts the least recently used cache entries when the maximum number of cache entries is exceeded.
+The LRU cache mechanism ensures that the most frequently accessed cache entries are retained, while entries that are
+rarely accessed and have not been accessed recently are evicted first as the cache fills up. The cache entries
+are stored in the cache directory, and the cache is trimmed if needed when cold starting the cache.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin" title="mleko.cache.lru_cache_mixin.LRUCacheMixin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LRUCacheMixin</span></code></a></p></td>
+<td><p>Least Recently Used Cache Mixin.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">#</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN" title="mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">METHOD_GROUP_CACHE_KEY_PATTERN</span></code></a></p></td>
+<td><p>A regular expression pattern for matching cache keys in the format <cite>.&lt;method_name&gt;.&lt;cache_key&gt;.&lt;fingerprint&gt;</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mleko.cache.lru_cache_mixin.logger" title="mleko.cache.lru_cache_mixin.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p>A module-level custom logger.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN">
+<span class="sig-prename descclassname"><span class="pre">mleko.cache.lru_cache_mixin.</span></span><span class="sig-name descname"><span class="pre">METHOD_GROUP_CACHE_KEY_PATTERN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\\.([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)?\\.[a-fA-F\\d]{32}'</span></em><a class="headerlink" href="#mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN" title="Permalink to this definition">#</a></dt>
+<dd><p>A regular expression pattern for matching cache keys in the format <cite>.&lt;method_name&gt;.&lt;cache_key&gt;.&lt;fingerprint&gt;</cite>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.logger">
+<span class="sig-prename descclassname"><span class="pre">mleko.cache.lru_cache_mixin.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.logger" title="Permalink to this definition">#</a></dt>
+<dd><p>A module-level custom logger.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mleko.cache.lru_cache_mixin.</span></span><span class="sig-name descname"><span class="pre">LRUCacheMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../cache_mixin/index.html#mleko.cache.cache_mixin.CacheMixin" title="mleko.cache.cache_mixin.CacheMixin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mleko.cache.cache_mixin.CacheMixin</span></code></a></p>
+<p>Least Recently Used Cache Mixin.</p>
+<p>This mixin class extends the CacheMixin to provide a Least Recently Used (LRU) cache mechanism.
+It evicts the least recently used cache entries when the maximum number of cache entries is exceeded.
+The LRU cache mechanism ensures that the most frequently accessed cache entries are retained,
+while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.</p>
+<p>Initializes the <cite>LRUCacheMixin</cite> with the provided cache directory and maximum number of cache entries.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The cache directory is created if it does not exist. When cold starting the cache, the cache will be loaded
+from the cache directory. The files are sorted by their modification time, and the cache is trimmed if
+needed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_directory</strong> (<em>str</em><em> | </em><em>pathlib.Path</em>) – The directory where cache files will be stored. If None, the cache will be disabled.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em>) – The maximum number of cache entries allowed before eviction.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mleko.cache</span> <span class="kn">import</span> <span class="n">LRUCacheMixin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">(</span><span class="n">LRUCacheMixin</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_execute</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span> <span class="o">=</span> <span class="n">MyClass</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">4 # This is not cached</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">4 # This is cached</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">9 # This is not cached</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">4 # This is cached</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">9 # This is cached</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_class</span><span class="o">.</span><span class="n">my_method</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">16 # This is not cached, and the cache is full so the least recently used entry is evicted (x = 2)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._load_cache_from_disk">
+<span class="sig-name descname"><span class="pre">_load_cache_from_disk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._load_cache_from_disk" title="Permalink to this definition">#</a></dt>
+<dd><p>Loads the cache entries from the cache directory and initializes the LRU cache.</p>
+<p>Cache entries are ordered by their modification time, and the cache is trimmed if needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._load_from_cache">
+<span class="sig-name descname"><span class="pre">_load_from_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_handlers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._load_from_cache" title="Permalink to this definition">#</a></dt>
+<dd><p>Loads data from the cache based on the provided cache key and updates the LRU cache.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_key</strong> (<em>str</em>) – A string representing the cache key.</p></li>
+<li><p><strong>cache_handlers</strong> (<em>mleko.cache.handlers.CacheHandler</em><em> | </em><em>list</em><em>[</em><em>mleko.cache.handlers.CacheHandler</em><em>]</em>) – A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+provided, each CacheHandler instance will be used for each cache file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cached data if it exists, or None if there is no data for the given cache key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._save_to_cache">
+<span class="sig-name descname"><span class="pre">_save_to_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_handlers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._save_to_cache" title="Permalink to this definition">#</a></dt>
+<dd><p>Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.</p>
+<p>If the cache reaches its maximum size, the least recently used entry will be evicted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_key</strong> (<em>str</em>) – A string representing the cache key.</p></li>
+<li><p><strong>output</strong> (<em>Any</em><em> | </em><em>Sequence</em><em>[</em><em>Any</em><em>]</em>) – The data to be saved to the cache.</p></li>
+<li><p><strong>cache_handlers</strong> (<em>mleko.cache.handlers.CacheHandler</em><em> | </em><em>list</em><em>[</em><em>mleko.cache.handlers.CacheHandler</em><em>]</em>) – A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+provided, each CacheHandler instance will be used for each cache file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._evict_least_recently_used_if_full">
+<span class="sig-name descname"><span class="pre">_evict_least_recently_used_if_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._evict_least_recently_used_if_full" title="Permalink to this definition">#</a></dt>
+<dd><p>Evicts the least recently used cache entry if the cache is full.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>group_identifier</strong> (<em>str</em>) – The group identifier for the cache entries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._cached_execute">
+<span class="sig-name descname"><span class="pre">_cached_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_key_inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../fingerprinters/base_fingerprinter/index.html#mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter" title="mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter"><span class="pre">mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_recompute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_handlers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._cached_execute" title="Permalink to this definition">#</a></dt>
+<dd><p>Executes the given function, caching the results based on the provided cache keys and fingerprints.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The cache group is used to group related cache keys together to prevent collisions between cache keys
+originating from the same method. For example, if a method is called during the training and testing
+phases of a machine learning pipeline, the cache keys for the training and testing phases should be
+using different cache groups to prevent collisions between the cache keys for the two phases. Otherwise,
+the later cache keys might overwrite the earlier cache entries.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda_func</strong> (<em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>Any</em><em>]</em>) – A lambda function to execute.</p></li>
+<li><p><strong>cache_key_inputs</strong> (<em>list</em><em>[</em><em>Hashable</em><em> | </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><a class="reference internal" href="../fingerprinters/base_fingerprinter/index.html#mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter" title="mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter"><em>mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter</em></a><em>]</em><em>]</em>) – A list of cache keys that can be a mix of hashable values and tuples containing
+a value and a BaseFingerprinter instance for generating fingerprints.</p></li>
+<li><p><strong>cache_group</strong> (<em>str</em><em> | </em><em>None</em>) – A string representing the cache group, used to group related cache keys together when methods
+are called independently.</p></li>
+<li><p><strong>force_recompute</strong> (<em>bool</em>) – A boolean indicating whether to force recompute the result and update the cache, even if a
+cached result is available.</p></li>
+<li><p><strong>cache_handlers</strong> (<em>mleko.cache.handlers.CacheHandler</em><em> | </em><em>list</em><em>[</em><em>mleko.cache.handlers.CacheHandler</em><em>] </em><em>| </em><em>None</em>) – A CacheHandler instance or a list of CacheHandler instances. If None, the cache files will
+be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
+files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
+each cache file.</p></li>
+<li><p><strong>disable_cache</strong> (<em>bool</em>) – Overrides the class-level <cite>disable_cache</cite> attribute. If set to True, disables the cache.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
+given function. If a cached result is available and <cite>force_recompute</cite> is False, the cached result will be
+returned instead of recomputing the result.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._compute_cache_key">
+<span class="sig-name descname"><span class="pre">_compute_cache_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_key_inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../fingerprinters/base_fingerprinter/index.html#mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter" title="mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter"><span class="pre">mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._compute_cache_key" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes the cache key based on the provided cache keys and the calling function’s fully qualified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_key_inputs</strong> (<em>list</em><em>[</em><em>Hashable</em><em> | </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><a class="reference internal" href="../fingerprinters/base_fingerprinter/index.html#mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter" title="mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter"><em>mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter</em></a><em>]</em><em>]</em>) – A list of cache keys that can be a mix of hashable values and tuples containing a
+value and a BaseFingerprinter instance for generating fingerprints.</p></li>
+<li><p><strong>cache_group</strong> (<em>str</em><em> | </em><em>None</em>) – A string representing the cache group.</p></li>
+<li><p><strong>frame_depth</strong> (<em>int</em>) – The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+function or method. For each nested function or method, the frame depth should be increased by 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the computed cache key is too long.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representing the computed cache key, which is the MD5 hash of the fully qualified name of the
+calling function or method, along with the fingerprints of the provided cache keys.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._get_handler">
+<span class="sig-name descname"><span class="pre">_get_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_handlers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">mleko.cache.handlers.CacheHandler</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._get_handler" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the cache handler at the given index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_handlers</strong> (<em>mleko.cache.handlers.CacheHandler</em><em> | </em><em>list</em><em>[</em><em>mleko.cache.handlers.CacheHandler</em><em>]</em>) – A CacheHandler instance or a list of CacheHandler instances.</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – The index of the cache handler to get.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Handler at the given index. If a single CacheHandler instance is provided, it will be returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mleko.cache.handlers.CacheHandler</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._write_to_cache_file">
+<span class="sig-name descname"><span class="pre">_write_to_cache_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_handlers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">mleko.cache.handlers.CacheHandler</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sequence_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._write_to_cache_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Writes the given data to the cache file using the provided cache key.</p>
+<p>If the output is None and the cache handler cannot handle None, the output will be saved using the pickle
+cache handler. Otherwise, the output will be saved to a cache file using the provided cache handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache_key</strong> (<em>str</em>) – A string representing the cache key.</p></li>
+<li><p><strong>output_item</strong> (<em>Any</em>) – The data to be saved to the cache.</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – The index of the cache handler to use.</p></li>
+<li><p><strong>cache_handlers</strong> (<em>mleko.cache.handlers.CacheHandler</em><em> | </em><em>list</em><em>[</em><em>mleko.cache.handlers.CacheHandler</em><em>]</em>) – A CacheHandler instance or a list of CacheHandler instances.</p></li>
+<li><p><strong>is_sequence_output</strong> (<em>bool</em>) – Whether the output is a sequence or not. If True, the cache file will be saved with the
+index appended to the cache key.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mleko.cache.lru_cache_mixin.LRUCacheMixin._find_cache_type_name">
+<span class="sig-name descname"><span class="pre">_find_cache_type_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._find_cache_type_name" title="Permalink to this definition">#</a></dt>
+<dd><p>Recursively searches the class hierarchy for the name of the class that inherits from <cite>CacheMixin</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cls</strong> (<em>type</em>) – The class to search.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The name of the class that inherits from <cite>CacheMixin</cite>, or None if no such class exists.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../../dataset/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset</span></code></div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../cache_mixin/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.cache_mixin</span></code></div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Klarna Bank AB
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.lru_cache_mixin</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN"><code class="docutils literal notranslate"><span class="pre">METHOD_GROUP_CACHE_KEY_PATTERN</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin</span></code></a><ul>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._load_cache_from_disk"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._load_cache_from_disk()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._load_from_cache"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._load_from_cache()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._save_to_cache"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._save_to_cache()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._evict_least_recently_used_if_full"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._evict_least_recently_used_if_full()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._cached_execute"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._cached_execute()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._compute_cache_key"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._compute_cache_key()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._get_handler"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._get_handler()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._write_to_cache_file"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._write_to_cache_file()</span></code></a></li>
+<li><a class="reference internal" href="#mleko.cache.lru_cache_mixin.LRUCacheMixin._find_cache_type_name"><code class="docutils literal notranslate"><span class="pre">LRUCacheMixin._find_cache_type_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>

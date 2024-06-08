@@ -1,0 +1,350 @@
+:py:mod:`mleko.dataset.transform.label_encoder_transformer`
+===========================================================
+
+.. py:module:: mleko.dataset.transform.label_encoder_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the label encoder transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.label_encoder_transformer.LabelEncoderTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.label_encoder_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: LabelEncoderTransformer(features: list[str] | tuple[str, Ellipsis], label_dict: dict[str, dict[str | None, int | None]] | None = None, allow_unseen: bool = False, encode_null: bool = False, cache_directory: str | pathlib.Path = 'data/label-encoder-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   Transforms features using label encoding.
+
+   Initializes the transformer.
+
+   Encodes categorical features with integer values between `0` and `n_classes-1`. If a value is not seen during
+   fitting, it will be encoded as `-2`, unless `allow_unseen` is set to False, in which case an error will be
+   raised. If `encode_null` is set to True, null values will be encoded as `-1`, otherwise they will be kept as
+   `None`.
+
+   .. warning:: Should only be used with categorical features of string type.
+
+   .. note::
+
+      If `label_dict` is not provided, during fitting, the transformer will assign label mappings from the data
+      with no guarantee of consistency across different runs. If `label_dict` is provided, keep in mind that
+      the mappings must be integers between `0` and `n_classes-1` or `None`. Otherwise, the transformer will
+      raise an error during fitting.
+
+   :param features: List of feature names to be used by the transformer.
+   :param label_dict: A dictionary of label mappings dicts for each feature. Encoded labels must be integers
+                      between `0` and `n_classes-1` or `None`. If only some features are provided, the transformer will
+                      only use the provided label mappings for those features, while the rest will be assigned during
+                      fitting. If not provided at all, the transformer will assign label mappings for all features
+                      during fitting.
+   :param allow_unseen: Whether to allow unseen values once the transformer is fitted.
+   :param encode_null: Whether to encode null values as a separate category or keep them as null.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.transform import LabelEncoderTransformer
+   >>> df = vaex.from_arrays(
+   ...     a=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+   ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
+   ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
+   ... )
+   >>> ds = DataSchema(
+   ...     categorical=["a", "b", "c"],
+   ... )
+   >>> _, _, df = LabelEncoderTransformer(
+   ...     features=["a", "b"],
+   ...     allow_unseen=True,
+   ...     label_dict={  # Optional, but recommended
+   ...         "a": {
+   ...             "a": 0,
+   ...             "b": 1,
+   ...             "c": 2,
+   ...             "d": 3,
+   ...             "e": 4,
+   ...             "f": 5,
+   ...             "g": 6,
+   ...             "h": 7,
+   ...             "i": 8,
+   ...             "j": 9,
+   ...         },
+   ...         "b": {
+   ...             "a": 1,
+   ...             "b": 0,
+   ...         },
+   ...         "c": {
+   ...             "a": 1,
+   ...             "b": 0,
+   ...         },
+   ...     },
+   ... ).fit_transform(ds, df)
+   >>> df["a"].tolist()
+   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+   >>> df["b"].tolist()
+   [1, 1, 1, 1, None, None, None, None, None, None]
+   >>> df["c"].tolist()
+   [1, 0, 0, 0, 0, 0, None, None, None, None]
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, dict[str, dict[str | None, int | None]] | dict[str, dict[str | None, int]]]
+
+      Fits the transformer on the given DataFrame.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to fit the transformer on.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the features of the given DataFrame using label encoding.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      Appends the `allow_unseen`, `encode_null`, and `label_dict` attributes to the fingerprint.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+   .. py:method:: _fit_using_label_dict(feature: str, observed_labels: list[str]) -> bool
+
+      Attempts to fit the label dictionary for the specified feature.
+
+      If the label dictionary is not provided or the feature is not in the label dictionary, the function will
+      return False. Otherwise, it will fit the label dictionary and return True.
+
+      :param feature: The feature to fit the label dictionary for.
+      :param observed_labels: The observed labels for the feature.
+
+      :raises ValueError: If the label dictionary contains invalid mappings.
+
+      :returns: Whether the label dictionary was fitted.
+
+
+   .. py:method:: _ensure_valid_feature_type(feature: str, data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> None
+
+      Check if the feature is of the correct type.
+
+      :param feature: The feature to check.
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to check.
+
+      :raises ValueError: If the feature is not of the correct type.
+
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+
+      Fits the transformer to the specified DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Updated data schema and fitted transformer.
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the specified features in the DataFrame, using the cached result if available.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the transformer has not been fitted.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                              cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and transforms the specified features in the DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame used for fitting and transformation.
+
+      :returns: Tuple of updated data schema, fitted transformer, and transformed DataFrame.
+
+
+   .. py:method:: _assign_transformer(transformer: Any) -> None
+
+      Assigns the specified transformer to the transformer attribute.
+
+      Can be overridden by subclasses to assign the transformer using a different method.
+
+      :param transformer: Transformer to be assigned.
+
+
+   .. py:method:: _load_cache_from_disk() -> None
+
+      Loads the cache entries from the cache directory and initializes the LRU cache.
+
+      Cache entries are ordered by their modification time, and the cache is trimmed if needed.
+
+
+   .. py:method:: _load_from_cache(cache_key: str, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> Any | None
+
+      Loads data from the cache based on the provided cache key and updates the LRU cache.
+
+      :param cache_key: A string representing the cache key.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+      :returns: The cached data if it exists, or None if there is no data for the given cache key.
+
+
+   .. py:method:: _save_to_cache(cache_key: str, output: Any | Sequence[Any], cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> None
+
+      Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
+
+      If the cache reaches its maximum size, the least recently used entry will be evicted.
+
+      :param cache_key: A string representing the cache key.
+      :param output: The data to be saved to the cache.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+
+   .. py:method:: _evict_least_recently_used_if_full(group_identifier: str) -> None
+
+      Evicts the least recently used cache entry if the cache is full.
+
+      :param group_identifier: The group identifier for the cache entries.
+
+
+   .. py:method:: _cached_execute(lambda_func: Callable[[], Any], cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, force_recompute: bool = False, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler] | None = None, disable_cache: bool = False) -> Any
+
+      Executes the given function, caching the results based on the provided cache keys and fingerprints.
+
+      .. warning::
+
+         The cache group is used to group related cache keys together to prevent collisions between cache keys
+         originating from the same method. For example, if a method is called during the training and testing
+         phases of a machine learning pipeline, the cache keys for the training and testing phases should be
+         using different cache groups to prevent collisions between the cache keys for the two phases. Otherwise,
+         the later cache keys might overwrite the earlier cache entries.
+
+      :param lambda_func: A lambda function to execute.
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing
+                               a value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group, used to group related cache keys together when methods
+                          are called independently.
+      :param force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
+                              cached result is available.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If None, the cache files will
+                             be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
+                             files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
+                             each cache file.
+      :param disable_cache: Overrides the class-level `disable_cache` attribute. If set to True, disables the cache.
+
+      :returns: A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
+                given function. If a cached result is available and `force_recompute` is False, the cached result will be
+                returned instead of recomputing the result.
+
+
+   .. py:method:: _compute_cache_key(cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, frame_depth: int = 3) -> str
+
+      Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
+
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing a
+                               value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group.
+      :param frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+                          function or method. For each nested function or method, the frame depth should be increased by 1.
+
+      :raises ValueError: If the computed cache key is too long.
+
+      :returns: A string representing the computed cache key, which is the MD5 hash of the fully qualified name of the
+                calling function or method, along with the fingerprints of the provided cache keys.
+
+
+   .. py:method:: _get_handler(cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], index: int = 0) -> mleko.cache.handlers.CacheHandler
+
+      Gets the cache handler at the given index.
+
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param index: The index of the cache handler to get.
+
+      :returns: Handler at the given index. If a single CacheHandler instance is provided, it will be returned.
+
+
+   .. py:method:: _write_to_cache_file(cache_key: str, output_item: Any, index: int, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], is_sequence_output: bool) -> None
+
+      Writes the given data to the cache file using the provided cache key.
+
+      If the output is None and the cache handler cannot handle None, the output will be saved using the pickle
+      cache handler. Otherwise, the output will be saved to a cache file using the provided cache handler.
+
+      :param cache_key: A string representing the cache key.
+      :param output_item: The data to be saved to the cache.
+      :param index: The index of the cache handler to use.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param is_sequence_output: Whether the output is a sequence or not. If True, the cache file will be saved with the
+                                 index appended to the cache key.
+
+
+   .. py:method:: _find_cache_type_name(cls: type) -> str | None
+
+      Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.
+
+      :param cls: The class to search.
+
+      :returns: The name of the class that inherits from `CacheMixin`, or None if no such class exists.
+
+
+

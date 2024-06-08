@@ -1,0 +1,270 @@
+:py:mod:`mleko.dataset.ingest.kaggle_ingester`
+==============================================
+
+.. py:module:: mleko.dataset.ingest.kaggle_ingester
+
+.. autoapi-nested-parse::
+
+   A module for downloading and managing Kaggle datasets using the Kaggle API.
+
+   In order to use this module, the user must have valid Kaggle API credentials.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.kaggle_ingester.KaggleCredentials
+   mleko.dataset.ingest.kaggle_ingester.KaggleCredentialsManager
+   mleko.dataset.ingest.kaggle_ingester.KaggleFileManifest
+   mleko.dataset.ingest.kaggle_ingester.KaggleIngester
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.kaggle_ingester.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: KaggleCredentials
+
+   Bases: :py:obj:`NamedTuple`
+
+   Represents a set of Kaggle API credentials, including a username and API key.
+
+   .. py:attribute:: username
+      :type: str
+
+      Username for the Kaggle API.
+
+   .. py:attribute:: key
+      :type: str
+
+      API key for the Kaggle API.
+
+
+.. py:class:: KaggleCredentialsManager
+
+   Manages retrieval of Kaggle API credentials from environment variables or a file.
+
+   .. py:attribute:: _ENV_VARIABLE_USERNAME
+      :value: 'KAGGLE_USERNAME'
+
+      Name of the environment variable containing the Kaggle username.
+
+   .. py:attribute:: _ENV_VARIABLE_KEY
+      :value: 'KAGGLE_KEY'
+
+      Name of the environment variable containing the Kaggle API key.
+
+   .. py:attribute:: _CONFIG_DEFAULT_PATH
+      :value: '~/.kaggle/kaggle.json'
+
+      Default path to the Kaggle API credentials file.
+
+   .. py:attribute:: _CONFIG_VARIABLE_USERNAME
+      :value: 'username'
+
+      Name of the key in the Kaggle API credentials file containing the Kaggle username.
+
+   .. py:attribute:: _CONFIG_VARIABLE_KEY
+      :value: 'key'
+
+      Name of the key in the Kaggle API credentials file containing the Kaggle API key.
+
+   .. py:method:: get_kaggle_credentials(credentials_file_path: str | pathlib.Path | None = None) -> KaggleCredentials
+      :staticmethod:
+
+      Retrieves Kaggle API credentials from the specified file, environment variables, or the default location.
+
+      :param credentials_file_path: Path to the Kaggle API credentials file.
+
+      :returns: A KaggleCredentials instance with the retrieved username and API key.
+
+
+   .. py:method:: _read_config_file(credentials_file_path: pathlib.Path) -> KaggleCredentials
+      :staticmethod:
+
+      Reads Kaggle API credentials from the given configuration file.
+
+      :param credentials_file_path: Path to the Kaggle API credentials file.
+
+      :returns: A KaggleCredentials instance with the retrieved username and API key.
+
+      :raises FileNotFoundError: If the file does not exist or is a directory.
+      :raises key_error: If the username or API key is missing from the credentials JSON.
+      :raises JSONDecodeError: If the JSON decoding fails while reading the credentials.
+
+
+   .. py:method:: _read_environment_config() -> KaggleCredentials | None
+      :staticmethod:
+
+      Reads Kaggle API credentials from environment variables.
+
+      :returns:
+
+                A KaggleCredentials instance with the retrieved username and API key, or None
+                    if the environment variables are not set.
+
+
+
+.. py:class:: KaggleFileManifest
+
+   Manifest entry for a single file in a Kaggle dataset.
+
+   .. py:attribute:: name
+      :type: str
+
+      Name of the file.
+
+   .. py:attribute:: creation_timestamp
+      :type: float
+
+      Timestamp of the file creation.
+
+   .. py:attribute:: total_bytes
+      :type: int
+
+      Total size of the file in bytes.
+
+
+.. py:class:: KaggleIngester(owner_slug: str, dataset_slug: str, file_pattern: str | list[str] = '*', dataset_id: str | None = None, destination_directory: str | pathlib.Path = 'data/kaggle-ingester', dataset_version: str | int | None = None, kaggle_api_credentials_file: str | pathlib.Path | None = None, num_workers: int = 64)
+
+   Bases: :py:obj:`mleko.dataset.ingest.base_ingester.BaseIngester`
+
+   Handles dataset retrieval from Kaggle, downloading and updating files as necessary.
+
+   The `KaggleIngester` class downloads files from the specified Kaggle dataset and saves them to the destination
+   directory. It also checks if the local files are up to date and skips downloading if everything is already in
+   place.
+
+   Initializes a `KaggleIngester` instance to fetch data from a specific Kaggle dataset.
+
+   In order to use `KaggleIngester`, valid Kaggle API credentials are required. These credentials can be obtained
+   by creating an API token on the Kaggle account settings page. The token should be saved in a JSON file named
+   `kaggle.json` containing the "username" and "key" fields.
+
+   There are three possible locations where Kaggle API credentials can be provided:
+
+   1. Custom file location: Pass the file path to `kaggle_api_credentials_file` in the constructor.
+   2. Environment variables: Set the KAGGLE_USERNAME and KAGGLE_KEY environment variables.
+   3. Default .kaggle folder: Place the `kaggle.json` file into the "~/.kaggle/" directory.
+
+   .. note::
+
+      The Kaggle API is not perfect and sometimes returns incorrect metadata for files, where one or more of the
+      files are missing from the dataset. This can lead to the wrong files being downloaded or the download
+      failing altogether. If you encounter this issue, please report it to Kaggle.
+
+      The issue is observed when the dataset contains a large number of files (e.g. 1000+) or if the dataset
+      contains nested folders.
+
+   :param owner_slug: The owner's Kaggle username or organization name.
+   :param dataset_slug: The dataset's unique Kaggle identifier (slug).
+   :param file_pattern: Pattern to match the files to download, e.g. `*.csv` or [`*.csv`, `*.json`], etc.
+                        For more information, see https://docs.python.org/3/library/fnmatch.html.
+   :param dataset_id: Id of the dataset to be used instead of the default fingerprint (MD5 hash of the owner slug,
+                      dataset version, and dataset slug). Note that this will overwrite any existing dataset with the same
+                      name in the destination directory, so make sure to use a unique name.
+   :param destination_directory: The directory where the downloaded files will be stored.
+   :param dataset_version: The specific dataset version number to download. If not provided,
+                           the latest version will be fetched.
+   :param kaggle_api_credentials_file: Path to a Kaggle API credentials JSON file. If not
+                                       provided, environment variables or the default file location will be used.
+   :param num_workers: Number of concurrent threads to use when downloading files.
+
+   .. rubric:: Examples
+
+   >>> from mleko.dataset.sources import KaggleIngester
+   >>> kaggle_ingester = KaggleIngester(
+   ...     owner_slug="allen-institute-for-ai",
+   ...     dataset_slug="covid-19-masks-dataset",
+   ...     file_pattern="file_*.zip",
+   ...     dataset_id="covid-19", # Optional, but will store the data in "./data/covid-19/" instead of
+   ...                            # "./data/<fingerprint>/".
+   ...     dataset_version=1,
+   ... )
+   >>> kaggle_ingester.fetch_data()
+   [PosixPath('~/data/covid-19/file_1.zip'), PosixPath('~/data/covid-19/file_2.zip')]
+
+   .. py:attribute:: _KAGGLE_API_VERSION
+      :value: 'v1'
+
+      The Kaggle API version to use.
+
+   .. py:attribute:: _KAGGLE_DATASET_URL
+
+      The base URL for Kaggle dataset API requests.
+
+   .. py:method:: fetch_data(force_recompute: bool = False) -> list[pathlib.Path]
+
+      Fetches data from the specified Kaggle dataset.
+
+      This method downloads files from the Kaggle dataset and returns the local file paths of the downloaded files.
+      The method checks if local files are up-to-date and skips downloading if everything is already in place and
+      `force_recompute` is set to False.
+
+      :param force_recompute: If set to False, the method will check if the local files are up-to-date and
+                              skip downloading if everything is already in place.
+
+      :returns: A list of local file paths pointing to the downloaded files.
+
+
+   .. py:method:: _build_kaggle_manifest(params: dict[str, str]) -> list[KaggleFileManifest]
+
+      Fetch the metadata of the files in the dataset.
+
+      When fetching the metadata, the API returns a list of files in the dataset. The list contains the name of the
+      file, the creation date, and the file size.
+
+      :param params: A dictionary of query parameters to pass to the Kaggle API.
+
+      :raises HTTPError: If there is an error in the HTTP response while requesting file list from Kaggle.
+
+      :returns: A list of KaggleFileManifest objects containing the metadata of the files in the dataset.
+
+
+   .. py:method:: _kaggle_fetch_file(kaggle_file_path: str, params: dict[str, str]) -> None
+
+      Downloads a single Kaggle dataset file and saves it in the destination directory.
+
+      :param kaggle_file_path: The Kaggle file path to download.
+      :param params: The request parameters containing the dataset version number, if applicable.
+
+      :raises HTTPError: If there is an error in the HTTP response while downloading file from Kaggle.
+
+
+   .. py:method:: _kaggle_fetch_files(kaggle_file_paths: list[str], params: dict[str, str]) -> None
+
+      Downloads multiple Kaggle dataset files concurrently.
+
+      :param kaggle_file_paths: A list of Kaggle file paths to download.
+      :param params: The request parameters containing the dataset version number, if applicable.
+
+
+   .. py:method:: _is_local_dataset_fresh(files_metadata: list[KaggleFileManifest]) -> bool
+
+      Checks if the local dataset files are up to date with the Kaggle dataset files.
+
+      Comparing file size and modification timestamp, this method determines if the local files are up to date and
+      if they match the remote Kaggle dataset files.
+
+      :param files_metadata: A list containing the metadata of the files in the Kaggle dataset.
+
+      :returns: True if the local dataset files are up to date, False otherwise.
+
+
+

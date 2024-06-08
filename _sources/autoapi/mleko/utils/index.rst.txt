@@ -1,0 +1,75 @@
+:py:mod:`mleko.utils`
+=====================
+
+.. py:module:: mleko.utils
+
+.. autoapi-nested-parse::
+
+   Subpackage with utility functions and classes.
+
+   This subpackage contains utility functions and classes that are used throughout the project. These include a custom
+   logger, decorators, and helper functions for working with `vaex` DataFrames and `tqdm` progress bars.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   custom_logger/index.rst
+   decorators/index.rst
+   file_helpers/index.rst
+   s3_helpers/index.rst
+   tqdm_helpers/index.rst
+   vaex_helpers/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.CustomLogger
+   mleko.utils.LocalFileEntry
+   mleko.utils.LocalManifest
+   mleko.utils.LocalManifestHandler
+   mleko.utils.S3Client
+   mleko.utils.S3FileManifest
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.auto_repr
+   mleko.utils.timing
+   mleko.utils.clear_directory
+   mleko.utils.set_tqdm_percent_wrapper
+   mleko.utils.get_column
+   mleko.utils.get_columns
+   mleko.utils.get_filtered_df
+   mleko.utils.get_indices
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,115 @@
+:py:mod:`mleko.cache.fingerprinters.optuna_pruner_fingerprinter`
+================================================================
+
+.. py:module:: mleko.cache.fingerprinters.optuna_pruner_fingerprinter
+
+.. autoapi-nested-parse::
+
+   The module contains a fingerprinter for `Optuna` pruners.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.optuna_pruner_fingerprinter.OptunaPrunerFingerprinter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.optuna_pruner_fingerprinter.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: OptunaPrunerFingerprinter
+
+   Bases: :py:obj:`mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter`
+
+   Class to generate unique fingerprints for different types of Optuna pruners.
+
+   .. py:method:: fingerprint(data: optuna.pruners.BasePruner) -> str
+
+      Generate a fingerprint string for a given Optuna pruner.
+
+      :param data: The pruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the pruner's configuration.
+
+
+   .. py:method:: _fingerprint_medianpruner(pruner: optuna.pruners.MedianPruner) -> str
+
+      Generate a fingerprint string for an Optuna MedianPruner.
+
+      :param pruner: The MedianPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the MedianPruner's configuration.
+
+
+   .. py:method:: _fingerprint_noppruner(_pruner: optuna.pruners.NopPruner) -> str
+
+      Generate a fingerprint string for an Optuna NopPruner.
+
+      :param pruner: The NopPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the NopPruner's configuration.
+
+
+   .. py:method:: _fingerprint_patientpruner(pruner: optuna.pruners.PatientPruner) -> str
+
+      Generate a fingerprint string for an Optuna PatientPruner.
+
+      :param pruner: The PatientPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the PatientPruner's configuration.
+
+
+   .. py:method:: _fingerprint_percentilepruner(pruner: optuna.pruners.PercentilePruner) -> str
+
+      Generate a fingerprint string for an Optuna PercentilePruner.
+
+      :param pruner: The PercentilePruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the PercentilePruner's configuration.
+
+
+   .. py:method:: _fingerprint_successivehalvingpruner(pruner: optuna.pruners.SuccessiveHalvingPruner) -> str
+
+      Generate a fingerprint string for an Optuna SuccessiveHalvingPruner.
+
+      :param pruner: The SuccessiveHalvingPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the SuccessiveHalvingPruner's configuration.
+
+
+   .. py:method:: _fingerprint_hyperbandpruner(pruner: optuna.pruners.HyperbandPruner) -> str
+
+      Generate a fingerprint string for an Optuna HyperbandPruner.
+
+      :param pruner: The HyperbandPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the HyperbandPruner's configuration.
+
+
+   .. py:method:: _fingerprint_thresholdpruner(pruner: optuna.pruners.ThresholdPruner) -> str
+
+      Generate a fingerprint string for an Optuna ThresholdPruner.
+
+      :param pruner: The ThresholdPruner to fingerprint.
+
+      :returns: A fingerprint string that uniquely identifies the ThresholdPruner's configuration.
+
+
+

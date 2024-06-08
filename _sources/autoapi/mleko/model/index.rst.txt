@@ -1,0 +1,50 @@
+:py:mod:`mleko.model`
+=====================
+
+.. py:module:: mleko.model
+
+.. autoapi-nested-parse::
+
+   The subpackage contains the model building functionality of the `mleko` library.
+
+   The following modules are provided:
+       - `base_model`: The module provides the base class for all models.
+       - `lgbm_model`: The module provides functionality for building LightGBM models.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   tune/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_model/index.rst
+   lgbm_model/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.BaseModel
+   mleko.model.LGBMModel
+
+
+
+
+
+

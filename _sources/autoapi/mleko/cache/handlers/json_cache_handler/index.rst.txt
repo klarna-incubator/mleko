@@ -1,0 +1,54 @@
+:py:mod:`mleko.cache.handlers.json_cache_handler`
+=================================================
+
+.. py:module:: mleko.cache.handlers.json_cache_handler
+
+.. autoapi-nested-parse::
+
+   This module contains the CacheHandler for serializing and deserializing data using JSON.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.json_cache_handler.write_json
+   mleko.cache.handlers.json_cache_handler.read_json
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.json_cache_handler.JSON_CACHE_HANDLER
+
+
+.. py:function:: write_json(cache_file_path: pathlib.Path, output: dict | list) -> None
+
+   Writes the given data to a cache file at the specified path, serializing it using JSON.
+
+   :param cache_file_path: A Path object representing the location where the cache file should be saved.
+   :param output: The data to be serialized and saved to the cache file.
+
+
+.. py:function:: read_json(cache_file_path: pathlib.Path) -> Any
+
+   Reads the cache file from the specified path and returns the deserialized data.
+
+   :param cache_file_path: A Path object representing the location of the cache file.
+
+   :returns: The deserialized data stored in the cache file.
+
+
+.. py:data:: JSON_CACHE_HANDLER
+
+   A CacheHandler for serializing and deserializing data using JSON.
+

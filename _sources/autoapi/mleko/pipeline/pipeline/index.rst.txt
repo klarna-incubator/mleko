@@ -1,0 +1,86 @@
+:py:mod:`mleko.pipeline.pipeline`
+=================================
+
+.. py:module:: mleko.pipeline.pipeline
+
+.. autoapi-nested-parse::
+
+   Provides a flexible and customizable Pipeline class for managing and executing a series of data processing steps.
+
+   The module defines a Pipeline class that allows for the creation of a sequence of data processing steps. It is
+   designed for building complex data processing workflows by chaining together custom `PipelineStep` instances.
+   The Pipeline class encapsulates the ordered sequence of steps added to it and provides methods to manage, execute,
+   and visualize these steps. Each step's output is passed as input to the next step, effectively managing the flow
+   of data through the processing pipeline.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.pipeline.Pipeline
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.pipeline.logger
+
+
+.. py:data:: logger
+
+   A CustomLogger instance that's used throughout the module for logging.
+
+.. py:class:: Pipeline(steps: list[mleko.pipeline.pipeline_step.PipelineStep] | None = None)
+
+   Encapsulates a pipeline that manages and executes a series of data processing steps in a defined order.
+
+   Creates a new Pipeline instance, initializing it with a list of steps or an empty list.
+
+   .. note::
+
+      The steps list can be provided as an argument to the constructor, or the pipeline can be initialized
+      with an empty list of steps and have them added later using the `add_step` method. This allows for
+      more flexibility in the creation of the pipeline, as steps can be added dynamically.
+
+   :param steps: An optional list of `PipelineStep` instances that define the data processing steps in the
+                 pipeline. If not provided, the pipeline will be initialized with an empty list of steps,
+                 allowing steps to be added later using the `add_step` method.
+
+   .. py:method:: add_step(step: mleko.pipeline.pipeline_step.PipelineStep) -> None
+
+      Appends a new PipelineStep to the end of the pipeline, extending the processing sequence.
+
+      Adding a step to the pipeline implies that it will be executed after all the steps previously
+      appended to the pipeline when calling the `run` method.
+
+      :param step: The PipelineStep instance to be added at the end of the pipeline's steps list.
+
+
+   .. py:method:: run(data_container: mleko.pipeline.data_container.DataContainer | None = None, force_recompute: bool = False, disable_cache: bool = False) -> mleko.pipeline.data_container.DataContainer
+
+      Executes the pipeline steps in the order they were added, passing output from one to the next.
+
+      Processes the initial given data or an empty data container through each step in the pipeline.
+      The output of each step is passed as input to the next step, allowing the given input to be transformed
+      through the whole sequence of steps.
+
+      :param data_container: An optional DataContainer instance carrying the input data to be processed by the
+                             first step in the pipeline. If not provided, an empty DataContainer instance will be
+                             created automatically, and the first step's execute method must handle it.
+      :param force_recompute: Whether to force the pipeline to recompute its output, even if it already exists.
+      :param disable_cache: Whether to disable the `mleko` caching mechanism for the pipeline execution.
+
+      :returns: The output as a DataContainer instance from the last step in the pipeline after processing the data.
+
+
+

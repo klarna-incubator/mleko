@@ -1,0 +1,1164 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="License" href="license.html" /><link rel="prev" title="Contributor Guide" href="contributing.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.09.10 -->
+        <title>Changelog - mleko documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">mleko  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">mleko  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/mleko/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of mleko</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/mleko/cache/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of mleko.cache</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of mleko.cache.fingerprinters</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/base_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.base_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/callable_source_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.callable_source_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/csv_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.csv_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/json_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.json_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/optuna_pruner_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_pruner_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/optuna_sampler_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.optuna_sampler_fingerprinter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/fingerprinters/vaex_fingerprinter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.fingerprinters.vaex_fingerprinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/cache/handlers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of mleko.cache.handlers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/base_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.base_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/joblib_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.joblib_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/json_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.json_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/pickle_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.pickle_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/string_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.string_cache_handler</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/cache/handlers/vaex_cache_handler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.handlers.vaex_cache_handler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/cache/cache_mixin/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.cache_mixin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/cache/lru_cache_mixin/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.cache.lru_cache_mixin</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/mleko/dataset/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of mleko.dataset</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/convert/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of mleko.dataset.convert</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/convert/base_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.base_converter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/convert/csv_to_vaex_converter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.convert.csv_to_vaex_converter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/export/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of mleko.dataset.export</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/export/base_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.base_exporter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/export/local_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.local_exporter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/export/s3_exporter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.export.s3_exporter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of mleko.dataset.feature_select</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/base_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.base_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/composite_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.composite_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/invariance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.invariance_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/missing_rate_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.missing_rate_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/pearson_correlation_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.pearson_correlation_feature_selector</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/feature_select/variance_feature_selector/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.feature_select.variance_feature_selector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of mleko.dataset.filter</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/filter/base_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.base_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/filter/expression_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.expression_filter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/filter/imblearn_resampling_filter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.filter.imblearn_resampling_filter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/ingest/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of mleko.dataset.ingest</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/ingest/base_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.base_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/ingest/kaggle_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.kaggle_ingester</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/ingest/s3_ingester/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.ingest.s3_ingester</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/split/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of mleko.dataset.split</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/split/base_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.base_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/split/expression_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.expression_splitter</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/split/random_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.split.random_splitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/dataset/transform/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of mleko.dataset.transform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/base_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.base_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/composite_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.composite_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/expression_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.expression_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/frequency_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.frequency_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/label_encoder_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.label_encoder_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/max_abs_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.max_abs_scaler_transformer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/dataset/transform/min_max_scaler_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.transform.min_max_scaler_transformer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/dataset/data_schema/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.dataset.data_schema</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/mleko/model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of mleko.model</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/model/tune/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of mleko.model.tune</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/model/tune/base_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.base_tuner</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/model/tune/optuna_tuner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.tune.optuna_tuner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/model/base_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.base_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/model/lgbm_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.model.lgbm_model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/mleko/pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of mleko.pipeline</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/mleko/pipeline/steps/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of mleko.pipeline.steps</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/convert_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.convert_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/export_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.export_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/feature_select_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.feature_select_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/filter_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.filter_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/ingest_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.ingest_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/model_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.model_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/split_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.split_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/transform_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.transform_step</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/mleko/pipeline/steps/tune_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.steps.tune_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/pipeline/data_container/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.data_container</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/pipeline/pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/pipeline/pipeline_step/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.pipeline.pipeline_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/mleko/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of mleko.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/custom_logger/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.custom_logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/decorators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.decorators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/file_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.file_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/s3_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.s3_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/tqdm_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.tqdm_helpers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/mleko/utils/vaex_helpers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mleko.utils.vaex_helpers</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributor Guide</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">#</a></h1>
+<section id="v4-3-0-2024-06-08">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v4.3.0">v4.3.0</a> (2024-06-08)<a class="headerlink" href="#v4-3-0-2024-06-08" title="Permalink to this heading">#</a></h2>
+<section id="features">
+<h3>✨ Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>model:</strong> Add check for fitted model in LGBMModel fingerprint. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/f6a09337af6743d6686d9078a01ed22e29630086"><code class="docutils literal notranslate"><span class="pre">f6a0933</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="bug-fixes">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>tuning:</strong> Optional <code class="docutils literal notranslate"><span class="pre">enqueue_trials</span></code> parameter added to fingerprint of <code class="docutils literal notranslate"><span class="pre">OptunaTuner</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/80fa37408ee5df2be0de23f08358c45932970686"><code class="docutils literal notranslate"><span class="pre">80fa374</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> Update <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> to use <code class="docutils literal notranslate"><span class="pre">PyArrow</span></code> implementation of <code class="docutils literal notranslate"><span class="pre">unique</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">vaex</span></code> bug from crashing the transformer. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/85059d791d44e49a4b2cf9438389f8033ddcbf8b"><code class="docutils literal notranslate"><span class="pre">85059d7</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v4-2-0-2024-05-21">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v4.2.0">v4.2.0</a> (2024-05-21)<a class="headerlink" href="#v4-2-0-2024-05-21" title="Permalink to this heading">#</a></h2>
+<section id="id1">
+<h3>✨ Features<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>transformer:</strong> Update <code class="docutils literal notranslate"><span class="pre">ExpressionTransformer</span></code> to use <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> instead of tuples. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3950abd1330bd7542d3c1af0a5533857b2c07c03"><code class="docutils literal notranslate"><span class="pre">3950abd</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v4-1-0-2024-05-18">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v4.1.0">v4.1.0</a> (2024-05-18)<a class="headerlink" href="#v4-1-0-2024-05-18" title="Permalink to this heading">#</a></h2>
+<section id="id2">
+<h3>✨ Features<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>tuning:</strong> Add support for enqueuing trials in <code class="docutils literal notranslate"><span class="pre">OptunaTuner</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/9e0b6b2a04d0345bdc930017fd72a1f58122014e"><code class="docutils literal notranslate"><span class="pre">9e0b6b2</span></code></a>)</p></li>
+<li><p><strong>data splitting:</strong> Add support for stratification on multiple features in the <code class="docutils literal notranslate"><span class="pre">RandomSplitter</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d74543457405f37a5eb45de4a7a324464a3ef90f"><code class="docutils literal notranslate"><span class="pre">d745434</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> Add <code class="docutils literal notranslate"><span class="pre">metadata</span></code> option for the <code class="docutils literal notranslate"><span class="pre">ExpressionTransformer</span></code> that allows for creation of meta features not tracked in the <code class="docutils literal notranslate"><span class="pre">DataSchema</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/f16ea8b81ed57a63889db9120fef7c018085af62"><code class="docutils literal notranslate"><span class="pre">f16ea8b</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> Add <code class="docutils literal notranslate"><span class="pre">ExpressionTransformer</span></code> for creating features using the <code class="docutils literal notranslate"><span class="pre">vaex</span></code> expression system. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/c0faf7488ccaf5eba40c2e1d9c8e901e99498752"><code class="docutils literal notranslate"><span class="pre">c0faf74</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v4-0-0-2024-05-09">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v4.0.0">v4.0.0</a> (2024-05-09)<a class="headerlink" href="#v4-0-0-2024-05-09" title="Permalink to this heading">#</a></h2>
+<section id="breaking-changes">
+<h3>⛔️ BREAKING CHANGES<a class="headerlink" href="#breaking-changes" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>exporter:</strong> Add <code class="docutils literal notranslate"><span class="pre">S3Exporter</span></code> that implements cached S3 exporting of files from the local disk. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d17b2d20e93d0542f25e2142e4dc61c104f7e0b8"><code class="docutils literal notranslate"><span class="pre">d17b2d2</span></code></a>)</p></li>
+<li><p><strong>exporter:</strong> Add <code class="docutils literal notranslate"><span class="pre">BaseExporter</span></code> and <code class="docutils literal notranslate"><span class="pre">LocalExporter</span></code> implementations that support exporting data to disk, along with corresponding <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> steps. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/6ce13cf5bff65c2da429f1db80fc9612f1f9c223"><code class="docutils literal notranslate"><span class="pre">6ce13cf</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3>✨ Features<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>exporter:</strong> Add <code class="docutils literal notranslate"><span class="pre">LocalManifest</span></code> support for <code class="docutils literal notranslate"><span class="pre">LocalExporter</span></code> which simplifies caching logic and enables S3 manifest translations. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/2199ff0a5d2bf347ef25898c28f94c59ec4b210e"><code class="docutils literal notranslate"><span class="pre">2199ff0</span></code></a>)</p></li>
+<li><p><strong>exporter:</strong> Add support for multiple data export using <code class="docutils literal notranslate"><span class="pre">LocalExporter</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ff988b683ca59782212d34f915e9e55587f6a9e8"><code class="docutils literal notranslate"><span class="pre">ff988b6</span></code></a>)</p></li>
+<li><p><strong>data source:</strong> Add support for reading manifest files from S3 buckets in <code class="docutils literal notranslate"><span class="pre">S3Ingester</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/9c68a9b107a0436cbdace8cdbd41f839783f9369"><code class="docutils literal notranslate"><span class="pre">9c68a9b</span></code></a>)</p></li>
+<li><p><strong>pipeline:</strong> Add <code class="docutils literal notranslate"><span class="pre">disable_cache</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> execution. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/da1e31a90a2e1de58f15dd0df91309bc81f10427"><code class="docutils literal notranslate"><span class="pre">da1e31a</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data cleaning:</strong> Fix newline characters breaking CSV reading using Arrow. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3a7e59426ff8575f4ece679fd1468edec3173cfe"><code class="docutils literal notranslate"><span class="pre">3a7e594</span></code></a>)</p></li>
+<li><p><strong>tuning:</strong> Delete logging of storage URI to minimize risk of accidentally logging credentials. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/054692d5508018fd77ea82c05fe27a2dd2f229b3"><code class="docutils literal notranslate"><span class="pre">054692d</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="code-refactoring">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#code-refactoring" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data source:</strong> Extract shared S3 logic to <code class="docutils literal notranslate"><span class="pre">utils</span></code> which can be then used by <code class="docutils literal notranslate"><span class="pre">S3Exporter</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/97a79748996aede230507fa88d09839d00d2029e"><code class="docutils literal notranslate"><span class="pre">97a7974</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v3-2-0-2024-04-18">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v3.2.0">v3.2.0</a> (2024-04-18)<a class="headerlink" href="#v3-2-0-2024-04-18" title="Permalink to this heading">#</a></h2>
+<section id="id5">
+<h3>✨ Features<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>tuning:</strong> Add support for <code class="docutils literal notranslate"><span class="pre">RDSStorage</span></code> using the <code class="docutils literal notranslate"><span class="pre">OptunaTuner</span></code> (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/cc06dddd3e9c6e0ac8968319ef64881039a1fec4"><code class="docutils literal notranslate"><span class="pre">cc06ddd</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data source:</strong> Fix bug where <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> consisting of path components would break local metadata file creation (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/17c48669f22ff449fad28528340ad8f5221361bb"><code class="docutils literal notranslate"><span class="pre">17c4866</span></code></a>)</p></li>
+<li><p><strong>model:</strong> Add <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">BaseModel</span></code> to set log level in the base class. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/0a3828f246c82ba1f8257da53de0743d9b92c3fa"><code class="docutils literal notranslate"><span class="pre">0a3828f</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v3-1-0-2024-04-12">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v3.1.0">v3.1.0</a> (2024-04-12)<a class="headerlink" href="#v3-1-0-2024-04-12" title="Permalink to this heading">#</a></h2>
+<section id="id7">
+<h3>✨ Features<a class="headerlink" href="#id7" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>model:</strong> Add optional memoization to datasets during model training. (#209) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/2ca44651b793ca0b2c9a38bf8ac99934da07760a"><code class="docutils literal notranslate"><span class="pre">2ca4465</span></code></a>)</p></li>
+<li><p><strong>model:</strong> Add optional memoization to datasets during model training. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/6a955dca44bc1df139f5dde2e34bb97d12ae8de8"><code class="docutils literal notranslate"><span class="pre">6a955dc</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v3-0-0-2024-04-05">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v3.0.0">v3.0.0</a> (2024-04-05)<a class="headerlink" href="#v3-0-0-2024-04-05" title="Permalink to this heading">#</a></h2>
+<section id="id8">
+<h3>⛔️ BREAKING CHANGES<a class="headerlink" href="#id8" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>model:</strong> Update <code class="docutils literal notranslate"><span class="pre">LGBMModel</span></code> to use dependency injection, now expects a <code class="docutils literal notranslate"><span class="pre">lightgbm.LGBMModel</span></code> as argument. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/7250f344304eadc013ed54b40c7a1e017133833c"><code class="docutils literal notranslate"><span class="pre">7250f34</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id9" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Switch <code class="docutils literal notranslate"><span class="pre">vaex</span></code> file format to <code class="docutils literal notranslate"><span class="pre">Arrow</span></code> instead of <code class="docutils literal notranslate"><span class="pre">HDF5</span></code> for better type support. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ac8e5008617ecc2185f9cb6927b578d24807265b"><code class="docutils literal notranslate"><span class="pre">ac8e500</span></code></a>)</p></li>
+<li><p><strong>data cleaning:</strong> Fix bug where boolean columns are stored as numerical in the data schema due to <code class="docutils literal notranslate"><span class="pre">int8</span></code> conversion. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/da358d850313fba116cb69fe554f727de0a19380"><code class="docutils literal notranslate"><span class="pre">da358d8</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v2-2-0-2024-03-22">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v2.2.0">v2.2.0</a> (2024-03-22)<a class="headerlink" href="#v2-2-0-2024-03-22" title="Permalink to this heading">#</a></h2>
+<section id="id10">
+<h3>✨ Features<a class="headerlink" href="#id10" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>filter:</strong> Add <code class="docutils literal notranslate"><span class="pre">ImblearnResamplingFilter</span></code> which is a wrapper for <code class="docutils literal notranslate"><span class="pre">imblearn</span></code> over- and under-samplers. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/77a3d7d1a86c37ff91725afb12e6d2b1a6f1e649"><code class="docutils literal notranslate"><span class="pre">77a3d7d</span></code></a>)</p></li>
+<li><p><strong>filter:</strong> Add <code class="docutils literal notranslate"><span class="pre">ExpressionFilter</span></code> and base class for simple DataFrame filtering using <code class="docutils literal notranslate"><span class="pre">vaex</span></code> expressions. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/dc679ffc92d4ea2f4e064f51076b3edea61fd838"><code class="docutils literal notranslate"><span class="pre">dc679ff</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> Add <code class="docutils literal notranslate"><span class="pre">disable_cache</span></code> argument to all cached functions to completely bypass all caching functionality. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/fbdfc5dd94e5aaf440268efecf3ea1c4c6762d86"><code class="docutils literal notranslate"><span class="pre">fbdfc5d</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h3>📝 Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> format to include missing categories. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d97b32c9e825f59518b214d8b8338a470fcee7d4"><code class="docutils literal notranslate"><span class="pre">d97b32c</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v2-1-0-2024-02-24">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v2.1.0">v2.1.0</a> (2024-02-24)<a class="headerlink" href="#v2-1-0-2024-02-24" title="Permalink to this heading">#</a></h2>
+<section id="id11">
+<h3>✨ Features<a class="headerlink" href="#id11" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Update Titanic dataset to <code class="docutils literal notranslate"><span class="pre">mleko</span></code> 2.0 API. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/62bf991fa1324fefe5d83fc0ea1c36f62f2cdbb3"><code class="docutils literal notranslate"><span class="pre">62bf991</span></code></a>)</p></li>
+<li><p><strong>tuning:</strong> Add <code class="docutils literal notranslate"><span class="pre">optuna-dashboard</span></code> support to <code class="docutils literal notranslate"><span class="pre">OptunaTuner</span></code> including automatically generated experiment notes. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/29d81c288b8dffcc9374bfa813e987bda80228df"><code class="docutils literal notranslate"><span class="pre">29d81c2</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> Improve flexibility of <code class="docutils literal notranslate"><span class="pre">LabelEncoderTransformer</span></code> by adding optional null encoding and manual dictionary mapping. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/f7b30a9a17388b27163fd9addae378935974ddab"><code class="docutils literal notranslate"><span class="pre">f7b30a9</span></code></a>)</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">cache_directory</span></code> as optional argument, with custom default locations. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/08e8777aac8fca0429e0cdc887426fbc25907bc2"><code class="docutils literal notranslate"><span class="pre">08e8777</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id12">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id12" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data cleaning:</strong> Fix <code class="docutils literal notranslate"><span class="pre">meta_columns</span></code> not being forcefully cast to correct data type in <code class="docutils literal notranslate"><span class="pre">CSVToVaexConverter</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/b42b9ed7a8592a4c3038bb3dc5b7dd512e4be2e6"><code class="docutils literal notranslate"><span class="pre">b42b9ed</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id13">
+<h3>📝 Documentation<a class="headerlink" href="#id13" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Update year in Copyright in README.md (#192) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/eeb56e1e04f34aff44527da463717f8cd41a2302"><code class="docutils literal notranslate"><span class="pre">eeb56e1</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="tests">
+<h3>🧪 Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix test cases generating cache directory outside temporary directory. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ba57fbfc838fd213446524a652cf235e002dde25"><code class="docutils literal notranslate"><span class="pre">ba57fbf</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v2-0-0-2024-02-07">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v2.0.0">v2.0.0</a> (2024-02-07)<a class="headerlink" href="#v2-0-0-2024-02-07" title="Permalink to this heading">#</a></h2>
+<section id="id14">
+<h3>⛔️ BREAKING CHANGES<a class="headerlink" href="#id14" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>pipeline:</strong> Refactor <code class="docutils literal notranslate"><span class="pre">PipelineStep</span></code> to use <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> for both inputs and outputs. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/2eb623c593deab9fc87d3accdc7dcc8f5f600f97"><code class="docutils literal notranslate"><span class="pre">2eb623c</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id15">
+<h3>✨ Features<a class="headerlink" href="#id15" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>model:</strong> Refactor validation_dataframe parameter in BaseModel and LGBMModel to be optional. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d18ed291926e1969ba8d4163964f443956626ae2"><code class="docutils literal notranslate"><span class="pre">d18ed29</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> Add cache support for <code class="docutils literal notranslate"><span class="pre">None</span></code> returns on fields using cache handlers not equipped to process None. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/a489996258884d1a584fc33388617ae758c7c009"><code class="docutils literal notranslate"><span class="pre">a489996</span></code></a>)</p></li>
+<li><p><strong>model:</strong> Add support for custom evaluation function in LGBMModel. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/4e70a55304fd6a49109add2e6d987bb77f3a9eaf"><code class="docutils literal notranslate"><span class="pre">4e70a55</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id16">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id16" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data cleaning:</strong> Rename empty column name to <code class="docutils literal notranslate"><span class="pre">_empty</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">vaex</span></code> crashes. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/da72b757f8395112bd0a17644af09547d5c72c0a"><code class="docutils literal notranslate"><span class="pre">da72b75</span></code></a>)</p></li>
+<li><p><strong>data cleaning:</strong> Cast boolean columns to <code class="docutils literal notranslate"><span class="pre">int8</span></code> during cleaning to reduce label encoding needs. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d94f7c9f1c8f50a5b482668f85bb7382845092f0"><code class="docutils literal notranslate"><span class="pre">d94f7c9</span></code></a>)</p></li>
+<li><p>Added reserved keyword column name replacement to prevent evaluation errors from <code class="docutils literal notranslate"><span class="pre">vaex</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3969ffd4974854ee24d5dd1fce10f5169ff0e36e"><code class="docutils literal notranslate"><span class="pre">3969ffd</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id17">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id17" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Improve error logging messages, and update codebase to new <code class="docutils literal notranslate"><span class="pre">black</span></code> format. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/a29ad45156cad00e9cd01b09d677390187fc24d9"><code class="docutils literal notranslate"><span class="pre">a29ad45</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> Break out cache handler retrieval method. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/aba9e4158bc76b9fa8b2444ae26fd6889ec832e3"><code class="docutils literal notranslate"><span class="pre">aba9e41</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id18">
+<h3>📝 Documentation<a class="headerlink" href="#id18" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Refactor mleko package documentation to format bullet list correctly. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/76ee895fe284aff3409501a8628af61f18392364"><code class="docutils literal notranslate"><span class="pre">76ee895</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="continous-integration">
+<h3>🤖 Continous Integration<a class="headerlink" href="#continous-integration" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Remove TypeGuard and PyUpgrade from build and pre-commit. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d374406f4f595dd4b2fadd2d95bd7b9543f17d48"><code class="docutils literal notranslate"><span class="pre">d374406</span></code></a>)</p></li>
+<li><p>Add custom template for release notes to follow changelog structure. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/30518c066cbe1c8c8eabb3918531512dc4e37069"><code class="docutils literal notranslate"><span class="pre">30518c0</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-6-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.6">v1.2.6</a> (2024-01-25)<a class="headerlink" href="#v1-2-6-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id19">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id19" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bump patch release. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ff5f94e49df12db51cf18c22708a6dfeab49a942"><code class="docutils literal notranslate"><span class="pre">ff5f94e</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-5-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.5">v1.2.5</a> (2024-01-25)<a class="headerlink" href="#v1-2-5-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id20">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id20" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> template location (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/141c9b7a9ea3e785308f6ed821ac799d60d163a1"><code class="docutils literal notranslate"><span class="pre">141c9b7</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-4-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.4">v1.2.4</a> (2024-01-25)<a class="headerlink" href="#v1-2-4-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id21">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id21" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Trigger patch release. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/7269dcab2ce7e19fc2809a5485c1f1bdd33f2db2"><code class="docutils literal notranslate"><span class="pre">7269dca</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="build">
+<h3>🏗️ Build<a class="headerlink" href="#build" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>semantic versioning:</strong> Update <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> template and semantic versioning logic. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/1727e097861c0f23520380a2b5d526d905861dee"><code class="docutils literal notranslate"><span class="pre">1727e09</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-3-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.3">v1.2.3</a> (2024-01-25)<a class="headerlink" href="#v1-2-3-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id22">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id22" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Remove coverage from workflow (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/09eb09da4fae09716c1fa37ebbc91dc532d7ed67"><code class="docutils literal notranslate"><span class="pre">09eb09d</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-2-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.2">v1.2.2</a> (2024-01-25)<a class="headerlink" href="#v1-2-2-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id23">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id23" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Switch to trusted publishing (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e84712deb1775c4689a8d89b5bb54f0461494145"><code class="docutils literal notranslate"><span class="pre">e84712d</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-1-2024-01-25">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.1">v1.2.1</a> (2024-01-25)<a class="headerlink" href="#v1-2-1-2024-01-25" title="Permalink to this heading">#</a></h2>
+<section id="id24">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id24" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Experiment with semantic versioning (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/0942196578df30f27c3d31435f5d2dc0b3c5775e"><code class="docutils literal notranslate"><span class="pre">0942196</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id25">
+<h3>🏗️ Build<a class="headerlink" href="#id25" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>🚧 Upgrade <code class="docutils literal notranslate"><span class="pre">python-gitlab</span></code> to <code class="docutils literal notranslate"><span class="pre">4.4.0</span></code> (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/15fff07cae12e57a8bb7e30a2d4394ecee424e98"><code class="docutils literal notranslate"><span class="pre">15fff07</span></code></a>)</p></li>
+<li><p>🚧 Fix failing builds (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/79f7d959691924a1a8b2e68d462aa448969058da"><code class="docutils literal notranslate"><span class="pre">79f7d95</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-2-0-2023-10-09">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.2.0">v1.2.0</a> (2023-10-09)<a class="headerlink" href="#v1-2-0-2023-10-09" title="Permalink to this heading">#</a></h2>
+<section id="id26">
+<h3>✨ Features<a class="headerlink" href="#id26" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data source:</strong> ✨ Add support for pattern matching in <code class="docutils literal notranslate"><span class="pre">*Ingester</span></code> and add <code class="docutils literal notranslate"><span class="pre">LocalManifest</span></code> to index fetched files. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/75974a40aa1af5e21a4dedc7e0d05be2153ec7aa"><code class="docutils literal notranslate"><span class="pre">75974a4</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id27">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id27" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>logging:</strong> 🐛 Fix LGBM logging routing to correct log level. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/0e5fa77ae14ccd27eb9b435ec8a73815fe764350"><code class="docutils literal notranslate"><span class="pre">0e5fa77</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="style">
+<h3>🎨 Style<a class="headerlink" href="#style" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>remove unnecessary blank lines (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/a06edf23e865e6bfb95f9f3d13611a24de12b4ba"><code class="docutils literal notranslate"><span class="pre">a06edf2</span></code></a>)</p></li>
+<li><p>✏️ Improve logging of <code class="docutils literal notranslate"><span class="pre">CSVToVaexConverter</span></code> and fix typo in <code class="docutils literal notranslate"><span class="pre">write_vaex_dataframe</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/197e56ad4af59da2a08762c70b8e7ae5c5e350e2"><code class="docutils literal notranslate"><span class="pre">197e56a</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id28">
+<h3>🏗️ Build<a class="headerlink" href="#id28" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>🔒️ Bump <code class="docutils literal notranslate"><span class="pre">gitpython</span></code> to resolve CVE-2023-41040 and CVE-2023-40590. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/79627bda5228d0470b2a3ca4613ae7636d79f4b6"><code class="docutils literal notranslate"><span class="pre">79627bd</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-1-0-2023-09-27">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.1.0">v1.1.0</a> (2023-09-27)<a class="headerlink" href="#v1-1-0-2023-09-27" title="Permalink to this heading">#</a></h2>
+<section id="id29">
+<h3>✨ Features<a class="headerlink" href="#id29" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>tuning:</strong> ✨ Add hyperparameter tuning functionality, initially including <code class="docutils literal notranslate"><span class="pre">OptunaTuner</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/be38c075e269ed2e42560dfa26ac71ab08448444"><code class="docutils literal notranslate"><span class="pre">be38c07</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id30">
+<h3>🧪 Tests<a class="headerlink" href="#id30" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>tuning:</strong> 🧪 Add test cases for <code class="docutils literal notranslate"><span class="pre">TuneStep</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d811c7d4f60b4440b669cf723d3b85ee962efc97"><code class="docutils literal notranslate"><span class="pre">d811c7d</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v1-0-0-2023-09-20">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v1.0.0">v1.0.0</a> (2023-09-20)<a class="headerlink" href="#v1-0-0-2023-09-20" title="Permalink to this heading">#</a></h2>
+<section id="id31">
+<h3>⛔️ BREAKING CHANGES<a class="headerlink" href="#id31" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>📝 Improve <code class="docutils literal notranslate"><span class="pre">README.md</span></code> with more up to date information. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/b388b59a9c8da0df56da532a0cc17b347089a146"><code class="docutils literal notranslate"><span class="pre">b388b59</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id32">
+<h3>✨ Features<a class="headerlink" href="#id32" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>transformer:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">DataSchema</span></code> API to transformers <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">transform</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e053c854238614ef23c6e8ff7eedc004cbeedf71"><code class="docutils literal notranslate"><span class="pre">e053c85</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id33">
+<h3>📝 Documentation<a class="headerlink" href="#id33" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>📝 Add example notebook for <code class="docutils literal notranslate"><span class="pre">Titanic</span></code> dataset. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e651af99d96f2d012faaf6ab5c73cc681f7a5b5b"><code class="docutils literal notranslate"><span class="pre">e651af9</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-8-1-2023-09-07">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.8.1">v0.8.1</a> (2023-09-07)<a class="headerlink" href="#v0-8-1-2023-09-07" title="Permalink to this heading">#</a></h2>
+<section id="id34">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id34" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>config:</strong> 🐛 Fix readthedocs build to only generate html. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/13fc207adbba82fa9cc2d4dcad91038aecafa34f"><code class="docutils literal notranslate"><span class="pre">13fc207</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-8-0-2023-09-06">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.8.0">v0.8.0</a> (2023-09-06)<a class="headerlink" href="#v0-8-0-2023-09-06" title="Permalink to this heading">#</a></h2>
+<section id="id35">
+<h3>✨ Features<a class="headerlink" href="#id35" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>model:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">LGBMModel</span></code> along with base class which can be extended for all types of future models. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/b47a2412e8925226d5612e4b57c521f562c51636"><code class="docutils literal notranslate"><span class="pre">b47a241</span></code></a>)</p></li>
+<li><p>✨ Add<code class="docutils literal notranslate"> <span class="pre">DataSchema</span></code> which tracks dataset features throughout the pipeline and methods. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e03bd2cbc9e75347eeea37f5f818d05a2548c3de"><code class="docutils literal notranslate"><span class="pre">e03bd2c</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> ✨ Update <code class="docutils literal notranslate"><span class="pre">BaseFeatureSelector</span></code> and children to use the <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">transform</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> pattern. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/62e4dd13a37a852f239c490d2693b20665095cf6"><code class="docutils literal notranslate"><span class="pre">62e4dd1</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">transform</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> to all <code class="docutils literal notranslate"><span class="pre">Transformers</span></code>, along with API and caching simplificatons. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/5cc4ebc9da3b3f3aa5e8788d1237ac2c79ee4693"><code class="docutils literal notranslate"><span class="pre">5cc4ebc</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">CacheHandler</span></code> which allows customization of read/write functions for each cached return value individually. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/609e084e7c354bed5a298b3a3a1c3b033d3db71d"><code class="docutils literal notranslate"><span class="pre">609e084</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id36">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id36" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>feature selection:</strong> 🐛 Add <code class="docutils literal notranslate"><span class="pre">DataSchema</span></code> as partial return from all <code class="docutils literal notranslate"><span class="pre">fit</span></code> methods in feature selectors. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ebf2484fbaac7bbe067ab1491964bc50f4d7d711"><code class="docutils literal notranslate"><span class="pre">ebf2484</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id37">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id37" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>cache:</strong> 🚸 Replace <code class="docutils literal notranslate"><span class="pre">disable_cache</span></code> with a check if <code class="docutils literal notranslate"><span class="pre">cache_size=0</span></code> for <code class="docutils literal notranslate"><span class="pre">LRUCacheMixin</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/cfd759297d2d0e3b21f0f79827baab7c8b882784"><code class="docutils literal notranslate"><span class="pre">cfd7592</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-7-0-2023-07-11">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.7.0">v0.7.0</a> (2023-07-11)<a class="headerlink" href="#v0-7-0-2023-07-11" title="Permalink to this heading">#</a></h2>
+<section id="id38">
+<h3>✨ Features<a class="headerlink" href="#id38" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>✨ Add fit transform support to all <code class="docutils literal notranslate"><span class="pre">FeatureSelector</span></code> along with refactoring the <code class="docutils literal notranslate"><span class="pre">LRUCacheMixin</span></code>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3df06011085a1230c00250260374e5fd5d325fad"><code class="docutils literal notranslate"><span class="pre">3df0601</span></code></a>)</p></li>
+<li><p>✨ Add support for separate fitting and transforming inside the pipeline. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/bb9b7a4ea9920d5588972a29e390bac4017b45af"><code class="docutils literal notranslate"><span class="pre">bb9b7a4</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id39">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id39" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data cleaning:</strong> 🐛 Switched to HDF5 as file format for faster I/O and better SageMaker support. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/61f9e42ef215485b16d83be9726040b829d5a3e7"><code class="docutils literal notranslate"><span class="pre">61f9e42</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-6-1-2023-06-30">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.6.1">v0.6.1</a> (2023-06-30)<a class="headerlink" href="#v0-6-1-2023-06-30" title="Permalink to this heading">#</a></h2>
+<section id="id40">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id40" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data cleaning:</strong> 🐛 Fix date32/64[day] not converted to datetime. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/98f4b26ef5eab26e47cdcc1fd0f31928e063d49a"><code class="docutils literal notranslate"><span class="pre">98f4b26</span></code></a>)</p></li>
+<li><p><strong>data source:</strong> 🐛 Fix bug where S3 buckets with no manifest caused crash. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/90788454dc8b2c1665f79746ae1392a8d4d067dd"><code class="docutils literal notranslate"><span class="pre">9078845</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id41">
+<h3>🏗️ Build<a class="headerlink" href="#id41" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>config:</strong> 🔧 Switch mypy for pyright and update configuration. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/5631aedd059bdd6aed2c8e78d09629d8894e5cb8"><code class="docutils literal notranslate"><span class="pre">5631aed</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-6-0-2023-06-26">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.6.0">v0.6.0</a> (2023-06-26)<a class="headerlink" href="#v0-6-0-2023-06-26" title="Permalink to this heading">#</a></h2>
+<section id="id42">
+<h3>✨ Features<a class="headerlink" href="#id42" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>cache:</strong> ✨ Add cache_group that can segment an instance cache into different isolated parts. (#66) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/5fa8c9c39b96402daab25f12dabdcf95f425e066"><code class="docutils literal notranslate"><span class="pre">5fa8c9c</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> ✨ Add cache_group that can segment an instance cache into different isolated parts. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/b5c3de5f1397bfb9422590ba037f431c2eaad9ac"><code class="docutils literal notranslate"><span class="pre">b5c3de5</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-5-0-2023-06-17">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.5.0">v0.5.0</a> (2023-06-17)<a class="headerlink" href="#v0-5-0-2023-06-17" title="Permalink to this heading">#</a></h2>
+<section id="id43">
+<h3>✨ Features<a class="headerlink" href="#id43" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>transformer:</strong> ✨ Add MinMaxScalerTransformer for normalizing numerical features. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/9b26c00ecefa12929a2316309ba5b3e55022b5a5"><code class="docutils literal notranslate"><span class="pre">9b26c00</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> ✨ Add MaxAbsScalerTransformer that scales numerical features. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/1fd2a9369bfb74eba3d0015024857070f31bbe34"><code class="docutils literal notranslate"><span class="pre">1fd2a93</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> ✨ Add CompositeTransformer for chaining together multiple transformers sequentially. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/006d74157167e4ddb2c575ca897662de8a1c0d4d"><code class="docutils literal notranslate"><span class="pre">006d741</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> ✨ Add LabelEncoderTransformer for ordinal encoding. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/41a4c45dcb7a232f2a8f3af3a39e9bcf4bcb3929"><code class="docutils literal notranslate"><span class="pre">41a4c45</span></code></a>)</p></li>
+<li><p><strong>transformer:</strong> ✨ Add FrequencyEncoderTransformer along with support for pipeline. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/465e6db3b2830e3cc3f996af9eacb36b8ccf8468"><code class="docutils literal notranslate"><span class="pre">465e6db</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id44">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id44" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>💫 Switch to tqdm.auto to prevent breaking in Jupyter notebooks. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/dc139cf3844d1a6beb7b5682b44275fd2f9ef2cf"><code class="docutils literal notranslate"><span class="pre">dc139cf</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id45">
+<h3>🧪 Tests<a class="headerlink" href="#id45" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>✅ Now _get_local_filenames returns a sorted list of filenames to ensure stability. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/774e8eb2a38e5904a170473c56523926b3acffb4"><code class="docutils literal notranslate"><span class="pre">774e8eb</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-2-2023-06-11">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.4.2">v0.4.2</a> (2023-06-11)<a class="headerlink" href="#v0-4-2-2023-06-11" title="Permalink to this heading">#</a></h2>
+<section id="performance-improvements">
+<h3>🚀 Performance improvements<a class="headerlink" href="#performance-improvements" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>⚡️ Optimize VarianceFeatureSelector when threshold is 0. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/906dde391d83bc3b07ac5a56bb690dba294e757f"><code class="docutils literal notranslate"><span class="pre">906dde3</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id46">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id46" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>➖ Remove pandas dependency. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/40e264c0604793e860887bbbd03b5c374fa55162"><code class="docutils literal notranslate"><span class="pre">40e264c</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id47">
+<h3>🤖 Continous Integration<a class="headerlink" href="#id47" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>semantic versioning:</strong> 👷 Add more sections to changelog based on conventional commit categories. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e5b15944ae98793273ed407b13867abf68783f36"><code class="docutils literal notranslate"><span class="pre">e5b1594</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-1-2023-06-04">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.4.1">v0.4.1</a> (2023-06-04)<a class="headerlink" href="#v0-4-1-2023-06-04" title="Permalink to this heading">#</a></h2>
+<section id="id48">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id48" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>feature selection:</strong> 🐛 Fix <code class="docutils literal notranslate"><span class="pre">FeatureSelector</span></code> cache to use tuple in… (#60) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/758cf5ee770567e89dfac6dc06a8539318492feb"><code class="docutils literal notranslate"><span class="pre">758cf5e</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> 🐛 Fix <code class="docutils literal notranslate"><span class="pre">FeatureSelector</span></code> cache to use tuple instead of frozenset to have stable fingerprint. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/cd824177e252ae00af4d2ed8cc50b607c4a4928f"><code class="docutils literal notranslate"><span class="pre">cd82417</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-4-0-2023-06-03">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.4.0">v0.4.0</a> (2023-06-03)<a class="headerlink" href="#v0-4-0-2023-06-03" title="Permalink to this heading">#</a></h2>
+<section id="id49">
+<h3>✨ Features<a class="headerlink" href="#id49" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>feature selection:</strong> ✨ Add  that filters out invariant features. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/798c26103b41fd32f71d16b7b8d40f647f2c849b"><code class="docutils literal notranslate"><span class="pre">798c261</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">PearsonCorrelationFeatureSelector</span></code> which drops highly correlated features. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/66e5cd28a4621172ed1c3d27cfc430b89d7da321"><code class="docutils literal notranslate"><span class="pre">66e5cd2</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> ✨ Add <code class="docutils literal notranslate"><span class="pre">CompositeFeatureSelector</span></code>, for chaining multiple feature selection steps on the same DataFrame. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3d75079d1bc9ab1102a9edb6dbb545b03f43b4dd"><code class="docutils literal notranslate"><span class="pre">3d75079</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> ✨ Add standard deviation feature selector. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/c56177bb7e25cbf763418707d09976290f659088"><code class="docutils literal notranslate"><span class="pre">c56177b</span></code></a>)</p></li>
+<li><p><strong>feature selection:</strong> ✨ Add missing rate feature selector. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d5ba8b57ae4102b2c5c424556d86640f2934dc46"><code class="docutils literal notranslate"><span class="pre">d5ba8b5</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id50">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id50" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>🐛 Fix typeguard breaking changes causing build to fail. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/66c6a8e24e04815f35dc18de5b3ccd20589fe79d"><code class="docutils literal notranslate"><span class="pre">66c6a8e</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id51">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id51" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>🔥 Unify dataset subpackage naming to verbs and modules to nouns. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3ffb909806ceae8162ac31719bb228e9238a334d"><code class="docutils literal notranslate"><span class="pre">3ffb909</span></code></a>)</p></li>
+<li><p>🔥 Rename subpackages in dataset to singular variant. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/51a829707d41dcb66f7fba3d5c8b34bad3618225"><code class="docutils literal notranslate"><span class="pre">51a8297</span></code></a>)</p></li>
+<li><p>🔥 Refactor entire project to improve maintainability. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/dd1d22c52b678d56cb4750a96997c897d1a7f35c"><code class="docutils literal notranslate"><span class="pre">dd1d22c</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-1-2023-05-21">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.3.1">v0.3.1</a> (2023-05-21)<a class="headerlink" href="#v0-3-1-2023-05-21" title="Permalink to this heading">#</a></h2>
+<section id="id52">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id52" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>:bug: Added notes to pipeline step docstrings. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d94f89921befafe6a81540c996626e7a849fd260"><code class="docutils literal notranslate"><span class="pre">d94f899</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id53">
+<h3>🛠️ Code Refactoring<a class="headerlink" href="#id53" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data source:</strong> :bug: Added note to the KaggleDataSource init docstring. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d5f12d32eb1492bc3c2566ff16e6fd370301754b"><code class="docutils literal notranslate"><span class="pre">d5f12d3</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id54">
+<h3>🤖 Continous Integration<a class="headerlink" href="#id54" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>:rocket: Removed semantic PR workflow and updated test workflow to not run on release commits. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/8138745913457e4e69858c180b2ebacac9f40861"><code class="docutils literal notranslate"><span class="pre">8138745</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-0-2023-05-21">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.3.0">v0.3.0</a> (2023-05-21)<a class="headerlink" href="#v0-3-0-2023-05-21" title="Permalink to this heading">#</a></h2>
+<section id="id55">
+<h3>✨ Features<a class="headerlink" href="#id55" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>new notes (#54) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/21239f7f7f26cb8fe7b419e81a3e7fe9dd3736fd"><code class="docutils literal notranslate"><span class="pre">21239f7</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id56">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id56" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data splitting:</strong> :bug: Added notes and examples to splitters docstrings. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/d162c8611c0284d0a83e4b5ad9664f964351d194"><code class="docutils literal notranslate"><span class="pre">d162c86</span></code></a>)</p></li>
+<li><p><strong>pipeline:</strong> :bug: Updated some docstrings. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/56b36fd70030b2d39351b74b3c0e4dce5bd9a06c"><code class="docutils literal notranslate"><span class="pre">56b36fd</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id57">
+<h3>🤖 Continous Integration<a class="headerlink" href="#id57" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>:rocket: Updated release to only trigger if the commit message does not contain chore(release). (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/c9f3f3f4a666bcbac44bf86478487057e95609e0"><code class="docutils literal notranslate"><span class="pre">c9f3f3f</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-0-2023-05-21">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.2.0">v0.2.0</a> (2023-05-21)<a class="headerlink" href="#v0-2-0-2023-05-21" title="Permalink to this heading">#</a></h2>
+<section id="id58">
+<h3>✨ Features<a class="headerlink" href="#id58" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>add data splitting step (#53) (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/a668b1a0cd61b6fa1970f401f8209accd40e083f"><code class="docutils literal notranslate"><span class="pre">a668b1a</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id59">
+<h3>📝 Documentation<a class="headerlink" href="#id59" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Removed duplicate row. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/5d77131341fb9d241fb179115f1dbd51c9962059"><code class="docutils literal notranslate"><span class="pre">5d77131</span></code></a>)</p></li>
+<li><p>Adding pre-commit check for conventional commits. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/dd2076e38711368a94ba7b454ce830caf23ebf1d"><code class="docutils literal notranslate"><span class="pre">dd2076e</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-3-2023-05-13">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.1.3">v0.1.3</a> (2023-05-13)<a class="headerlink" href="#v0-1-3-2023-05-13" title="Permalink to this heading">#</a></h2>
+<section id="id60">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id60" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>cache:</strong> :bug: Cache modules exposed in subpackage <strong>init</strong>. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/fd65e9df668a0003543a1fa2e3260f723a87285f"><code class="docutils literal notranslate"><span class="pre">fd65e9d</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-2-2023-05-13">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.1.2">v0.1.2</a> (2023-05-13)<a class="headerlink" href="#v0-1-2-2023-05-13" title="Permalink to this heading">#</a></h2>
+<section id="id61">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id61" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>cache:</strong> :bug: Fixed LRUCacheMixin eviction test case. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/ce5bfc17aabaf858778eb42ef40c9f38a9e2ae97"><code class="docutils literal notranslate"><span class="pre">ce5bfc1</span></code></a>)</p></li>
+<li><p>:bug: Temporarely disabled failing tests for cache. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/9c17960185606b6e9d150154bc4b6aac6592a7cc"><code class="docutils literal notranslate"><span class="pre">9c17960</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id62">
+<h3>📝 Documentation<a class="headerlink" href="#id62" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p>:memo: Fixed sphinx-autoapi build warnings. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/040963ae3e0bcf871ea80591d9efa43aee66c157"><code class="docutils literal notranslate"><span class="pre">040963a</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-0-2023-05-12">
+<h2><a class="reference external" href="https://github.com/klarna-incubator/mleko/releases/tag/v0.1.0">v0.1.0</a> (2023-05-12)<a class="headerlink" href="#v0-1-0-2023-05-12" title="Permalink to this heading">#</a></h2>
+<section id="id63">
+<h3>✨ Features<a class="headerlink" href="#id63" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>data source:</strong> :sparkles: Add KaggleDataSource to download the dataset from Kaggle by providing a destination directory, owner slug, dataset slug, and necessary API credentials. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/3fa07b633a4347c27b576ea93d38946d721babdf"><code class="docutils literal notranslate"><span class="pre">3fa07b6</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="id64">
+<h3>🐛 Bug Fixes<a class="headerlink" href="#id64" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>cache:</strong> :bug: Fixed test by not testing it… (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/e3a0ce91da26bf424b199105be164c33b3a6b354"><code class="docutils literal notranslate"><span class="pre">e3a0ce9</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> :bug: Try logging using assert to fix GH issue (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/5e247ec2de355148b1710a1691404f8cffc4bd31"><code class="docutils literal notranslate"><span class="pre">5e247ec</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> :bug: Attempting to fix test case failing in GH actions. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/4892591e9ab6244ec6494d9fc9532eeeb8f12c68"><code class="docutils literal notranslate"><span class="pre">4892591</span></code></a>)</p></li>
+<li><p><strong>cache:</strong> :bug: LRUCacheMixin now relies on file modification time instead of access time due to system limitations. (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/127d6578715f5e852e3638d8a037d072991034d7"><code class="docutils literal notranslate"><span class="pre">127d657</span></code></a>)</p></li>
+<li><p>:bug: Fixed docstrings for private methods in KaggleDataSource and removed xdoctest from build steps (<a class="reference external" href="https://github.com/klarna-incubator/mleko/commit/bb55cf55c149a8fdec3458799e987969174b5207"><code class="docutils literal notranslate"><span class="pre">bb55cf5</span></code></a>)</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="license.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">License</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="contributing.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Contributor Guide</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Klarna Bank AB
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#v4-3-0-2024-06-08">v4.3.0 (2024-06-08)</a><ul>
+<li><a class="reference internal" href="#features">✨ Features</a></li>
+<li><a class="reference internal" href="#bug-fixes">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v4-2-0-2024-05-21">v4.2.0 (2024-05-21)</a><ul>
+<li><a class="reference internal" href="#id1">✨ Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v4-1-0-2024-05-18">v4.1.0 (2024-05-18)</a><ul>
+<li><a class="reference internal" href="#id2">✨ Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v4-0-0-2024-05-09">v4.0.0 (2024-05-09)</a><ul>
+<li><a class="reference internal" href="#breaking-changes">⛔️ BREAKING CHANGES</a></li>
+<li><a class="reference internal" href="#id3">✨ Features</a></li>
+<li><a class="reference internal" href="#id4">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#code-refactoring">🛠️ Code Refactoring</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v3-2-0-2024-04-18">v3.2.0 (2024-04-18)</a><ul>
+<li><a class="reference internal" href="#id5">✨ Features</a></li>
+<li><a class="reference internal" href="#id6">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v3-1-0-2024-04-12">v3.1.0 (2024-04-12)</a><ul>
+<li><a class="reference internal" href="#id7">✨ Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v3-0-0-2024-04-05">v3.0.0 (2024-04-05)</a><ul>
+<li><a class="reference internal" href="#id8">⛔️ BREAKING CHANGES</a></li>
+<li><a class="reference internal" href="#id9">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v2-2-0-2024-03-22">v2.2.0 (2024-03-22)</a><ul>
+<li><a class="reference internal" href="#id10">✨ Features</a></li>
+<li><a class="reference internal" href="#documentation">📝 Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v2-1-0-2024-02-24">v2.1.0 (2024-02-24)</a><ul>
+<li><a class="reference internal" href="#id11">✨ Features</a></li>
+<li><a class="reference internal" href="#id12">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id13">📝 Documentation</a></li>
+<li><a class="reference internal" href="#tests">🧪 Tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v2-0-0-2024-02-07">v2.0.0 (2024-02-07)</a><ul>
+<li><a class="reference internal" href="#id14">⛔️ BREAKING CHANGES</a></li>
+<li><a class="reference internal" href="#id15">✨ Features</a></li>
+<li><a class="reference internal" href="#id16">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id17">🛠️ Code Refactoring</a></li>
+<li><a class="reference internal" href="#id18">📝 Documentation</a></li>
+<li><a class="reference internal" href="#continous-integration">🤖 Continous Integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-6-2024-01-25">v1.2.6 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id19">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-5-2024-01-25">v1.2.5 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id20">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-4-2024-01-25">v1.2.4 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id21">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#build">🏗️ Build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-3-2024-01-25">v1.2.3 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id22">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-2-2024-01-25">v1.2.2 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id23">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-1-2024-01-25">v1.2.1 (2024-01-25)</a><ul>
+<li><a class="reference internal" href="#id24">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id25">🏗️ Build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-2-0-2023-10-09">v1.2.0 (2023-10-09)</a><ul>
+<li><a class="reference internal" href="#id26">✨ Features</a></li>
+<li><a class="reference internal" href="#id27">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#style">🎨 Style</a></li>
+<li><a class="reference internal" href="#id28">🏗️ Build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-1-0-2023-09-27">v1.1.0 (2023-09-27)</a><ul>
+<li><a class="reference internal" href="#id29">✨ Features</a></li>
+<li><a class="reference internal" href="#id30">🧪 Tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v1-0-0-2023-09-20">v1.0.0 (2023-09-20)</a><ul>
+<li><a class="reference internal" href="#id31">⛔️ BREAKING CHANGES</a></li>
+<li><a class="reference internal" href="#id32">✨ Features</a></li>
+<li><a class="reference internal" href="#id33">📝 Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-8-1-2023-09-07">v0.8.1 (2023-09-07)</a><ul>
+<li><a class="reference internal" href="#id34">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-8-0-2023-09-06">v0.8.0 (2023-09-06)</a><ul>
+<li><a class="reference internal" href="#id35">✨ Features</a></li>
+<li><a class="reference internal" href="#id36">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id37">🛠️ Code Refactoring</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-7-0-2023-07-11">v0.7.0 (2023-07-11)</a><ul>
+<li><a class="reference internal" href="#id38">✨ Features</a></li>
+<li><a class="reference internal" href="#id39">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-6-1-2023-06-30">v0.6.1 (2023-06-30)</a><ul>
+<li><a class="reference internal" href="#id40">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id41">🏗️ Build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-6-0-2023-06-26">v0.6.0 (2023-06-26)</a><ul>
+<li><a class="reference internal" href="#id42">✨ Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-5-0-2023-06-17">v0.5.0 (2023-06-17)</a><ul>
+<li><a class="reference internal" href="#id43">✨ Features</a></li>
+<li><a class="reference internal" href="#id44">🛠️ Code Refactoring</a></li>
+<li><a class="reference internal" href="#id45">🧪 Tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-4-2-2023-06-11">v0.4.2 (2023-06-11)</a><ul>
+<li><a class="reference internal" href="#performance-improvements">🚀 Performance improvements</a></li>
+<li><a class="reference internal" href="#id46">🛠️ Code Refactoring</a></li>
+<li><a class="reference internal" href="#id47">🤖 Continous Integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-4-1-2023-06-04">v0.4.1 (2023-06-04)</a><ul>
+<li><a class="reference internal" href="#id48">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-4-0-2023-06-03">v0.4.0 (2023-06-03)</a><ul>
+<li><a class="reference internal" href="#id49">✨ Features</a></li>
+<li><a class="reference internal" href="#id50">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id51">🛠️ Code Refactoring</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-3-1-2023-05-21">v0.3.1 (2023-05-21)</a><ul>
+<li><a class="reference internal" href="#id52">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id53">🛠️ Code Refactoring</a></li>
+<li><a class="reference internal" href="#id54">🤖 Continous Integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-3-0-2023-05-21">v0.3.0 (2023-05-21)</a><ul>
+<li><a class="reference internal" href="#id55">✨ Features</a></li>
+<li><a class="reference internal" href="#id56">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id57">🤖 Continous Integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-2-0-2023-05-21">v0.2.0 (2023-05-21)</a><ul>
+<li><a class="reference internal" href="#id58">✨ Features</a></li>
+<li><a class="reference internal" href="#id59">📝 Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-1-3-2023-05-13">v0.1.3 (2023-05-13)</a><ul>
+<li><a class="reference internal" href="#id60">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-1-2-2023-05-13">v0.1.2 (2023-05-13)</a><ul>
+<li><a class="reference internal" href="#id61">🐛 Bug Fixes</a></li>
+<li><a class="reference internal" href="#id62">📝 Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-1-0-2023-05-12">v0.1.0 (2023-05-12)</a><ul>
+<li><a class="reference internal" href="#id63">✨ Features</a></li>
+<li><a class="reference internal" href="#id64">🐛 Bug Fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>
