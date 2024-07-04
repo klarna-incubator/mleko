@@ -1,0 +1,118 @@
+:py:mod:`mleko.dataset.feature_select.pearson_correlation_feature_selector`
+===========================================================================
+
+.. py:module:: mleko.dataset.feature_select.pearson_correlation_feature_selector
+
+.. autoapi-nested-parse::
+
+   Module for the Pearson correlation feature selector.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.pearson_correlation_feature_selector.PearsonCorrelationFeatureSelector
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.pearson_correlation_feature_selector.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: PearsonCorrelationFeatureSelector(correlation_threshold: float, features: list[str] | tuple[str, Ellipsis] | None = None, ignore_features: list[str] | tuple[str, Ellipsis] | None = None, cache_directory: str | pathlib.Path = 'data/pearson-correlation-feature-selector', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.feature_select.base_feature_selector.BaseFeatureSelector`
+
+   Selects features based on the Pearson correlation.
+
+   Initializes the feature selector.
+
+   Will drop one of two features that are highly correlated. The feature to be dropped is the one with the lowest
+   average correlation with all other features. If both features have the same average correlation, the first
+   feature will be dropped. The default set of features is all numeric features in the DataFrame.
+
+   .. note:: Only works with numeric features.
+
+   .. warning::
+
+      Make sure to ignore any important features that need to be kept, such as the
+      target feature or some identifier.
+
+   :param correlation_threshold: The maximum correlation allowed for a feature to be selected.
+   :param features: List of feature names to be used by the feature selector.
+   :param ignore_features: List of feature names to be ignored by the feature selector.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.feature_select import PearsonCorrelationFeatureSelector
+   >>> from mleko.utils.vaex_helpers import get_column
+   >>> df = vaex.from_arrays(
+   ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+   ...     b=[1, 2, 3, 4, 5, 6, 7, 8, 9, 9],
+   ...     c=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+   ... )
+   >>> ds = DataSchema(numerical=["a", "b", "c"])
+   >>> feature_selector = PearsonCorrelationFeatureSelector(
+   ...     correlation_threshold=0.75,
+   ... )
+   >>> ds, _, df = feature_selector.fit_transform(ds, df)
+   >>> df.get_column_names()
+   ['a', 'c']
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, set[str]]
+
+      Fits the feature selector on the input data.
+
+      :param data_schema: The DataSchema of the DataFrame.
+      :param dataframe: The DataFrame to fit the feature selector on.
+
+      :returns: Updated DataSchema and the set of features to be dropped.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Selects features based on the Pearson correlation.
+
+      :param data_schema: The DataSchema of the DataFrame.
+      :param dataframe: The DataFrame to select features from.
+
+      :returns: The updated DataSchema and DataFrame with the selected features.
+
+
+   .. py:method:: _default_features(data_schema: mleko.dataset.data_schema.DataSchema) -> tuple[str, Ellipsis]
+
+      Returns the default set of features.
+
+      :param data_schema: The DataSchema of the DataFrame.
+
+      :returns: Tuple of default features.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns a hashable fingerprint of the feature selector.
+
+      Append the pearson correlation threshold to the fingerprint.
+
+      :returns: The fingerprint of the feature selector.
+
+
+

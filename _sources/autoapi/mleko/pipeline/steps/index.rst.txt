@@ -1,0 +1,62 @@
+:py:mod:`mleko.pipeline.steps`
+==============================
+
+.. py:module:: mleko.pipeline.steps
+
+.. autoapi-nested-parse::
+
+   Subpackage containing specialized pipeline steps for various data processing tasks.
+
+   This subpackage offers a collection of pipeline steps, each designed for a specific purpose: data ingestion,
+   data conversion, and other data manipulation tasks. By using these unique steps sequentially, you can create a
+   complete data processing workflow within the pipeline.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   convert_step/index.rst
+   export_step/index.rst
+   feature_select_step/index.rst
+   filter_step/index.rst
+   ingest_step/index.rst
+   model_step/index.rst
+   split_step/index.rst
+   transform_step/index.rst
+   tune_step/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.steps.ConvertStep
+   mleko.pipeline.steps.ExportStep
+   mleko.pipeline.steps.FeatureSelectStep
+   mleko.pipeline.steps.FilterStep
+   mleko.pipeline.steps.IngestStep
+   mleko.pipeline.steps.ModelStep
+   mleko.pipeline.steps.SplitStep
+   mleko.pipeline.steps.TransformStep
+   mleko.pipeline.steps.TuneStep
+
+
+
+
+
+
+
+
+
+
+
+
+

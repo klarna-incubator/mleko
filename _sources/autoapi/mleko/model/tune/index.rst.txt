@@ -1,0 +1,41 @@
+:py:mod:`mleko.model.tune`
+==========================
+
+.. py:module:: mleko.model.tune
+
+.. autoapi-nested-parse::
+
+   The subpackage provides hyperparameter tuning functionality.
+
+   The following hyperparameter tuners are provided by the subpackage:
+       - `BaseTuner`: The abstract base class for all hyperparameter tuners.
+       - `OptunaTuner`: A hyperparameter tuner that uses Optuna for hyperparameter tuning.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_tuner/index.rst
+   optuna_tuner/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.BaseTuner
+   mleko.model.tune.OptunaTuner
+
+
+
+
+
+

@@ -1,0 +1,377 @@
+:py:mod:`mleko.utils.custom_logger`
+===================================
+
+.. py:module:: mleko.utils.custom_logger
+
+.. autoapi-nested-parse::
+
+   Custom logging module providing a CustomLogger and CustomFormatter.
+
+   This module defines CustomLogger and CustomFormatter classes that extend the functionality of the standard Python
+   logging module. CustomLogger provides colored output, configurable log levels, and improved stack trace information.
+   CustomFormatter enables colored log level names and custom formatting of log records.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.custom_logger.CustomFormatter
+   mleko.utils.custom_logger.CustomLogger
+
+
+
+
+.. py:class:: CustomFormatter
+
+   Bases: :py:obj:`logging.Formatter`
+
+   A custom formatter to add colors and more detailed information for log messages.
+
+   Initialize the custom formatter with the desired date and message format.
+
+   .. py:attribute:: RESET_SEQ
+      :value: '\x1b[0m'
+
+      
+
+   .. py:attribute:: COLOR_SEQ
+      :value: '\x1b[1;%dm'
+
+      
+
+   .. py:attribute:: BOLD_SEQ
+      :value: '\x1b[1m'
+
+      
+
+   .. py:attribute:: COLORS
+
+      
+
+   .. py:attribute:: FORMAT
+
+      
+
+   .. py:attribute:: converter
+
+      
+
+   .. py:attribute:: default_time_format
+      :value: '%Y-%m-%d %H:%M:%S'
+
+      
+
+   .. py:attribute:: default_msec_format
+      :value: '%s,%03d'
+
+      
+
+   .. py:method:: format(record: logging.LogRecord) -> str
+
+      Format a log record according to the specified format.
+
+      :param record: The log record to be formatted.
+
+      :returns: The formatted log message as a string.
+
+
+   .. py:method:: formatTime(record, datefmt=None)
+
+      Return the creation time of the specified LogRecord as formatted text.
+
+      This method should be called from format() by a formatter which
+      wants to make use of a formatted time. This method can be overridden
+      in formatters to provide for any specific requirement, but the
+      basic behaviour is as follows: if datefmt (a string) is specified,
+      it is used with time.strftime() to format the creation time of the
+      record. Otherwise, an ISO8601-like (or RFC 3339-like) format is used.
+      The resulting string is returned. This function uses a user-configurable
+      function to convert the creation time to a tuple. By default,
+      time.localtime() is used; to change this for a particular formatter
+      instance, set the 'converter' attribute to a function with the same
+      signature as time.localtime() or time.gmtime(). To change it for all
+      formatters, for example if you want all logging times to be shown in GMT,
+      set the 'converter' attribute in the Formatter class.
+
+
+   .. py:method:: formatException(ei)
+
+      Format and return the specified exception information as a string.
+
+      This default implementation just uses
+      traceback.print_exception()
+
+
+   .. py:method:: usesTime()
+
+      Check if the format uses the creation time of the record.
+
+
+   .. py:method:: formatMessage(record)
+
+
+   .. py:method:: formatStack(stack_info)
+
+      This method is provided as an extension point for specialized
+      formatting of stack information.
+
+      The input data is a string as returned from a call to
+      :func:`traceback.print_stack`, but with the last trailing newline
+      removed.
+
+      The base implementation just returns the value passed in.
+
+
+
+.. py:class:: CustomLogger
+
+   Bases: :py:obj:`logging.Logger`
+
+   A custom logger class to use the `CustomFormatter` class.
+
+   Initialize the custom logger and set the log level and default handler.
+
+   .. py:attribute:: _global_log_level
+      :type: int
+
+      
+
+   .. py:attribute:: _instances
+      :type: list[CustomLogger]
+      :value: []
+
+      
+
+   .. py:method:: set_global_log_level(log_level: int) -> None
+      :staticmethod:
+
+      Set the global log level for all instances of CustomLogger.
+
+      :param log_level: The minimum log level to output.
+
+
+   .. py:method:: debug(msg: object, *args: object, exc_info: Any = None, stack_info: bool = False, stacklevel: int = 2, extra: Mapping[str, object] | None = None) -> None
+
+      Log a debug message.
+
+      :param msg: The message to be logged.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: info(msg: object, *args: object, exc_info: Any = None, stack_info: bool = False, stacklevel: int = 2, extra: Mapping[str, object] | None = None) -> None
+
+      Log an info message.
+
+      :param msg: The message to be logged.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: warning(msg: object, *args: object, exc_info: Any = None, stack_info: bool = False, stacklevel: int = 2, extra: Mapping[str, object] | None = None) -> None
+
+      Log a warning message.
+
+      :param msg: The message to be logged.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: error(msg: object, *args: object, exc_info: Any = None, stack_info: bool = False, stacklevel: int = 2, extra: Mapping[str, object] | None = None) -> None
+
+      Log an error message.
+
+      :param msg: The message to be logged.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: critical(msg: object, *args: object, exc_info: Any = None, stack_info: bool = False, stacklevel: int = 2, extra: Mapping[str, object] | None = None) -> None
+
+      Log a critical message.
+
+      :param msg: The message to be logged.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: set_level(log_level: int) -> None
+
+      Set the minimum log level for this CustomLogger instance.
+
+      :param log_level: The minimum logging level to output.
+
+
+   .. py:method:: _route_message(message: object, log_level: int, *args: object, exc_info: Any, stack_info: bool, stacklevel: int, extra: Mapping[str, object] | None) -> None
+
+      Route and clean the log message based on its content.
+
+      :param message: The log message to be routed.
+      :param log_level: The original log level at which the message was sent.
+      :param args: Additional arguments propagated to the built-in `logging` module.
+      :param exc_info: Exception information to log.
+      :param stack_info: Whether to add stack information to the log message.
+      :param stacklevel: Level in the stack frame to log the origin of this log record.
+      :param extra: Additional information to log.
+
+
+   .. py:method:: setLevel(level)
+
+      Set the logging level of this logger.  level must be an int or a str.
+
+
+   .. py:method:: warn(msg, *args, **kwargs)
+
+
+   .. py:method:: exception(msg, *args, exc_info=True, **kwargs)
+
+      Convenience method for logging an ERROR with exception information.
+
+
+   .. py:method:: fatal(msg, *args, **kwargs)
+
+      Don't use this method, use critical() instead.
+
+
+   .. py:method:: log(level, msg, *args, **kwargs)
+
+      Log 'msg % args' with the integer severity 'level'.
+
+      To pass exception information, use the keyword argument exc_info with
+      a true value, e.g.
+
+      logger.log(level, "We have a %s", "mysterious problem", exc_info=1)
+
+
+   .. py:method:: findCaller(stack_info=False, stacklevel=1)
+
+      Find the stack frame of the caller so that we can note the source
+      file name, line number and function name.
+
+
+   .. py:method:: makeRecord(name, level, fn, lno, msg, args, exc_info, func=None, extra=None, sinfo=None)
+
+      A factory method which can be overridden in subclasses to create
+      specialized LogRecords.
+
+
+   .. py:method:: _log(level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1)
+
+      Low-level logging routine which creates a LogRecord and then calls
+      all the handlers of this logger to handle the record.
+
+
+   .. py:method:: handle(record)
+
+      Call the handlers for the specified record.
+
+      This method is used for unpickled records received from a socket, as
+      well as those created locally. Logger-level filtering is applied.
+
+
+   .. py:method:: addHandler(hdlr)
+
+      Add the specified handler to this logger.
+
+
+   .. py:method:: removeHandler(hdlr)
+
+      Remove the specified handler from this logger.
+
+
+   .. py:method:: hasHandlers()
+
+      See if this logger has any handlers configured.
+
+      Loop through all handlers for this logger and its parents in the
+      logger hierarchy. Return True if a handler was found, else False.
+      Stop searching up the hierarchy whenever a logger with the "propagate"
+      attribute set to zero is found - that will be the last logger which
+      is checked for the existence of handlers.
+
+
+   .. py:method:: callHandlers(record)
+
+      Pass a record to all relevant handlers.
+
+      Loop through all handlers for this logger and its parents in the
+      logger hierarchy. If no handler was found, output a one-off error
+      message to sys.stderr. Stop searching up the hierarchy whenever a
+      logger with the "propagate" attribute set to zero is found - that
+      will be the last logger whose handlers are called.
+
+
+   .. py:method:: getEffectiveLevel()
+
+      Get the effective level for this logger.
+
+      Loop through this logger and its parents in the logger hierarchy,
+      looking for a non-zero logging level. Return the first one found.
+
+
+   .. py:method:: isEnabledFor(level)
+
+      Is this logger enabled for level 'level'?
+
+
+   .. py:method:: getChild(suffix)
+
+      Get a logger which is a descendant to this one.
+
+      This is a convenience method, such that
+
+      logging.getLogger('abc').getChild('def.ghi')
+
+      is the same as
+
+      logging.getLogger('abc.def.ghi')
+
+      It's useful, for example, when the parent logger is named using
+      __name__ rather than a literal string.
+
+
+   .. py:method:: addFilter(filter)
+
+      Add the specified filter to this handler.
+
+
+   .. py:method:: removeFilter(filter)
+
+      Remove the specified filter from this handler.
+
+
+   .. py:method:: filter(record)
+
+      Determine if a record is loggable by consulting all the filters.
+
+      The default is to allow the record to be logged; any filter can veto
+      this and the record is then dropped. Returns a zero value if a record
+      is to be dropped, else non-zero.
+
+      .. versionchanged:: 3.2
+
+         Allow filters to be just callables.
+
+
+

@@ -1,0 +1,95 @@
+:py:mod:`mleko.cache.handlers`
+==============================
+
+.. py:module:: mleko.cache.handlers
+
+.. autoapi-nested-parse::
+
+   The subpackage provides common cache handlers for serializing and deserializing data to the disk.
+
+   To implement a custom cache handler, you need to create a `CacheHandler` object with the following attributes:
+       - `writer`: A function that takes a Path object and data as input and saves the data to the cache file.
+       - `reader`: A function that takes a Path object as input and returns the deserialized data stored in the cache file.
+       - `suffix`: The suffix of the cache files.
+
+   The following cache handlers are provided by the subpackage:
+       - `JOBLIB_CACHE_HANDLER`: A cache handler for Python objects using joblib
+       - `PICKLE_CACHE_HANDLER`: A cache handler for pickling Python objects.
+       - `VAEX_DATAFRAME_CACHE_HANDLER`: A cache handler for `vaex` DataFrames.
+       - `JSON_CACHE_HANDLER`: A cache handler for serializing and deserializing data using JSON.
+       - `STRING_CACHE_HANDLER`: A cache handler for serializing and deserializing string data.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_cache_handler/index.rst
+   joblib_cache_handler/index.rst
+   json_cache_handler/index.rst
+   pickle_cache_handler/index.rst
+   string_cache_handler/index.rst
+   vaex_cache_handler/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.CacheHandler
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.read_joblib
+   mleko.cache.handlers.write_joblib
+   mleko.cache.handlers.read_json
+   mleko.cache.handlers.write_json
+   mleko.cache.handlers.read_pickle
+   mleko.cache.handlers.write_pickle
+   mleko.cache.handlers.read_string
+   mleko.cache.handlers.write_string
+   mleko.cache.handlers.read_vaex_dataframe
+   mleko.cache.handlers.write_vaex_dataframe
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.JOBLIB_CACHE_HANDLER
+   mleko.cache.handlers.JSON_CACHE_HANDLER
+   mleko.cache.handlers.PICKLE_CACHE_HANDLER
+   mleko.cache.handlers.STRING_CACHE_HANDLER
+   mleko.cache.handlers.VAEX_DATAFRAME_CACHE_HANDLER
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

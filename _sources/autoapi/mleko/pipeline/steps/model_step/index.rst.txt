@@ -1,0 +1,562 @@
+:py:mod:`mleko.pipeline.steps.model_step`
+=========================================
+
+.. py:module:: mleko.pipeline.steps.model_step
+
+.. autoapi-nested-parse::
+
+   Module containing the ModelStep class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.steps.model_step.ModelStepInputFitType
+   mleko.pipeline.steps.model_step.ModelStepInputTransformType
+   mleko.pipeline.steps.model_step.ModelStepOutputFitType
+   mleko.pipeline.steps.model_step.ModelStepOutputTransformType
+   mleko.pipeline.steps.model_step.ModelStepOutputFitTransformType
+   mleko.pipeline.steps.model_step.ModelStep
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.steps.model_step.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: ModelStepInputFitType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The input type of the ModelStep when action is 'fit'.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: data_schema
+      :type: Union[str, mleko.dataset.data_schema.DataSchema]
+
+      DataSchema or the key for the DataSchema to be used for training.
+
+   .. py:attribute:: dataframe
+      :type: Union[str, vaex.DataFrame]
+
+      DataFrame or the key for the DataFrame to be used for training.
+
+   .. py:attribute:: validation_dataframe
+      :type: Optional[Union[str, vaex.DataFrame]]
+
+      DataFrame or the key for the validation DataFrame to be used for training.
+
+   .. py:attribute:: hyperparameters
+      :type: Optional[Union[str, mleko.model.base_model.HyperparametersType]]
+
+      Hyperparameters or the key for the hyperparameters to be used for training.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ModelStepInputTransformType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The input type of the ModelStep when action is 'transform'.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: data_schema
+      :type: Union[str, mleko.dataset.data_schema.DataSchema]
+
+      DataSchema or the key for the DataSchema to be used for prediction.
+
+   .. py:attribute:: dataframe
+      :type: Union[str, vaex.DataFrame]
+
+      DataFrame or the key for the DataFrame to be used for prediction.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ModelStepOutputFitType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The output type of the ModelStep when action is 'fit'.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: model
+      :type: str
+
+      The key for the fitted model after training.
+
+   .. py:attribute:: metrics
+      :type: str
+
+      The key for the metrics dictionary after training.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ModelStepOutputTransformType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The output type of the ModelStep when action is 'transform'.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: dataframe
+      :type: str
+
+      The key for the transformed DataFrame after prediction.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ModelStepOutputFitTransformType
+
+   Bases: :py:obj:`ModelStepOutputFitType`, :py:obj:`ModelStepOutputTransformType`
+
+   The output type of the ModelStep when action is 'fit_transform'.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: validation_dataframe
+      :type: Optional[str]
+
+      The key for the transformed validation DataFrame after prediction.
+
+   .. py:attribute:: model
+      :type: str
+
+      The key for the fitted model after training.
+
+   .. py:attribute:: metrics
+      :type: str
+
+      The key for the metrics dictionary after training.
+
+   .. py:attribute:: dataframe
+      :type: str
+
+      The key for the transformed DataFrame after prediction.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ModelStep(model: mleko.model.base_model.BaseModel, action: mleko.pipeline.pipeline_step.FitTransformAction, inputs: ModelStepInputFitType | ModelStepInputTransformType, outputs: ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType, cache_group: str | None = None)
+
+   Bases: :py:obj:`mleko.pipeline.pipeline_step.FitTransformPipelineStep`
+
+   Pipeline step for model training and prediction.
+
+   Initialize the ModelStep with the specified model.
+
+   The action parameter specifies whether the model should be fitted, transformed, or both. If the action
+   is "fit" the `ModelStep` will return the fitted model. If the action is "transform" the
+   `ModelStep` will return the predictions of the DataFrame. If the action is "fit_transform" the `ModelStep`
+   will return both the fitted model and the predictions of the DataFrame in the specified order.
+
+   .. note::
+
+      The hyperparameters input is optional. If it is not provided, the model will be trained using the
+      default hyperparameters configured in the model.
+
+   :param model: The model used for training and prediction.
+   :param action: The action to perform, one of "fit", "transform", or "fit_transform".
+   :param inputs: A dictionary of input keys following the `ModelStepInputFitType` or `ModelStepInputTransformType`
+                  schema, depending on the action.
+   :param outputs: A list of output keys following the `ModelStepOutputFitType`, `ModelStepOutputTransformType`, or
+                   `ModelStepOutputFitTransformType` schema, depending on the action.
+   :param cache_group: The cache group to use.
+
+   .. py:attribute:: _inputs
+      :type: ModelStepInputFitType | ModelStepInputTransformType
+
+      
+
+   .. py:attribute:: _outputs
+      :type: ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType
+
+      
+
+   .. py:attribute:: _action
+      :type: FitTransformAction
+
+      
+
+   .. py:method:: execute(data_container: mleko.pipeline.data_container.DataContainer, force_recompute: bool, disable_cache: bool) -> mleko.pipeline.data_container.DataContainer
+
+      Perform actions using the configured model.
+
+      :param data_container: Contains the input.
+      :param force_recompute: Whether to force the step to recompute its output, even if it already exists.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: A DataContainer containing the output of the action performed by the step, either the fitted model,
+                the predictions on the DataFrame, or both.
+
+
+   .. py:method:: _get_input_model() -> type[ModelStepInputFitType | ModelStepInputTransformType]
+
+      Get the input type for the TransformStep.
+
+      :returns: Input type for the TransformStep.
+
+
+   .. py:method:: _get_output_model() -> type[ModelStepOutputFitType | ModelStepOutputTransformType | ModelStepOutputFitTransformType]
+
+      Get the output type for the TransformStep.
+
+      :returns: Output type for the TransformStep.
+
+
+   .. py:method:: _validate_and_get_input(input_object: str | T, expected_type: type[T], data_container: mleko.pipeline.data_container.DataContainer, is_optional: bool = False) -> T
+
+      Validate and get the input from the data container or as a direct value.
+
+      If the input is a string, it is treated as a key to look up in the data container. If it is not a string,
+      it is treated as the input value itself. The method validates the input type, and returns the input value
+      if it is valid.
+
+      .. warning::
+
+         This method does not handle subscripted types, such as `List[str]`. It only handles simple types. If you
+         need to validate a subscripted type, you should do so manually after retrieving the input value from this
+         method.
+
+      :param input_object: The input key or value to validate and retrieve.
+      :param expected_type: The expected type of the input value.
+      :param data_container: The data container containing the input data.
+      :param is_optional: Whether the input is optional.
+
+      :raises ValueError: If the input is invalid or not found in the data container.
+
+      :returns: The input value if it is valid, or None if it is optional and not found in the data container.
+
+
+   .. py:method:: _validate_inputs() -> None
+
+      Validates the step's inputs using TypeDict models.
+
+      :raises ValueError: If the inputs are not a dictionary.
+
+
+   .. py:method:: _validate_outputs() -> None
+
+      Validates the step's outputs using TypeDict models.
+
+      :raises ValueError: If the outputs are not a dictionary.
+
+
+

@@ -1,0 +1,165 @@
+:py:mod:`mleko.dataset.convert.csv_to_vaex_converter`
+=====================================================
+
+.. py:module:: mleko.dataset.convert.csv_to_vaex_converter
+
+.. autoapi-nested-parse::
+
+   The module contains the `CSVToVaexConverter`, which converts CSV to a random-access `vaex` compatible format.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.convert.csv_to_vaex_converter.CSVToVaexConverter
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.convert.csv_to_vaex_converter.write_vaex_dataframe_with_cleanup
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.convert.csv_to_vaex_converter.logger
+   mleko.dataset.convert.csv_to_vaex_converter.V_CPU_COUNT
+   mleko.dataset.convert.csv_to_vaex_converter.RESERVED_KEYWORDS
+
+
+.. py:data:: logger
+
+   A module-level logger instance.
+
+.. py:data:: V_CPU_COUNT
+
+   A module-level constant representing the total number of CPUs available on the current system.
+
+.. py:data:: RESERVED_KEYWORDS
+
+   A module-level constant representing the reserved keywords in Python.
+
+.. py:function:: write_vaex_dataframe_with_cleanup(cache_file_path: pathlib.Path, output: vaex.DataFrame) -> None
+
+   Writes the results of the DataFrame conversion to a file and cleans up the cache directory.
+
+   :param cache_file_path: The path of the cache file to be written.
+   :param output: The Vaex DataFrame to be saved in the cache file.
+
+
+.. py:class:: CSVToVaexConverter(forced_numerical_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), forced_categorical_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), forced_boolean_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), drop_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), meta_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), drop_rows_with_na_columns: list[str] | tuple[str, Ellipsis] | tuple[] = (), na_values: list[str] | tuple[str, Ellipsis] | tuple[] = ('-9998', '-9998.0', '-9999', '-9999.0', '-99', '-99.0', 'nan', 'none', 'non', 'Nan', 'None', 'Non', '', 'N/A', 'N/a', 'unknown', 'missing'), true_values: list[str] | tuple[str, Ellipsis] | tuple[] = ('t', 'True', 'true', '1'), false_values: list[str] | tuple[str, Ellipsis] | tuple[] = ('f', 'False', 'false', '0'), downcast_float: bool = False, random_state: int | None = 42, num_workers: int = V_CPU_COUNT, cache_directory: str | pathlib.Path = 'data/csv-to-vaex-converter', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.convert.base_converter.BaseConverter`
+
+   A class that converts CSV to a random-access `vaex` compatible format.
+
+   Initializes the `CSVToArrowConverter` with the necessary configurations and parameters.
+
+   :param forced_numerical_columns: A sequence of column names to force as numerical type.
+   :param forced_categorical_columns: A sequence of column names to force as categorical type.
+   :param forced_boolean_columns: A sequence of column names to force as boolean type.
+   :param drop_columns: A sequence of column names to drop during conversion.
+   :param meta_columns: A sequence of column names to be considered as metadata (e.g. ID or target columns).
+   :param drop_rows_with_na_columns: A sequence of column names to drop rows with missing values.
+   :param na_values: A sequence of strings to consider as NaN or missing values.
+   :param true_values: A sequence of strings to consider as True values.
+   :param false_values: A sequence of strings to consider as False values.
+   :param downcast_float: If True, downcast float64 to float32 during conversion.
+   :param random_state: A seed for the random number generator.
+   :param num_workers: Number of workers to use for parallel processing.
+   :param cache_directory: The directory where the converted files will be saved.
+   :param cache_size: Maximum number of cache entries for the LRUCacheMixin.
+
+   .. warning::
+
+      The `forced_numerical_columns`, `forced_categorical_columns`, `forced_boolean_columns`, and `drop_columns`
+      parameters are mutually exclusive. Meaning, a column cannot be specified in more than one of these
+      parameters. If a column is specified in more than one of these parameters, the last parameter will be used
+      and the previous ones will be ignored.
+
+   .. rubric:: Example
+
+   >>> import vaex
+   >>> from mleko.dataset.convert import CSVToArrowConverter
+   >>> converter = CSVToArrowConverter(
+   ...     forced_numerical_columns=["x"],
+   ...     forced_categorical_columns=["y"],
+   ...     forced_boolean_columns=["z"],
+   ...     drop_columns=["a"],
+   ...     na_values=["-9999"],
+   ...     true_values=["t"],
+   ...     false_values=["f"],
+   ...     downcast_float=True,
+   ...     random_state=42,
+   ...     num_workers=4,
+   ...     cache_size=1,
+   ... )
+   >>> df = converter.convert(["data.csv"])
+
+   .. py:method:: convert(file_paths: list[pathlib.Path] | list[str], cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Converts a list of CSV files to Arrow format and returns a `vaex` dataframe joined from the converted data.
+
+      The method takes care of caching, and results will be reused accordingly unless `force_recompute`
+      is set to True. The resulting dataframe is a `vaex` DataFrame joined from the converted data.
+      The conversion is done in chunks to optimize parallel processing.
+
+      .. note::
+
+         Will read the first `100,000/len(file_paths)` rows of each file to determine if the file is the same as the
+         one in the cache. If the file is the same, the cache will be used. Otherwise, the file will be converted
+         and the cache will be updated.
+
+      :param file_paths: A list of file paths to be converted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: If set to True, forces recomputation and ignores the cache.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: The resulting dataframe with the combined converted data.
+
+
+   .. py:method:: _convert_csv_file_to_arrow(file_path: pathlib.Path | str, output_directory: pathlib.Path, forced_numerical_columns: tuple[str, Ellipsis], forced_categorical_columns: tuple[str, Ellipsis], forced_boolean_columns: tuple[str, Ellipsis], drop_columns: tuple[str, Ellipsis], na_values: tuple[str, Ellipsis], true_values: tuple[str, Ellipsis], false_values: tuple[str, Ellipsis], downcast_float: bool) -> None
+      :staticmethod:
+
+      Converts a single CSV file to Arrow format using the provided options and saves it to the output directory.
+
+      This operation is done in chunks to optimize parallel processing. The resulting dataframe is saved in the
+      output directory with the given suffix.
+
+      :param file_path: The path of the CSV file to be converted.
+      :param output_directory: The directory where the converted file should be saved.
+      :param forced_numerical_columns: A sequence of column names to be forced to numerical type.
+      :param forced_categorical_columns: A sequence of column names to be forced to categorical type.
+      :param forced_boolean_columns: A sequence of column names to be forced to boolean type.
+      :param drop_columns: A sequence of column names to be dropped from the dataframe.
+      :param na_values: A sequence of values to be considered as NaN.
+      :param true_values: A sequence of values to be considered as True.
+      :param false_values: A sequence of values to be considered as False.
+      :param downcast_float: If set to True, downcasts float64 to float32.
+
+
+   .. py:method:: _convert(file_paths: list[pathlib.Path] | list[str]) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Converts a list of CSV files to Arrow format using parallel processing.
+
+      Chunks of files are processed in parallel and saved in the output directory.
+
+      :param file_paths: A list of file paths to be converted.
+
+      :returns: A DataFrame containing the merged chunks.
+
+
+

@@ -1,0 +1,119 @@
+:py:mod:`mleko.dataset.data_schema`
+===================================
+
+.. py:module:: mleko.dataset.data_schema
+
+.. autoapi-nested-parse::
+
+   Module for DataSchema class, used for storing type information about the dataset.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.data_schema.DataSchema
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.data_schema.logger
+   mleko.dataset.data_schema.DataType
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:data:: DataType
+
+   Type alias for the data types.
+
+.. py:class:: DataSchema(numerical: list[str] | tuple[str, Ellipsis] | tuple[] = (), categorical: list[str] | tuple[str, Ellipsis] | tuple[] = (), boolean: list[str] | tuple[str, Ellipsis] | tuple[] = (), datetime: list[str] | tuple[str, Ellipsis] | tuple[] = (), timedelta: list[str] | tuple[str, Ellipsis] | tuple[] = ())
+
+   DataSchema class for storing type information about the dataset.
+
+   Initialize DataSchema with the given features.
+
+   :param numerical: List of numerical features.
+   :param categorical: List of categorical features.
+   :param boolean: List of boolean features.
+   :param datetime: List of datetime features.
+   :param timedelta: List of timedelta features.
+
+   :raises ValueError: If feature names are not unique across all types.
+
+   .. py:method:: get_features(types: list[DataType] | tuple[DataType, Ellipsis] | tuple[] = ()) -> list[str]
+
+      Get features of a given type.
+
+      If no type is specified, all features are returned.
+
+      :param types: List of data types to be returned.
+
+      :returns: List of features of a given type.
+
+
+   .. py:method:: get_type(feature: str) -> DataType
+
+      Get the type of a given feature.
+
+      :param feature: Feature name.
+
+      :raises ValueError: If feature is not found in the schema.
+
+      :returns: Feature data type.
+
+
+   .. py:method:: drop_features(features: set[str] | list[str] | tuple[str, Ellipsis] | tuple[]) -> DataSchema
+
+      Drop a feature from the DataSchema.
+
+      :param features: List of feature names to be dropped.
+
+
+   .. py:method:: add_feature(feature: str, dtype: DataType) -> DataSchema
+
+      Add a feature to the DataSchema.
+
+      :param feature: Feature name.
+      :param dtype: Feature data type.
+
+      :raises ValueError: If feature is already present in the schema.
+
+
+   .. py:method:: change_feature_type(feature: str, dtype: DataType) -> DataSchema
+
+      Change the type of a feature in the DataSchema.
+
+      :param feature: Feature name.
+      :param dtype: Feature data type.
+
+      :raises ValueError: If feature is not present in the schema.
+
+
+   .. py:method:: to_dict() -> dict[str, list[str]]
+
+      Return the dict representation of DataSchema.
+
+      :returns: Dict representation of DataSchema.
+
+
+   .. py:method:: copy() -> DataSchema
+
+      Create a copy of this DataSchema.
+
+      :returns: A copy of this DataSchema.
+
+
+

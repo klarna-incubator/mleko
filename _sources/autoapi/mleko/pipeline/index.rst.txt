@@ -1,0 +1,54 @@
+:py:mod:`mleko.pipeline`
+========================
+
+.. py:module:: mleko.pipeline
+
+.. autoapi-nested-parse::
+
+   Pipeline subpackage for managing and executing data processing steps.
+
+   This subpackage provides the necessary components to create a customizable data processing pipeline. It includes
+   abstract base classes for pipeline steps, a flexible and customizable Pipeline class for managing and executing a
+   series of data processing steps, and a subpackage named `steps` that contains concrete implementations of the
+   `PipelineStep` class.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   steps/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   data_container/index.rst
+   pipeline/index.rst
+   pipeline_step/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.DataContainer
+   mleko.pipeline.Pipeline
+   mleko.pipeline.PipelineStep
+
+
+
+
+
+
+

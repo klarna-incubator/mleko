@@ -1,0 +1,190 @@
+:py:mod:`mleko.dataset.feature_select.base_feature_selector`
+============================================================
+
+.. py:module:: mleko.dataset.feature_select.base_feature_selector
+
+.. autoapi-nested-parse::
+
+   Module for the base feature selector class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.base_feature_selector.BaseFeatureSelector
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.base_feature_selector.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:class:: BaseFeatureSelector(features: list[str] | tuple[str, Ellipsis] | None, ignore_features: list[str] | tuple[str, Ellipsis] | None, cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.lru_cache_mixin.LRUCacheMixin`, :py:obj:`abc.ABC`
+
+   Abstract class for feature selection.
+
+   The feature selection process is implemented in the `fit`, `transform`, and `fit_transform` methods, following the
+   scikit-learn API. The `fit` method takes a DataFrame as input and returns a fitted feature selector. The `transform`
+   method takes a DataFrame as input and returns a transformed DataFrame. The `fit_transform` method takes a DataFrame
+   as input and returns a tuple of a fitted feature selector and a transformed DataFrame.
+
+   .. note::
+
+      The default set of features to be used by the feature selector is all features applicable to the feature
+      selector. This can be overridden by passing a list of feature names to the `features` parameter of the
+      constructor. The default set of features to be ignored by the feature selector is no features. This can be
+      overridden by passing a list of feature names to the `ignore_features` parameter of the constructor.
+
+   Initializes the feature selector and ensures the destination directory exists.
+
+   .. note::
+
+      The `features` and `ignore_features` arguments are mutually exclusive. If both are specified, a
+      `ValueError` is raised.
+
+   :param features: List of feature names to be used by the feature selector. If None, the default is all features
+                    applicable to the feature selector.
+   :param ignore_features: List of feature names to be ignored by the feature selector. If None, the default is to
+                           ignore no features.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of cache entries.
+
+   :raises ValueError: If both `features` and `ignore_features` are specified.
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+
+      Fits the feature selector to the specified DataFrame, using the cached result if available.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Updated DataSchema and fitted feature selector.
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Extracts the selected features from the DataFrame, using the cached result if available.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the feature selector has not been fitted.
+
+      :returns: Updated DataSchema and transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be fitted and transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                              cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame used for feature selection.
+
+      :returns: Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
+
+
+   .. py:method:: _assign_feature_selector(feature_selector: Any) -> None
+
+      Assigns the specified feature selector to the feature_selector attribute.
+
+      Can be overridden by subclasses to assign the feature selector using a different method.
+
+      :param feature_selector: Feature selector to be assigned.
+
+
+   .. py:method:: _feature_set(data_schema: mleko.dataset.data_schema.DataSchema) -> list[str]
+
+      Returns the list of features to be used by the feature selector.
+
+      It is the default set of features minus the features to be ignored if the `features` argument is None, or the
+      list of names in the `features` argument if it is not None.
+
+      :param data_schema: DataSchema of the DataFrame.
+
+      :returns: Sorted list of feature names to be used by the feature selector.
+
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+      :abstractmethod:
+
+      Fits the feature selector to the specified DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+      :abstractmethod:
+
+      Transforms the dataframe by extracting the selected features.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
+
+
+   .. py:method:: _default_features(data_schema: mleko.dataset.data_schema.DataSchema) -> tuple[str, Ellipsis]
+      :abstractmethod:
+
+      Returns the default set of features to be used by the feature selector.
+
+      :param data_schema: DataSchema of the DataFrame.
+
+      :raises NotImplementedError: Must be implemented in the child class that inherits from `BaseFeatureSelector`.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+      :abstractmethod:
+
+      Returns a hashable object that uniquely identifies the feature selector.
+
+      .. note::
+
+         Subclasses should call the parent method and include the result in the hashable object along with any other
+         information that uniquely identifies the feature selector. All attributes that are used in the
+         feature selector that affect the output of the feature selector should be included in the hashable object.
+
+      :returns: Hashable object that uniquely identifies the feature selector.
+
+
+

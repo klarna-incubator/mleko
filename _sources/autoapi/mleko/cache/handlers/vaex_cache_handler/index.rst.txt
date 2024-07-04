@@ -1,0 +1,54 @@
+:py:mod:`mleko.cache.handlers.vaex_cache_handler`
+=================================================
+
+.. py:module:: mleko.cache.handlers.vaex_cache_handler
+
+.. autoapi-nested-parse::
+
+   This module contains the CacheHandler for reading a writing `vaex` DataFrames to disk.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.vaex_cache_handler.read_vaex_dataframe
+   mleko.cache.handlers.vaex_cache_handler.write_vaex_dataframe
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.vaex_cache_handler.VAEX_DATAFRAME_CACHE_HANDLER
+
+
+.. py:function:: read_vaex_dataframe(cache_file_path: pathlib.Path) -> vaex.DataFrame
+
+   Reads a cache file containing a `vaex` DataFrame.
+
+   :param cache_file_path: The path of the cache file to be read.
+
+   :returns: The contents of the cache file as a DataFrame.
+
+
+.. py:function:: write_vaex_dataframe(cache_file_path: pathlib.Path, output: vaex.DataFrame) -> None
+
+   Writes the results of the DataFrame conversion to a file.
+
+   :param cache_file_path: The path of the cache file to be written.
+   :param output: The Vaex DataFrame to be saved in the cache file.
+
+
+.. py:data:: VAEX_DATAFRAME_CACHE_HANDLER
+
+   A CacheHandler for `vaex` DataFrames.
+

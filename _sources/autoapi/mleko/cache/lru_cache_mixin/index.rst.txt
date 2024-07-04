@@ -1,0 +1,213 @@
+:py:mod:`mleko.cache.lru_cache_mixin`
+=====================================
+
+.. py:module:: mleko.cache.lru_cache_mixin
+
+.. autoapi-nested-parse::
+
+   This module contains a LRU cache mixin that can be used by the cache classes.
+
+   The `LRUCacheMixin` can be used to add Least Recently Used (LRU) cache functionality to the cached classes.
+   It evicts the least recently used cache entries when the maximum number of cache entries is exceeded.
+   The LRU cache mechanism ensures that the most frequently accessed cache entries are retained, while entries that are
+   rarely accessed and have not been accessed recently are evicted first as the cache fills up. The cache entries
+   are stored in the cache directory, and the cache is trimmed if needed when cold starting the cache.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.lru_cache_mixin.LRUCacheMixin
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.lru_cache_mixin.METHOD_GROUP_CACHE_KEY_PATTERN
+   mleko.cache.lru_cache_mixin.logger
+
+
+.. py:data:: METHOD_GROUP_CACHE_KEY_PATTERN
+   :value: '\\.([a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)?\\.[a-fA-F\\d]{32}'
+
+   A regular expression pattern for matching cache keys in the format `.<method_name>.<cache_key>.<fingerprint>`.
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: LRUCacheMixin(cache_directory: str | pathlib.Path, cache_size: int)
+
+   Bases: :py:obj:`mleko.cache.cache_mixin.CacheMixin`
+
+   Least Recently Used Cache Mixin.
+
+   This mixin class extends the CacheMixin to provide a Least Recently Used (LRU) cache mechanism.
+   It evicts the least recently used cache entries when the maximum number of cache entries is exceeded.
+   The LRU cache mechanism ensures that the most frequently accessed cache entries are retained,
+   while entries that are rarely accessed and have not been accessed recently are evicted first as the cache fills up.
+
+   Initializes the `LRUCacheMixin` with the provided cache directory and maximum number of cache entries.
+
+   .. note::
+
+      The cache directory is created if it does not exist. When cold starting the cache, the cache will be loaded
+      from the cache directory. The files are sorted by their modification time, and the cache is trimmed if
+      needed.
+
+   :param cache_directory: The directory where cache files will be stored. If None, the cache will be disabled.
+   :param cache_size: The maximum number of cache entries allowed before eviction.
+
+   .. rubric:: Examples
+
+   >>> from mleko.cache import LRUCacheMixin
+   >>> class MyClass(LRUCacheMixin):
+   ...     def __init__(self):
+   ...         super().__init__("cache", "pkl", 2)
+   ...
+   ...     def my_method(self, x):
+   ...         return self._cached_execute(lambda: x ** 2, [x])[1]
+   >>> my_class = MyClass()
+   >>> my_class.my_method(2)
+   4 # This is not cached
+   >>> my_class.my_method(2)
+   4 # This is cached
+   >>> my_class.my_method(3)
+   9 # This is not cached
+   >>> my_class.my_method(2)
+   4 # This is cached
+   >>> my_class.my_method(3)
+   9 # This is cached
+   >>> my_class.my_method(4)
+   16 # This is not cached, and the cache is full so the least recently used entry is evicted (x = 2)
+
+   .. py:method:: _load_cache_from_disk() -> None
+
+      Loads the cache entries from the cache directory and initializes the LRU cache.
+
+      Cache entries are ordered by their modification time, and the cache is trimmed if needed.
+
+
+   .. py:method:: _load_from_cache(cache_key: str, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> Any | None
+
+      Loads data from the cache based on the provided cache key and updates the LRU cache.
+
+      :param cache_key: A string representing the cache key.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+      :returns: The cached data if it exists, or None if there is no data for the given cache key.
+
+
+   .. py:method:: _save_to_cache(cache_key: str, output: Any | Sequence[Any], cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> None
+
+      Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
+
+      If the cache reaches its maximum size, the least recently used entry will be evicted.
+
+      :param cache_key: A string representing the cache key.
+      :param output: The data to be saved to the cache.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+
+   .. py:method:: _evict_least_recently_used_if_full(group_identifier: str) -> None
+
+      Evicts the least recently used cache entry if the cache is full.
+
+      :param group_identifier: The group identifier for the cache entries.
+
+
+   .. py:method:: _cached_execute(lambda_func: Callable[[], Any], cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, force_recompute: bool = False, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler] | None = None, disable_cache: bool = False) -> Any
+
+      Executes the given function, caching the results based on the provided cache keys and fingerprints.
+
+      .. warning::
+
+         The cache group is used to group related cache keys together to prevent collisions between cache keys
+         originating from the same method. For example, if a method is called during the training and testing
+         phases of a machine learning pipeline, the cache keys for the training and testing phases should be
+         using different cache groups to prevent collisions between the cache keys for the two phases. Otherwise,
+         the later cache keys might overwrite the earlier cache entries.
+
+      :param lambda_func: A lambda function to execute.
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing
+                               a value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group, used to group related cache keys together when methods
+                          are called independently.
+      :param force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
+                              cached result is available.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If None, the cache files will
+                             be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
+                             files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
+                             each cache file.
+      :param disable_cache: Overrides the class-level `disable_cache` attribute. If set to True, disables the cache.
+
+      :returns: A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
+                given function. If a cached result is available and `force_recompute` is False, the cached result will be
+                returned instead of recomputing the result.
+
+
+   .. py:method:: _compute_cache_key(cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, frame_depth: int = 3) -> str
+
+      Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
+
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing a
+                               value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group.
+      :param frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+                          function or method. For each nested function or method, the frame depth should be increased by 1.
+
+      :raises ValueError: If the computed cache key is too long.
+
+      :returns: A string representing the computed cache key, which is the MD5 hash of the fully qualified name of the
+                calling function or method, along with the fingerprints of the provided cache keys.
+
+
+   .. py:method:: _get_handler(cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], index: int = 0) -> mleko.cache.handlers.CacheHandler
+
+      Gets the cache handler at the given index.
+
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param index: The index of the cache handler to get.
+
+      :returns: Handler at the given index. If a single CacheHandler instance is provided, it will be returned.
+
+
+   .. py:method:: _write_to_cache_file(cache_key: str, output_item: Any, index: int, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], is_sequence_output: bool) -> None
+
+      Writes the given data to the cache file using the provided cache key.
+
+      If the output is None and the cache handler cannot handle None, the output will be saved using the pickle
+      cache handler. Otherwise, the output will be saved to a cache file using the provided cache handler.
+
+      :param cache_key: A string representing the cache key.
+      :param output_item: The data to be saved to the cache.
+      :param index: The index of the cache handler to use.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param is_sequence_output: Whether the output is a sequence or not. If True, the cache file will be saved with the
+                                 index appended to the cache key.
+
+
+   .. py:method:: _find_cache_type_name(cls: type) -> str | None
+
+      Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.
+
+      :param cls: The class to search.
+
+      :returns: The name of the class that inherits from `CacheMixin`, or None if no such class exists.
+
+
+

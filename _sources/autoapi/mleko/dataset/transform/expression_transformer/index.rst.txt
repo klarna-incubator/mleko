@@ -1,0 +1,195 @@
+:py:mod:`mleko.dataset.transform.expression_transformer`
+========================================================
+
+.. py:module:: mleko.dataset.transform.expression_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the expression transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.expression_transformer.ExpressionTransformerConfig
+   mleko.dataset.transform.expression_transformer.ExpressionTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.expression_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: ExpressionTransformerConfig
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   A type alias for the configuration of the expression transformer.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: expression
+      :type: str
+
+      The `vaex` expression used to create the new feature.
+
+   .. py:attribute:: type
+      :type: mleko.dataset.data_schema.DataType
+
+      The data type of the new feature.
+
+   .. py:attribute:: is_meta
+      :type: bool
+
+      A boolean indicating if the new feature is a metadata feature.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ExpressionTransformer(expressions: dict[str, ExpressionTransformerConfig], cache_directory: str | pathlib.Path = 'data/expression-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   Creates new features using `vaex` expressions.
+
+   Initializes the transformer with the specified expressions.
+
+   The expressions are a dictionary where the key is the name of the new feature and the value is a tuple
+   containing the expression, the data type and a boolean indicating if the feaature is a metadata feature.
+   The expression must be a valid `vaex` expression that can be evaluated on the DataFrame.
+
+   .. note::
+
+      To translate a `vaex` vectorized statement to a valid `vaex` expression, use the `.expression` attribute.
+      For example, the expression of `df["a"] + df["b"]` can be extracted using `(df["a"] + df["b"]).expression`.
+
+   :param expressions: A dictionary where the key is the name of the new feature and the value is a dictionary
+                       containing the expression, the data type and a boolean indicating if the feaature is a metadata feature.
+                       The expression must be a valid `vaex` expression that can be evaluated on the DataFrame.
+   :param cache_directory: The directory where the cache will be stored locally.
+   :param cache_size: The maximum number of cache entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> from mleko.dataset.data_schema import DataSchema
+   >>> from mleko.dataset.transform import ExpressionTransformer
+   >>> transformer = ExpressionTransformer(
+   ...     expressions={
+   ...         "sum": {"expression": "a + b", "type": "numerical", "is_meta": False},
+   ...         "product": {"expression": "a * b", "type": "numerical", "is_meta": False},
+   ...         "both_positive": {"expression": "(a > 0) & (b > 0)", "type": "boolean", "is_meta": True},
+   ...     }
+   ... )
+   >>> df = vaex.from_dict({"a": [1, 2, 3], "b": [4, 5, 6]})
+   >>> ds = DataSchema(numerical=["a", "b"])
+   >>> data_schema, _, transformed_df = transformer.fit_transform(ds, df)
+   >>> transformed_df
+   #    a    b    sum    product   both_positive
+   0    1    4      5          4            True
+   1    2    5      7         10            True
+   2    3    6      9         18            True
+   >>> data_schema # The 'both_positive' feature is a metadata feature and is not included in the data schema.
+   DataSchema(numerical=['a', 'b', 'sum', 'product'])
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, dict[str, ExpressionTransformerConfig]]
+
+      No fitting is required for the expression transformer.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to fit.
+
+      :returns: The data schema and the transformer.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the specified features in the DataFrame using the expressions provided.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: The transformed data schema and the transformed DataFrame.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+

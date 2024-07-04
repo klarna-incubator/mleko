@@ -1,0 +1,44 @@
+:py:mod:`mleko.dataset.filter`
+==============================
+
+.. py:module:: mleko.dataset.filter
+
+.. autoapi-nested-parse::
+
+   The subpackage provides functionality for filtering `vaex` DataFrames.
+
+   The subpackage contains the following filter classes:
+       - `BaseFilter`: The abstract base class for all filters.
+       - `ExpressionFilter`: A class that handles filtering of `vaex` DataFrames based on a given `vaex` expression.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_filter/index.rst
+   expression_filter/index.rst
+   imblearn_resampling_filter/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.filter.BaseFilter
+   mleko.dataset.filter.ExpressionFilter
+   mleko.dataset.filter.ImblearnResamplingFilter
+
+
+
+
+
+
+

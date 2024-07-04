@@ -1,0 +1,45 @@
+:py:mod:`mleko.dataset.split`
+=============================
+
+.. py:module:: mleko.dataset.split
+
+.. autoapi-nested-parse::
+
+   The subpackage provides functionality for splitting `vaex` DataFrames into two separate DataFrames.
+
+   The subpackage contains the following splitter classes:
+       - `BaseSplitter`: The abstract base class for all splitters.
+       - `RandomSplitter`: A splitter for splitting `vaex` DataFrames into two random parts.
+       - `ExpressionSplitter`: A splitter for splitting `vaex` DataFrames into two parts based on a specified expression.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_splitter/index.rst
+   expression_splitter/index.rst
+   random_splitter/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.split.BaseSplitter
+   mleko.dataset.split.ExpressionSplitter
+   mleko.dataset.split.RandomSplitter
+
+
+
+
+
+
+

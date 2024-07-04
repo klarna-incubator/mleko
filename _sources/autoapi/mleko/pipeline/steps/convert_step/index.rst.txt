@@ -1,0 +1,290 @@
+:py:mod:`mleko.pipeline.steps.convert_step`
+===========================================
+
+.. py:module:: mleko.pipeline.steps.convert_step
+
+.. autoapi-nested-parse::
+
+   Module for data conversion as a part of the pipeline process.
+
+   This module contains the `ConvertStep` class which is a specialized pipeline step for handling data format
+   conversion. It uses the provided `BaseDataConverter` for converting the data into the desired format.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.steps.convert_step.ConvertStepInputType
+   mleko.pipeline.steps.convert_step.ConvertStepOutputType
+   mleko.pipeline.steps.convert_step.ConvertStep
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.pipeline.steps.convert_step.logger
+   mleko.pipeline.steps.convert_step.TypedDictType
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:data:: TypedDictType
+
+   Type variable for TypedDict type annotations.
+
+.. py:class:: ConvertStepInputType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The input type of the ConvertStep.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: file_paths
+      :type: Union[str, List[pathlib.Path], List[str]]
+
+      List of file paths or the key identifying the list of file paths to be converted.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ConvertStepOutputType
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   The output type of the ConvertStep.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: data_schema
+      :type: str
+
+      The key for the DataSchema after conversion.
+
+   .. py:attribute:: dataframe
+      :type: str
+
+      The key for the DataFrame after conversion.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: ConvertStep(converter: mleko.dataset.convert.BaseConverter, inputs: ConvertStepInputType, outputs: ConvertStepOutputType, cache_group: str | None = None)
+
+   Bases: :py:obj:`mleko.pipeline.pipeline_step.PipelineStep`
+
+   Pipeline step that manages data conversion from one format to another.
+
+   Initialize the ConvertStep with the specified data converter.
+
+   :param converter: The DataConverter responsible for handling data format conversion.
+   :param inputs: A dictionary of input keys following the `ConvertStepInputType` schema.
+   :param outputs: A dictionary of output keys following the `ConvertStepOutputType` schema.
+   :param cache_group: The cache group to use.
+
+   .. py:attribute:: _inputs
+      :type: ConvertStepInputType
+
+      
+
+   .. py:attribute:: _outputs
+      :type: ConvertStepOutputType
+
+      
+
+   .. py:method:: execute(data_container: mleko.pipeline.data_container.DataContainer, force_recompute: bool, disable_cache: bool) -> mleko.pipeline.data_container.DataContainer
+
+      Perform data format conversion using the configured converter.
+
+      :param data_container: Contains a list of file Paths to be converted.
+      :param force_recompute: Whether to force the step to recompute its output, even if it already exists.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises ValueError: If the input data types are invalid.
+
+      :returns: A DataContainer containing the result.
+
+
+   .. py:method:: _get_input_model() -> type[ConvertStepInputType]
+
+      Get the input type for the ConvertStep.
+
+      :returns: Input type for the ConvertStep.
+
+
+   .. py:method:: _get_output_model() -> type[ConvertStepOutputType]
+
+      Get the output type for the ConvertStep.
+
+      :returns: Output type for the ConvertStep.
+
+
+   .. py:method:: _validate_and_get_input(input_object: str | T, expected_type: type[T], data_container: mleko.pipeline.data_container.DataContainer, is_optional: bool = False) -> T
+
+      Validate and get the input from the data container or as a direct value.
+
+      If the input is a string, it is treated as a key to look up in the data container. If it is not a string,
+      it is treated as the input value itself. The method validates the input type, and returns the input value
+      if it is valid.
+
+      .. warning::
+
+         This method does not handle subscripted types, such as `List[str]`. It only handles simple types. If you
+         need to validate a subscripted type, you should do so manually after retrieving the input value from this
+         method.
+
+      :param input_object: The input key or value to validate and retrieve.
+      :param expected_type: The expected type of the input value.
+      :param data_container: The data container containing the input data.
+      :param is_optional: Whether the input is optional.
+
+      :raises ValueError: If the input is invalid or not found in the data container.
+
+      :returns: The input value if it is valid, or None if it is optional and not found in the data container.
+
+
+   .. py:method:: _validate_inputs() -> None
+
+      Validates the step's inputs using TypeDict models.
+
+      :raises ValueError: If the inputs are not a dictionary.
+
+
+   .. py:method:: _validate_outputs() -> None
+
+      Validates the step's outputs using TypeDict models.
+
+      :raises ValueError: If the outputs are not a dictionary.
+
+
+

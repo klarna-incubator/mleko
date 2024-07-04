@@ -1,0 +1,150 @@
+:py:mod:`mleko.utils.file_helpers`
+==================================
+
+.. py:module:: mleko.utils.file_helpers
+
+.. autoapi-nested-parse::
+
+   This module provides utility functions for file and directory operations.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.file_helpers.LocalFileEntry
+   mleko.utils.file_helpers.LocalManifest
+   mleko.utils.file_helpers.LocalManifestHandler
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.file_helpers.clear_directory
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.file_helpers.logger
+
+
+.. py:function:: clear_directory(directory: pathlib.Path, pattern: str = '*') -> None
+
+   Remove all files in a directory that match a given pattern.
+
+   This function takes a directory and, using the provided pattern, searches for all matching files
+   and removes them. This is useful when cleaning up temporary or intermediate files in a workspace.
+
+   :param directory: The `Path` object referring to the directory to be cleared.
+   :param pattern: The search pattern to match the files in the directory (default: "*", matches all files).
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: LocalFileEntry
+
+   Manifest entry for a single local file.
+
+   .. py:attribute:: name
+      :type: str
+
+      Name of the file.
+
+   .. py:attribute:: size
+      :type: int
+
+      Size of the file in bytes.
+
+   .. py:attribute:: hash
+      :type: str | None
+
+      
+
+
+.. py:class:: LocalManifest
+
+   Manifest for the local dataset.
+
+   .. py:attribute:: files
+      :type: list[LocalFileEntry]
+
+      List of files in the local dataset.
+
+
+.. py:class:: LocalManifestHandler(manifest_path: str | pathlib.Path)
+
+   `LocalManifestHandler` provides a convenient interface for reading and writing local manifest files.
+
+   Initializes the local manifest handler.
+
+   The manifest is intended to be used to keep track of the downloaded file names and sizes.
+   It should reflect the current state of the local dataset.
+
+   :param manifest_path: Path to the manifest file.
+
+   .. py:method:: set_files(file_data: list[LocalFileEntry]) -> None
+
+      Sets the manifest to the specified files.
+
+      :param file_data: List of file data to set the manifest to.
+
+
+   .. py:method:: add_files(file_data: list[LocalFileEntry]) -> None
+
+      Adds the specified files to the manifest.
+
+      :param file_data: List of file data to add to the manifest.
+
+
+   .. py:method:: remove_files(file_names: list[str]) -> None
+
+      Removes the specified files from the manifest.
+
+      :param file_names: List of file names to remove from the manifest.
+
+
+   .. py:method:: get_file_names() -> list[str]
+
+      Gets the list of file names in the manifest.
+
+      :returns: List of file names in the manifest.
+
+
+   .. py:method:: _read_manifest() -> LocalManifest
+
+      Reads the manifest from the manifest file.
+
+      :returns: Manifest data read from the manifest file.
+
+
+   .. py:method:: _write_manifest(manifest_data: LocalManifest) -> None
+
+      Writes the manifest to the manifest file.
+
+      :param manifest_data: Manifest data to write to the manifest file.
+
+
+   .. py:method:: _deserialize_manifest(manifest_dict: dict) -> LocalManifest
+
+      Deserializes the manifest from the manifest dictionary.
+
+      :param manifest_dict: Manifest dictionary to deserialize.
+
+      :returns: Deserialized manifest.
+
+
+

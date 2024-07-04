@@ -1,0 +1,158 @@
+:py:mod:`mleko.model.lgbm_model`
+================================
+
+.. py:module:: mleko.model.lgbm_model
+
+.. autoapi-nested-parse::
+
+   Module for the LightGBM model.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.lgbm_model.LGBMModel
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.lgbm_model.python_to_lgbm_verbosity
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.lgbm_model.logger
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:function:: python_to_lgbm_verbosity(verbosity: int) -> int
+
+   Converts a Python `logging` level to a `LightGBM` verbosity level.
+
+   :param verbosity: The Python `logging` level (e.g., `logging.INFO`).
+
+   :returns: The corresponding `LightGBM` verbosity level.
+
+
+.. py:class:: LGBMModel(target: str, model: lightgbm.LGBMClassifier | lightgbm.LGBMRegressor, eval_metric: lightgbm.sklearn._LGBM_ScikitEvalMetricType | None = None, log_eval_period: int | None = 10, features: list[str] | tuple[str, Ellipsis] | None = None, ignore_features: list[str] | tuple[str, Ellipsis] | None = None, random_state: int | None = 42, verbosity: int = logging.INFO, memoized_dataset_cache_size: int | None = 0, cache_directory: str | pathlib.Path = 'data/lgbm-model', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.model.base_model.BaseModel`
+
+   Wrapper for the LightGBM model.
+
+   Full documentation of the LightGBM model can be found here
+   https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMModel.html.
+
+   Initialize the LightGBM model with the given hyperparameters.
+
+   .. note::
+
+      Features and ignore_features are mutually exclusive. If both are provided, a `ValueError` will be raised.
+      By default, all features are used. If ignore_features is provided, all features except the ones in
+      ignore_features will be used. If features is provided, only the features in features will be used.
+
+   .. warning::
+
+      The `memoized_dataset_cache_size` parameter is experimental and should be used with caution. It refers to
+      the number of datasets to keep in memory for speeding up repeated training. This can be useful when
+      hyperparameter tuning or cross-validation is performed, as the dataset does not need to be loaded from disk
+      every time. However, this can lead to memory issues if the dataset is too large. Specify 0 to disable the
+      cache. When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to
+      clear the cache and free up memory.
+
+   :param target: The name of the target feature.
+   :param model: The LightGBM model to be used.
+   :param eval_metric: Evaluation metric(s) to be used as list of strings or a single string. Refer to
+                       https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMClassifier.html#lightgbm.LGBMClassifier.fit
+                       to see the list of available metrics and how to define custom metrics.
+   :param log_eval_period: The period to log the evaluation results.
+   :param features: The names of the features to be used as input for the model.
+   :param ignore_features: The names of the features to be ignored.
+   :param random_state: The random state to be used for reproducibility.
+   :param verbosity: The verbosity level of the logger, will be passed to the LightGBM model.
+   :param memoized_dataset_cache_size: The number of datasets to keep in memory for speeding up repeated training.
+                                       When finished with the fitting and transforming, please call the `_clear_dataset_cache` method to clear
+                                       the cache and free up memory. Specify 0 to disable the cache.
+   :param cache_directory: The target directory where the model will be saved.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.model import LGBMModel
+   >>> from lightgbm import LGBMClassifier
+   >>> df = vaex.ml.datasets.load_iris()
+   >>> df_train, df_test = df.ml.random_split(test_size=0.20, verbose=False)
+   >>> data_schema = DataSchema(
+   ...    numerical=["sepal_length", "sepal_width", "petal_length", "petal_width"],
+   ... )
+   >>> model = LGBMModel(
+   ...     target="class_",
+   ...     model=LGBMClassifier(n_estimators=100),
+   ...     random_state=42,
+   ...     features=["sepal_width", "petal_length", "petal_width"],
+   ... )
+   >>> booster, df_train_pred, df_test_pred = model.fit_transform(data_schema, df_train, df_test, {})
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, train_dataframe: vaex.DataFrame, validation_dataframe: vaex.DataFrame | None = None, hyperparameters: mleko.model.base_model.HyperparametersType | None = None) -> tuple[lightgbm.LGBMClassifier | lightgbm.LGBMRegressor, dict[str, dict[str, list[Any]]]]
+
+      Fits the LightGBM model to the given data with the given hyperparameters.
+
+      :param data_schema: The data schema of the dataframes.
+      :param train_dataframe: The training dataframe.
+      :param validation_dataframe: The validation dataframe, optional but required for early stopping.
+      :param hyperparameters: The hyperparameters to use for training.
+
+      :raises ValueError: If the target feature is in the feature set.
+
+      :returns: The trained LightGBM model.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> vaex.DataFrame
+
+      Transforms the given dataframe using the LightGBM model.
+
+      Will return the predictions of the model applied to the given dataframe.
+
+      :param data_schema: The data schema of the dataframe.
+      :param dataframe: The dataframe to transform.
+
+      :returns: The transformed dataframe.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the model.
+
+      Appends the target feature and number of iterations to the fingerprint.
+
+      :returns: The fingerprint of the model.
+
+
+   .. py:method:: _default_features(data_schema: mleko.dataset.data_schema.DataSchema) -> tuple[str, Ellipsis]
+
+      The default set of features to use for training.
+
+      :param data_schema: The data schema of the dataframes.
+
+      :returns: The default set of features.
+
+
+

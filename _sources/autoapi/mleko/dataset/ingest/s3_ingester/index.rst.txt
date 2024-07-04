@@ -1,0 +1,122 @@
+:py:mod:`mleko.dataset.ingest.s3_ingester`
+==========================================
+
+.. py:module:: mleko.dataset.ingest.s3_ingester
+
+.. autoapi-nested-parse::
+
+   Module for fetching data from AWS S3 and storing it locally using the `S3Ingester` class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.s3_ingester.S3Ingester
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.s3_ingester.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: S3Ingester(s3_bucket_name: str, s3_key_prefix: str, file_pattern: str | list[str] = '*', dataset_id: str | None = None, destination_directory: str | pathlib.Path = 'data/s3-ingester', aws_profile_name: str | None = None, aws_region_name: str = 'eu-west-1', max_concurrent_files: int = 64, workers_per_file: int = 1, manifest_file_name: str | None = 'manifest', s3_timestamp_tolerance: int = -1)
+
+   Bases: :py:obj:`mleko.dataset.ingest.base_ingester.BaseIngester`
+
+   `S3Ingester` provides a convenient interface for fetching data from AWS S3 buckets and storing it locally.
+
+   This class interacts with AWS S3 to download specified data from an S3 bucket.
+   It supports manifest-based caching, enabling more efficient data fetching by verifying if the
+   local dataset is up-to-date before downloading.
+
+   Initializes the S3 bucket client, configures the cache directory, and sets client-related parameters.
+
+   .. note::
+
+      The S3 bucket client is initialized using the provided AWS profile and region. If no profile is provided,
+      the default profile will be used. If no region is provided, the default region will be used.
+
+      The profile and region is read from the AWS credentials file located at '~/.aws/credentials'.
+
+   .. warning::
+
+      The `max_concurrent_files` and `workers_per_file` parameters are used to control the
+      number of concurrent downloads and parts downloaded per file, respectively. These parameters should be
+      set based on the available system resources and the S3 bucket's performance limits. The total number of
+      concurrent threads is the product of these two parameters
+      (i.e., `max_concurrent_files * workers_per_file`).
+
+   :param s3_bucket_name: Name of the S3 bucket containing the data.
+   :param s3_key_prefix: Prefix of the S3 keys for the files to download
+   :param file_pattern: Pattern to match the files to download, e.g. `*.csv` or [`*.csv`, `*.json`], etc.
+                        For more information, see https://docs.python.org/3/library/fnmatch.html.
+   :param dataset_id: Id of the dataset to be used instead of the default fingerprint (MD5 hash of the bucket
+                      name, key prefix, and region name). Note that this will overwrite any existing dataset with the same
+                      name in the cache directory, so make sure to use a unique name.
+   :param destination_directory: Directory to store the fetched data locally.
+   :param aws_profile_name: AWS profile name to use.
+   :param aws_region_name: AWS region name where the S3 bucket is located.
+   :param max_concurrent_files: Maximum number of files to download concurrently.
+   :param workers_per_file: Number of parts to download concurrently for each file. This is useful for
+                            downloading large files faster, as it allows for parallel downloads of different parts of the file.
+   :param manifest_file_name: Name of the manifest file located on S3. If provided, the manifest from S3 will
+                              be used to determine the files to include, before applying the file pattern.
+   :param s3_timestamp_tolerance: Tolerance in hours for the difference in last modified timestamps of files in the S3
+                                  bucket. If the difference is greater than this value, an exception will be raised. If set to -1, no
+                                  check will be performed.
+
+   .. rubric:: Examples
+
+   >>> from mleko.dataset.sources import S3Ingester
+   >>> s3_ingester = S3Ingester(
+   ...     s3_bucket_name="mleko-datasets",
+   ...     s3_key_prefix="kaggle/ashishpatel26/indian-food-101",
+   ...     file_pattern="file_*.csv",
+   ...     dataset_id="indian_food", # Optional, but will store the data in "./data/indian_food/" instead of
+   ...                               # "./data/<fingerprint>/".
+   ...     aws_profile_name="mleko",
+   ...     aws_region_name="eu-west-1",
+   ...     s3_timestamp_tolerance=2,
+   ... )
+   >>> s3_ingester.fetch_data()
+   [PosixPath('data/indian_food/indian_food.csv')]
+
+   .. py:method:: fetch_data(force_recompute: bool = False) -> list[pathlib.Path]
+
+      Downloads the data from the S3 bucket and stores it in the 'destination_directory'.
+
+      If 'force_recompute' is False, verifies whether the data in the local 'destination_directory' is current
+      with the S3 bucket contents based on the manifest file, and skips downloading if it is up to date.
+
+      :param force_recompute: Whether to force the data source to recompute its output, even if it already exists.
+
+      :raises Exception: If files in the S3 bucket have different last modified dates, indicating potential corruption
+          or duplication.
+      :raises FileNotFoundError: If no files matching the file pattern are found in the S3 bucket.
+
+      :returns: A list of Path objects pointing to the downloaded data files.
+
+
+   .. py:method:: _s3_fetch_all(keys: list[str]) -> None
+
+      Downloads all specified files from the S3 bucket to the local directory concurrently.
+
+      :param keys: List of S3 keys for the files to download.
+
+
+

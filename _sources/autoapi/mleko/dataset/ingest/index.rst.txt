@@ -1,0 +1,49 @@
+:py:mod:`mleko.dataset.ingest`
+==============================
+
+.. py:module:: mleko.dataset.ingest
+
+.. autoapi-nested-parse::
+
+   The subpackage provides functionality for fetching data from various sources.
+
+   This subpackage contains classes designed to easily fetch data from different sources, like AWS S3 or Kaggle,
+   and store them locally in specified destination directories. The main classes are 'BaseIngester', an abstract base
+   class for implementing specific data source classes, along with concrete implementations.
+
+   The following ingester classes are provided by the subpackage:
+       - `BaseIngester`: The abstract base class for all ingesters.
+       - `S3Ingester`: An ingester for fetching data from AWS S3.
+       - `KaggleIngester`: An ingester for fetching data from Kaggle.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_ingester/index.rst
+   kaggle_ingester/index.rst
+   s3_ingester/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.ingest.BaseIngester
+   mleko.dataset.ingest.KaggleIngester
+   mleko.dataset.ingest.S3Ingester
+
+
+
+
+
+
+

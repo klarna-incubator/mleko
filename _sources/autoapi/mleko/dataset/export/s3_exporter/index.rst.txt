@@ -1,0 +1,198 @@
+:py:mod:`mleko.dataset.export.s3_exporter`
+==========================================
+
+.. py:module:: mleko.dataset.export.s3_exporter
+
+.. autoapi-nested-parse::
+
+   Module for exporting data to AWS S3 from the local filesystem using the `S3Exporter` class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.export.s3_exporter.S3ExporterConfig
+   mleko.dataset.export.s3_exporter.S3Exporter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.export.s3_exporter.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: S3ExporterConfig
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   Configuration for the S3 exporter.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: bucket_name
+      :type: str
+
+      Name of the S3 bucket to export the files to.
+
+   .. py:attribute:: key_prefix
+      :type: str
+
+      Key prefix (folder) to place the files under.
+
+   .. py:attribute:: extra_args
+      :type: Optional[dict[str, Any]]
+
+      Extra arguments to pass to the S3 client.
+
+      Refer to the `boto3` documentation for the `upload_file` method for more information.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: S3Exporter(manifest_file_name: str | None = 'manifest', max_concurrent_files: int = 64, workers_per_file: int = 1, aws_profile_name: str | None = None, aws_region_name: str = 'eu-west-1')
+
+   Bases: :py:obj:`mleko.dataset.export.base_exporter.BaseExporter`
+
+   `S3Exporter` provides functionality to export files to an S3 bucket from the local filesystem.
+
+   The class interacts with AWS S3 using the `boto3` library to upload files to an S3 bucket. It supports
+   multi-threaded uploads to improve performance and caching to avoid re-uploading files that already exist in the
+   destination.
+
+   Initializes the `S3Exporter` class and creates the S3 client.
+
+   .. note::
+
+      The S3 bucket client is initialized using the provided AWS profile and region. If no profile is provided,
+      the default profile will be used. If no region is provided, the default region will be used.
+
+      The profile and region is read from the AWS credentials file located at '~/.aws/credentials'.
+
+   .. note::
+
+      If you want to update the S3 bucket content extra arguments, make sure to set the `force_recompute`
+      parameter to `True` when calling the `export` method. This will force the exporter to re-upload the
+      files to the S3 bucket with the updated extra arguments.
+
+   .. warning::
+
+      The `max_concurrent_files` and `workers_per_file` parameters are used to control the
+      number of concurrent upload and parts upload per file, respectively. These parameters should be
+      set based on the available system resources and the S3 bucket's performance limits. The total number of
+      concurrent threads is the product of these two parameters
+      (i.e., `max_concurrent_files * workers_per_file`).
+
+   :param manifest_file_name: Name of the manifest file to store the S3 file metadata.
+   :param max_concurrent_files: Maximum number of files to upload concurrently.
+   :param workers_per_file: Number of parts to upload concurrently for each file. This is useful for
+                            upload large files faster, as it allows for parallel upload of different parts of the file.
+   :param aws_profile_name: AWS profile name to use.
+   :param aws_region_name: AWS region name where the S3 bucket is located.
+
+   .. rubric:: Examples
+
+   >>> from mleko.dataset.export import S3Exporter
+   >>> s3_exporter = S3Exporter()
+   >>> s3_exporter.export(["file1.csv", "file2.csv"], {"bucket_name": "my-bucket", "key_prefix": "data/"})
+   ['s3://my-bucket/data/file1.csv', 's3://my-bucket/data/file2.csv']
+
+   .. py:method:: export(data: list[pathlib.Path] | list[str], config: S3ExporterConfig, force_recompute: bool = False) -> list[str]
+
+      Export the files to the specified S3 bucket and key prefix.
+
+      Will verify if the files already exist in the S3 bucket and key prefix before exporting them.
+
+      :param data: List of file paths to export to S3.
+      :param config: Configuration for the S3 exporter.
+      :param force_recompute: If set to True, forces the data to be exported even if it already exists
+                              at the destination.
+
+      :returns: List of S3 paths to the exported files.
+
+
+   .. py:method:: _s3_export_all(file_paths: list[pathlib.Path], bucket_name: str, key_prefix: str, extra_args: dict[str, Any] | None) -> list[mleko.utils.s3_helpers.S3FileManifest]
+
+      Exports all files to S3 to the specified bucket and key prefix in parallel.
+
+      :param file_paths: List of file paths to export to S3.
+      :param bucket_name: Name of the S3 bucket to export the files to.
+      :param key_prefix: Key prefix to use for the S3 object keys.
+      :param extra_args: Extra arguments to pass to the S3 client.
+
+      :returns: S3 manifest for the exported files.
+
+
+

@@ -1,0 +1,47 @@
+:py:mod:`mleko.utils.tqdm_helpers`
+==================================
+
+.. py:module:: mleko.utils.tqdm_helpers
+
+.. autoapi-nested-parse::
+
+   This module provides helper functions for `tqdm` progress bars.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.tqdm_helpers.set_tqdm_percent_wrapper
+
+
+
+.. py:function:: set_tqdm_percent_wrapper(pbar: tqdm.auto.tqdm) -> Callable[[float], None]
+
+   Return a function to set the percentage of a `tqdm` progress bar instead of incrementing it.
+
+   This function returns a function that can be used to set the percentage of a `tqdm` progress bar instead of
+   incrementing it. This is useful when the progress bar is used to track the progress of a task that is not
+   necessarily linear, such as a hyperparameter search.
+
+   :param pbar: A `tqdm` progress bar instance.
+
+   :returns: A function that sets the percentage based on the float value passed as a parameter.
+
+   .. rubric:: Example
+
+   >>> from tqdm.auto import tqdm
+   >>> from mleko.utils import set_tqdm_percent_wrapper
+   >>> pbar = tqdm(total=100)
+   >>> set_percent = set_tqdm_percent_wrapper(pbar)
+   >>> set_percent(0.5)
+   >>> pbar.n
+   50
+
+

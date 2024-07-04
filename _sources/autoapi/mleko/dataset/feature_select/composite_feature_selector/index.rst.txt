@@ -1,0 +1,200 @@
+:py:mod:`mleko.dataset.feature_select.composite_feature_selector`
+=================================================================
+
+.. py:module:: mleko.dataset.feature_select.composite_feature_selector
+
+.. autoapi-nested-parse::
+
+   A feature selector that combines multiple feature selectors.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.composite_feature_selector.CompositeFeatureSelector
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.composite_feature_selector.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: CompositeFeatureSelector(feature_selectors: list[mleko.dataset.feature_select.base_feature_selector.BaseFeatureSelector] | tuple[mleko.dataset.feature_select.base_feature_selector.BaseFeatureSelector, Ellipsis], cache_directory: str | pathlib.Path = 'data/composite-feature-selector', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.feature_select.base_feature_selector.BaseFeatureSelector`
+
+   A feature selector that combines multiple feature selectors.
+
+   It is possible to combine multiple feature selectors into a single feature selector. This can be useful when
+   multiple feature selectors need to be applied to a DataFrame and the cache needs to be shared between them.
+
+   Initializes the composite feature selector.
+
+   The composite feature selector will combine the feature selectors into a single feature selector. Each feature
+   selector will be applied to the DataFrame in the order they are specified.
+
+   :param feature_selectors: List of feature selectors to be combined.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.feature_select import CompositeFeatureSelector, MissingRateFeatureSelector
+   >>> df = vaex.from_arrays(
+   ...     a=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+   ...     b=[1, 2, 3, 4, None, None, None, None, None, None],
+   ...     c=[1, 2, 3, 4, 5, 6, None, None, None, None],
+   ... )
+   >>> ds = DataSchema(
+   ...     numerical=["a", "b", "c"],
+   ... )
+   >>> feature_selector = CompositeFeatureSelector(
+   ...     feature_selectors=[
+   ...         MissingRateFeatureSelector(
+   ...             missing_rate_threshold=0.75,
+   ...         ),
+   ...         MissingRateFeatureSelector(
+   ...             missing_rate_threshold=0.50,
+   ...         ),
+   ...     ],
+   ... )
+   >>> ds, _, df = feature_selector.fit_transform(ds, df)
+   >>> df
+   #    a    c
+   0    1    1
+   1    2    2
+   2    3    3
+   3    4    4
+   4    5    5
+   5    6    6
+   6    7    None
+   7    8    None
+   8    9    None
+   9   10    None
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, list[Any]]
+
+      Fits the feature selector on the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame on which the feature selector will be fitted.
+
+      :returns: Tuple of updated DataSchema and list of fitted feature selectors.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Selects the features from the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame from which the features will be selected.
+
+      :returns: DataFrame with the selected features.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame used for feature selection.
+
+      :returns: Tuple of updated data schema, fitted feature selector and transformed DataFrame.
+
+
+   .. py:method:: _assign_feature_selector(feature_selector: Any) -> None
+
+      Assigns the specified feature selector to the feature_selector attribute.
+
+      Can be overridden by subclasses to assign the feature selector using a different method.
+
+      :param feature_selector: Feature selector to be assigned.
+
+
+   .. py:method:: _default_features(data_schema: mleko.dataset.data_schema.DataSchema) -> tuple[str, Ellipsis]
+
+      Returns the default features of the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+
+      :returns: Tuple of default features.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the feature selector.
+
+      :returns: Fingerprint of the feature selector.
+
+
+   .. py:method:: fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any]
+
+      Fits the feature selector to the specified DataFrame, using the cached result if available.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Updated DataSchema and fitted feature selector.
+
+
+   .. py:method:: transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Extracts the selected features from the DataFrame, using the cached result if available.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the transformation to be recomputed even if the result is cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :raises RuntimeError: If the feature selector has not been fitted.
+
+      :returns: Updated DataSchema and transformed DataFrame.
+
+
+   .. py:method:: fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the feature selector to the specified DataFrame and extracts the selected features from the DataFrame.
+
+      :param data_schema: DataSchema of the DataFrame.
+      :param dataframe: DataFrame to be fitted and transformed.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Whether to force the fitting and transformation to be recomputed even if the result is
+                              cached.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple of updated DataSchema, fitted feature selector, and transformed DataFrame.
+
+
+   .. py:method:: _feature_set(data_schema: mleko.dataset.data_schema.DataSchema) -> list[str]
+
+      Returns the list of features to be used by the feature selector.
+
+      It is the default set of features minus the features to be ignored if the `features` argument is None, or the
+      list of names in the `features` argument if it is not None.
+
+      :param data_schema: DataSchema of the DataFrame.
+
+      :returns: Sorted list of feature names to be used by the feature selector.
+
+
+

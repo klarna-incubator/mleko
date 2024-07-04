@@ -1,0 +1,99 @@
+:py:mod:`mleko.dataset.filter.imblearn_resampling_filter`
+=========================================================
+
+.. py:module:: mleko.dataset.filter.imblearn_resampling_filter
+
+.. autoapi-nested-parse::
+
+   A module for filtering `vaex` DataFrames using `imblearn` sampling methods.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.filter.imblearn_resampling_filter.ImblearnResamplingFilter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.filter.imblearn_resampling_filter.logger
+
+
+.. py:data:: logger
+
+   A module-level logger instance.
+
+.. py:class:: ImblearnResamplingFilter(sampler: imblearn.under_sampling.base.BaseSampler, target_column: str, random_state: int | None = 42, verbosity: int = logging.INFO, cache_directory: str | pathlib.Path = 'data/imblearn-sampling-filter', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.filter.base_filter.BaseFilter`
+
+   A class that handles filtering of `vaex` DataFrames using `imblearn` sampling methods.
+
+   Initializes the `ImblearnResamplingFilter` with the given `imblearn` sampler and target column.
+
+   The `imblearn` sampler should be a sample object that inherits from `BaseSampler`.
+   For example, `imblearn.under_sampling.RandomUnderSampler`. Refer to the `imblearn` documentation for more
+   information (https://imbalanced-learn.org/stable/introduction.html).
+
+   :param sampler: The `imblearn` sampler to be used for sampling.
+   :param target_column: The target column to be used for sampling.
+   :param random_state: The random state to be used for reproducibility, and will recursively set the random state
+                        of the sampler and all nested objects if set.
+   :param verbosity: The verbosity level of the logger.
+   :param cache_directory: The target directory where the filtered dataframes are to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from imblearn.under_sampling import RandomUnderSampler
+   >>> from mleko.data.filter import ImblearnUnderSamplingFilter
+   >>> df = vaex.from_arrays(x=[1, 2, 3], y=[4, 5, 6])
+   >>> sampler = RandomUnderSampler()
+   >>> filter = ImblearnUnderSamplingFilter(sampler=sampler, target_column="x")
+   >>> df_filtered = filter.filter(df)
+   >>> df_filtered
+       #    x    y
+       0    1    4
+       1    2    5
+
+   .. py:method:: filter(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> vaex.DataFrame
+
+      Filters the given DataFrame using the specified `imblearn` sampler.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be filtered.
+      :param cache_group: The cache group to use.
+      :param force_recompute: Forces recomputation if True, otherwise reads from the cache if available.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: The filtered DataFrame.
+
+
+   .. py:method:: _filter(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> vaex.DataFrame
+
+      Filters the given DataFrame using the specified `imblearn` sampler.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be filtered.
+
+      :returns: The filtered DataFrame.
+
+
+   .. py:method:: _reset_random_state() -> None
+
+      Resets the random state of the sampler.
+
+
+

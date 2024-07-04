@@ -1,0 +1,61 @@
+:py:mod:`mleko.dataset.feature_select`
+======================================
+
+.. py:module:: mleko.dataset.feature_select
+
+.. autoapi-nested-parse::
+
+   The subpackage provides functionality for selecting features from data.
+
+   This subpackage offers a collection of feature selectors, each designed for a specific type of feature selection
+   task. By using these unique feature selectors sequentially, you can create a complete feature selection workflow
+   within the pipeline.
+
+   The following feature selectors are provided by the subpackage:
+       - `BaseFeatureSelector`: The abstract base class for all feature selectors.
+       - `CompositeFeatureSelector`: A feature selector for combining multiple feature selectors.
+       - `MissingRateFeatureSelector`: A feature selector for removing features with a high percentage of missing values.
+       - `VarianceFeatureSelector`: A feature selector for removing features with a low standard deviation.
+       - `PearsonCorrelationFeatureSelector`: A feature selector for removing features with a high Pearson correlation.
+       - `InvarianceFeatureSelector`: A feature selector for removing invariant features.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base_feature_selector/index.rst
+   composite_feature_selector/index.rst
+   invariance_feature_selector/index.rst
+   missing_rate_feature_selector/index.rst
+   pearson_correlation_feature_selector/index.rst
+   variance_feature_selector/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.feature_select.BaseFeatureSelector
+   mleko.dataset.feature_select.CompositeFeatureSelector
+   mleko.dataset.feature_select.InvarianceFeatureSelector
+   mleko.dataset.feature_select.MissingRateFeatureSelector
+   mleko.dataset.feature_select.PearsonCorrelationFeatureSelector
+   mleko.dataset.feature_select.VarianceFeatureSelector
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+:py:mod:`mleko.cache.fingerprinters.json_fingerprinter`
+=======================================================
+
+.. py:module:: mleko.cache.fingerprinters.json_fingerprinter
+
+.. autoapi-nested-parse::
+
+   The module contains a fingerprinter for JSON data.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.fingerprinters.json_fingerprinter.JsonFingerprinter
+
+
+
+
+.. py:class:: JsonFingerprinter
+
+   Bases: :py:obj:`mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter`
+
+   Class to generate unique fingerprints for valid JSON data.
+
+   .. py:method:: fingerprint(data: dict[str, Any] | list[Any] | None) -> str
+
+      Generate a fingerprint string for a given JSON.
+
+      :param data: The JSON data to generate a fingerprint for.
+
+      :returns: A fingerprint that uniquely identifies the JSON data.
+
+
+

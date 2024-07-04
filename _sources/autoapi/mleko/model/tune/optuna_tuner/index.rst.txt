@@ -1,0 +1,321 @@
+:py:mod:`mleko.model.tune.optuna_tuner`
+=======================================
+
+.. py:module:: mleko.model.tune.optuna_tuner
+
+.. autoapi-nested-parse::
+
+   Module for the base hyperparameter tuning class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.optuna_tuner.OptunaTuner
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.model.tune.optuna_tuner.logger
+   mleko.model.tune.optuna_tuner.OptimizeDirection
+
+
+.. py:data:: logger
+
+   The logger for the module.
+
+.. py:data:: OptimizeDirection
+
+   Literal type for the direction of optimization.
+
+.. py:class:: OptunaTuner(objective_function: Callable[[optuna.Trial, mleko.dataset.data_schema.DataSchema, vaex.DataFrame], float | list[float] | tuple[float, Ellipsis]] | Callable[[optuna.Trial, mleko.dataset.data_schema.DataSchema, list[tuple[vaex.DataFrame, vaex.DataFrame]]], float | list[float] | tuple[float, Ellipsis]], direction: OptimizeDirection | list[OptimizeDirection], num_trials: int, cv_folds: Callable[[mleko.dataset.data_schema.DataSchema, vaex.DataFrame], list[tuple[vaex.DataFrame, vaex.DataFrame]]] | None = None, enqueue_trials: list[dict[str, Any]] | None = None, sampler: optuna.samplers.BaseSampler | None = None, pruner: optuna.pruners.BasePruner | None = None, study_name: str | None = None, storage: str | optuna.storages.RDBStorage | None = None, load_if_exists: bool = False, random_state: int | None = 42, cache_directory: str | pathlib.Path = 'data/optuna-tuner', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.model.tune.base_tuner.BaseTuner`
+
+   Hyperparameter tuner using `Optuna`.
+
+   Initializes a new OptunaTuner instance.
+
+   For more information about Optuna, please refer to the documentation:
+   https://optuna.readthedocs.io/en/stable/.
+
+   .. note::
+
+      To visualize the optimization process, you can use the `optuna-dashboard`
+      library. By specifying the `storage` parameter, the tuner will save
+      the study to the specified file or storage.
+
+      If a sqlite3 file path is defined, the optimization can be visualized using the
+      `optuna-dashboard` command:
+      ```bash
+      optuna-dashboard sqlite:///PATH_TO_YOUR_OPTUNA_STORAGE.sqlite3
+      ```
+
+      The `study_name` parameter can be used to specify the name of the study,
+      which will be displayed in the `optuna-dashboard` interface. If the
+      `study_name` is not specified, the current date and time will be used.
+      It is also referred to as the `study_id` in Optuna.
+
+   .. warning::
+
+      The caching functionality of the objective function is implemented by
+      serializing the function source code itself. Ensure that all dependencies
+      of the objective function are defined within the function itself. Otherwise,
+      the dependencies will not be included in the fingerprint of the tuner and
+      the results of the hyperparameter tuning will be unpredictable. For example,
+      if the objective function depends on a global variable, the caching
+      functionality will not detect changes to the value itself and will not
+      recompute the result.
+
+      In addition, the objective function should preferably not use any cached
+      methods, such as `BaseModel.fit_transform`. Instead, the objective
+      function should use the underscored methods (`BaseModel._fit_transform`)
+      to avoid caching the results of each trial.
+
+   :param objective_function: The objective function to optimize. The function must
+                              accept three arguments: the Optuna trial, the data schema, and the
+                              DataFrame or CV list of DataFrames to be tuned on. The function must
+                              return either a single float value or a list/tuple of float values.
+                              If a list/tuple is returned, the tuner will perform multi-objective
+                              optimization.
+   :param direction: The direction of optimization. Either "maximize" or "minimize".
+                     If a list of directions is given, the tuner will perform multi-objective
+                     optimization. The length of the list must match the length of the list
+                     returned by the objective function.
+   :param cv_folds: The cross-validation function to use. The function must accept
+                    the data schema and the DataFrame to be tuned on and return a list of
+                    tuples containing the training and validation DataFrames. The length
+                    of the list must match the number of folds to perform.
+   :param enqueue_trials: A list of dictionaries containing the parameters configurations
+                          to enqueue trials. The keys of the dictionary must match the parameter
+                          names of the objective function. The tuner will enqueue the trials
+                          with the specified configurations before starting the optimization.
+   :param num_trials: The number of trials to perform.
+   :param sampler: The Optuna sampler to use, if None `TPESampler` is
+                   used for single-objective optimization and `NSGAIISampler`
+                   is used for multi-objective optimization.
+   :param pruner: The Optuna pruner to use, if None `optuna.pruners.MedianPruner` is
+                  used.
+   :param study_name: The name of the study. If None, the current date and time will
+                      be used.
+   :param storage: The name of the storage to save the study to. If None, the
+                   study will not be saved to a persistent storage. Refer to the Optuna
+                   documentation for more information on the storage options.
+   :param load_if_exists: Flag to control the behavior to handle a conflict of study
+                          names. In the case where a study named `study_name` already exists in
+                          the storage, a `DuplicatedStudyError` is raised if `load_if_exists`
+                          is set to `False`. Otherwise, the creation of the study is
+                          skipped, and the existing one is returned.
+   :param random_state: The random state to use for the Optuna sampler. If None, the
+                        default random state of the sampler is used. Setting this will override
+                        the random state of the sampler.
+   :param cache_directory: The target directory where the output is to be saved.
+   :param cache_size: The maximum number of cache entries.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.model import LGBMModel
+   >>> from mleko.tune import OptunaTuner
+   >>> from mleko.dataset import DataSchema
+   >>> def objective_function(trial, data_schema, dataframe):
+   ...     params = {
+   ...         "num_iterations": trial.suggest_int("num_iterations", 10, 100),
+   ...         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
+   ...         "num_leaves": trial.suggest_int("num_leaves", 10, 100),
+   ...     }
+   >>>     model = LGBMModel(
+   ...         target="class_",
+   ...         features=["sepal_width", "petal_length", "petal_width"],
+   ...         num_iterations=100,
+   ...         learning_rate=0.1,
+   ...         num_leaves=31,
+   ...         random_state=42,
+   ...         metric=["auc"],
+   ...     )
+   >>>     df_train, df_val = dataframe.ml.random_split(test_size=0.20, verbose=False)
+   >>>     _, metrics, _, _ = model._fit_transform(data_schema, df_train, df_val, params)
+   >>>     return metrics['validation']['auc'][-1]
+   >>> optuna_tuner = OptunaTuner(
+   ...     objective_function=objective_function,
+   ...     direction="maximize",
+   ...     num_trials=51,
+   ...     random_state=42,
+   ... )
+   >>> dataframe = vaex.ml.datasets.load_iris()
+   >>> data_schema = DataSchema(
+   ...     numerical=["sepal_length", "sepal_width", "petal_length", "petal_width"],
+   ... )
+   >>> best_trial, best_score, study = optuna_tuner.tune(data_schema, dataframe)
+
+   .. py:method:: _tune(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.model.base_model.HyperparametersType, float | list[float] | tuple[float, Ellipsis], optuna.study.Study]
+
+      Perform the hyperparameter tuning.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be tuned on.
+
+      :returns: Tuple containing the best hyperparameters, the best score, and a the Optuna study.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Generates a fingerprint for the tuner.
+
+      :returns: The fingerprint of the tuner.
+
+
+   .. py:method:: _reset_sampler_rng(sampler: optuna.samplers.BaseSampler) -> None
+
+      Resets the random number generator of the given Optuna sampler.
+
+      :param sampler: The Optuna sampler to reset the random number generator of.
+
+
+   .. py:method:: tune(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame, cache_group: str | None = None, force_recompute: bool = False, disable_cache: bool = False) -> tuple[mleko.model.base_model.HyperparametersType, float | list[float] | tuple[float, Ellipsis], Any]
+
+      Perform the hyperparameter tuning on the given DataFrame.
+
+      :param data_schema: Data schema for the DataFrame.
+      :param dataframe: DataFrame to be tuned on.
+      :param cache_group: The cache group to use for caching.
+      :param force_recompute: Weather to force recompute the result.
+      :param disable_cache: If set to True, disables the cache.
+
+      :returns: Tuple containing the best hyperparameters, the best score, and a dictionary
+                containing any additional information about the tuning process. The dictionary
+                is specific to each tuner, please refer to the documentation of the tuner
+                for more information.
+
+
+   .. py:method:: _load_cache_from_disk() -> None
+
+      Loads the cache entries from the cache directory and initializes the LRU cache.
+
+      Cache entries are ordered by their modification time, and the cache is trimmed if needed.
+
+
+   .. py:method:: _load_from_cache(cache_key: str, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> Any | None
+
+      Loads data from the cache based on the provided cache key and updates the LRU cache.
+
+      :param cache_key: A string representing the cache key.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+      :returns: The cached data if it exists, or None if there is no data for the given cache key.
+
+
+   .. py:method:: _save_to_cache(cache_key: str, output: Any | Sequence[Any], cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler]) -> None
+
+      Saves the given data to the cache using the provided cache key, updating the LRU cache accordingly.
+
+      If the cache reaches its maximum size, the least recently used entry will be evicted.
+
+      :param cache_key: A string representing the cache key.
+      :param output: The data to be saved to the cache.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If a single CacheHandler
+                             instance is provided, it will be used for all cache files. If a list of CacheHandler instances is
+                             provided, each CacheHandler instance will be used for each cache file.
+
+
+   .. py:method:: _evict_least_recently_used_if_full(group_identifier: str) -> None
+
+      Evicts the least recently used cache entry if the cache is full.
+
+      :param group_identifier: The group identifier for the cache entries.
+
+
+   .. py:method:: _cached_execute(lambda_func: Callable[[], Any], cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, force_recompute: bool = False, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler] | None = None, disable_cache: bool = False) -> Any
+
+      Executes the given function, caching the results based on the provided cache keys and fingerprints.
+
+      .. warning::
+
+         The cache group is used to group related cache keys together to prevent collisions between cache keys
+         originating from the same method. For example, if a method is called during the training and testing
+         phases of a machine learning pipeline, the cache keys for the training and testing phases should be
+         using different cache groups to prevent collisions between the cache keys for the two phases. Otherwise,
+         the later cache keys might overwrite the earlier cache entries.
+
+      :param lambda_func: A lambda function to execute.
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing
+                               a value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group, used to group related cache keys together when methods
+                          are called independently.
+      :param force_recompute: A boolean indicating whether to force recompute the result and update the cache, even if a
+                              cached result is available.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances. If None, the cache files will
+                             be read using pickle. If a single CacheHandler instance is provided, it will be used for all cache
+                             files. If a list of CacheHandler instances is provided, each CacheHandler instance will be used for
+                             each cache file.
+      :param disable_cache: Overrides the class-level `disable_cache` attribute. If set to True, disables the cache.
+
+      :returns: A tuple containing a boolean indicating whether the cached result was used, and the result of executing the
+                given function. If a cached result is available and `force_recompute` is False, the cached result will be
+                returned instead of recomputing the result.
+
+
+   .. py:method:: _compute_cache_key(cache_key_inputs: list[Hashable | tuple[Any, mleko.cache.fingerprinters.base_fingerprinter.BaseFingerprinter]], cache_group: str | None = None, frame_depth: int = 3) -> str
+
+      Computes the cache key based on the provided cache keys and the calling function's fully qualified name.
+
+      :param cache_key_inputs: A list of cache keys that can be a mix of hashable values and tuples containing a
+                               value and a BaseFingerprinter instance for generating fingerprints.
+      :param cache_group: A string representing the cache group.
+      :param frame_depth: The depth of the frame to inspect. The default value is 2, which is the frame of the calling
+                          function or method. For each nested function or method, the frame depth should be increased by 1.
+
+      :raises ValueError: If the computed cache key is too long.
+
+      :returns: A string representing the computed cache key, which is the MD5 hash of the fully qualified name of the
+                calling function or method, along with the fingerprints of the provided cache keys.
+
+
+   .. py:method:: _get_handler(cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], index: int = 0) -> mleko.cache.handlers.CacheHandler
+
+      Gets the cache handler at the given index.
+
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param index: The index of the cache handler to get.
+
+      :returns: Handler at the given index. If a single CacheHandler instance is provided, it will be returned.
+
+
+   .. py:method:: _write_to_cache_file(cache_key: str, output_item: Any, index: int, cache_handlers: mleko.cache.handlers.CacheHandler | list[mleko.cache.handlers.CacheHandler], is_sequence_output: bool) -> None
+
+      Writes the given data to the cache file using the provided cache key.
+
+      If the output is None and the cache handler cannot handle None, the output will be saved using the pickle
+      cache handler. Otherwise, the output will be saved to a cache file using the provided cache handler.
+
+      :param cache_key: A string representing the cache key.
+      :param output_item: The data to be saved to the cache.
+      :param index: The index of the cache handler to use.
+      :param cache_handlers: A CacheHandler instance or a list of CacheHandler instances.
+      :param is_sequence_output: Whether the output is a sequence or not. If True, the cache file will be saved with the
+                                 index appended to the cache key.
+
+
+   .. py:method:: _find_cache_type_name(cls: type) -> str | None
+
+      Recursively searches the class hierarchy for the name of the class that inherits from `CacheMixin`.
+
+      :param cls: The class to search.
+
+      :returns: The name of the class that inherits from `CacheMixin`, or None if no such class exists.
+
+
+

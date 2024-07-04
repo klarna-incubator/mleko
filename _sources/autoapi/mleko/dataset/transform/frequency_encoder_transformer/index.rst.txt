@@ -1,0 +1,110 @@
+:py:mod:`mleko.dataset.transform.frequency_encoder_transformer`
+===============================================================
+
+.. py:module:: mleko.dataset.transform.frequency_encoder_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the frequency encoder transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.frequency_encoder_transformer.FrequencyEncoderTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.frequency_encoder_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: FrequencyEncoderTransformer(features: list[str] | tuple[str, Ellipsis], unseen_strategy: Literal[zero, nan] = 'nan', cache_directory: str | pathlib.Path = 'data/frequency-encoder-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   Transforms features using frequency encoding.
+
+   Initializes the transformer.
+
+   Uses the `vaex.ml.FrequencyEncoder` transformer, which encodes categorical features using the frequency of
+   their respective samples. If a value is not seen during fitting, it will be encoded as zero or nan,
+   depending on the `unseen_strategy` parameter. Missing values will be encoded as nan, but will still count
+   towards the frequency of other values.
+
+   .. warning::
+
+      Should only be used with categorical features. High cardinality features are not recommended as they will
+      result in very small frequencies.
+
+   :param features: List of feature names to be used by the transformer.
+   :param unseen_strategy: Strategy to use for unseen values once the transformer is fitted.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.transform import FrequencyEncoderTransformer
+   >>> from mleko.utils.vaex_helpers import get_column
+   >>> df = vaex.from_arrays(
+   ...     a=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+   ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
+   ...     c=["a", "b", "b", "b", "b", "b", None, None, None, None],
+   ... )
+   >>> ds = DataSchema(
+   ...     categorical=["a", "b", "c"],
+   ... )
+   >>> _, _, df = FrequencyEncoderTransformer(
+   ...     features=["a", "b"],
+   ... ).fit_transform(ds, df)
+   >>> df["a"].tolist()
+   [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+   >>> df["b"].tolist()
+   [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.ml.FrequencyEncoder]
+
+      Fits the transformer on the input data.
+
+      :param data_schema: The DataSchema of the DataFrame.
+      :param dataframe: The DataFrame to fit the transformer on.
+
+      :returns: Updated DataSchema and the fitted transformer.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Transforms the features in the DataFrame using frequency encoding.
+
+      :param data_schema: The DataSchema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Updated DataSchema and the transformed DataFrame.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      Append the `unseen_strategy` to the fingerprint.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+

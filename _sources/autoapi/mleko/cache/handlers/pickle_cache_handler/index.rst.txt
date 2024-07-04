@@ -1,0 +1,54 @@
+:py:mod:`mleko.cache.handlers.pickle_cache_handler`
+===================================================
+
+.. py:module:: mleko.cache.handlers.pickle_cache_handler
+
+.. autoapi-nested-parse::
+
+   This module contains the CacheHandler for serializing and deserializing data using pickle.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.pickle_cache_handler.write_pickle
+   mleko.cache.handlers.pickle_cache_handler.read_pickle
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.cache.handlers.pickle_cache_handler.PICKLE_CACHE_HANDLER
+
+
+.. py:function:: write_pickle(cache_file_path: pathlib.Path, output: Any) -> None
+
+   Writes the given data to a cache file at the specified path, serializing it using pickle.
+
+   :param cache_file_path: A Path object representing the location where the cache file should be saved.
+   :param output: The data to be serialized and saved to the cache file.
+
+
+.. py:function:: read_pickle(cache_file_path: pathlib.Path) -> Any
+
+   Reads the cache file from the specified path and returns the deserialized data.
+
+   :param cache_file_path: A Path object representing the location of the cache file.
+
+   :returns: The deserialized data stored in the cache file.
+
+
+.. py:data:: PICKLE_CACHE_HANDLER
+
+   A CacheHandler for pickling Python objects.
+

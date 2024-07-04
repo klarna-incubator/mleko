@@ -1,0 +1,202 @@
+:py:mod:`mleko.dataset.export.local_exporter`
+=============================================
+
+.. py:module:: mleko.dataset.export.local_exporter
+
+.. autoapi-nested-parse::
+
+   Module for exporting data to a local file using the `LocalExporter` class.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.export.local_exporter.LocalExporterConfig
+   mleko.dataset.export.local_exporter.LocalExporter
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.export.local_exporter.logger
+   mleko.dataset.export.local_exporter.ExportType
+
+
+.. py:data:: logger
+
+   A module-level logger instance.
+
+.. py:data:: ExportType
+
+   Type alias for the supported export types.
+
+.. py:class:: LocalExporterConfig
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   Configuration for the LocalExporter.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+   .. py:attribute:: destination
+      :type: Union[str, pathlib.Path]
+
+      The path of the file to which the data will be exported.
+
+   .. py:attribute:: type
+      :type: Literal[vaex, json, pickle, joblib, string]
+
+      The type of export to perform. Supported types are 'vaex', 'json', 'pickle', 'joblib', and 'string'.
+
+      .. note::
+
+         - 'vaex' is used for exporting Vaex DataFrames, which are exported using the Arrow format or
+             the CSV format depending on the file extension.
+         - 'json' is used for exporting JSON data.
+         - 'pickle' is used for exporting generic data using Pickle.
+         - 'joblib' is used for exporting generic data using Joblib.
+         - 'string' is used for exporting string data.
+
+   .. py:method:: clear()
+
+      D.clear() -> None.  Remove all items from D.
+
+
+   .. py:method:: copy()
+
+      D.copy() -> a shallow copy of D
+
+
+   .. py:method:: get()
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: items()
+
+      D.items() -> a set-like object providing a view on D's items
+
+
+   .. py:method:: keys()
+
+      D.keys() -> a set-like object providing a view on D's keys
+
+
+   .. py:method:: pop()
+
+      D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+
+      If the key is not found, return the default if given; otherwise,
+      raise a KeyError.
+
+
+   .. py:method:: popitem()
+
+      Remove and return a (key, value) pair as a 2-tuple.
+
+      Pairs are returned in LIFO (last-in, first-out) order.
+      Raises KeyError if the dict is empty.
+
+
+   .. py:method:: setdefault()
+
+      Insert key with a value of default if key is not in the dictionary.
+
+      Return the value for key if key is in the dictionary, else default.
+
+
+   .. py:method:: update()
+
+      D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+      In either case, this is followed by: for k in F:  D[k] = F[k]
+
+
+   .. py:method:: values()
+
+      D.values() -> an object providing a view on D's values
+
+
+
+.. py:class:: LocalExporter(manifest_file_path: str | pathlib.Path, delete_old_files: bool = False)
+
+   Bases: :py:obj:`mleko.dataset.export.base_exporter.BaseExporter`
+
+   `LocalExporter` class for exporting data to a local file.
+
+   This class provides methods for exporting data to a local file using various methods, such as CSV, Arrow, JSON,
+   and Pickle. It can be chained with other exporters to export data to multiple destinations, such
+   as Python -> Local -> S3.
+
+   Initializes the `LocalExporter`.
+
+   .. note::
+
+      The manifest is intended to be used to keep track of the exported file names and sizes. It should
+      reflect the current state of the local dataset. In case a new set of files is exported and
+      `delete_old_files` is set to True, the old files will be deleted unless they are present in the
+      new data export.
+
+   :param manifest_file_path: Path to the manifest file to use for tracking exported files. If the file does
+                              not exist, it will be created.
+   :param delete_old_files: Whether to delete the old files from the local dataset before exporting the new ones
+                            based on the manifest.
+
+   .. py:method:: export(data: Any | list[Any], config: LocalExporterConfig | list[LocalExporterConfig], force_recompute: bool = False) -> list[pathlib.Path]
+
+      Exports the data to a local file.
+
+      :param data: Data to be exported.
+      :param config: Configuration for the export destination following the `LocalExporterConfig` schema.
+      :param force_recompute: If set to True, forces the data to be exported even if it already exists on disk.
+
+      .. rubric:: Examples
+
+      >>> from mleko.dataset.export import LocalExporter
+      >>> exporter = LocalExporter()
+      >>> exporter.export("test data", {"destination": "test.txt", "type": "string"})
+      Path('test.txt')
+
+
+   .. py:method:: _export_single(data: Any, config: LocalExporterConfig, force_recompute: bool) -> pathlib.Path
+
+      Exports a single data item to a local file.
+
+      :param data: Data to be exported.
+      :param config: Configuration for the export destination following the `LocalExporterConfig` schema.
+      :param force_recompute: If set to True, forces the data to be exported even if it already exists on disk.
+
+      :returns: The path to the exported file.
+
+
+   .. py:method:: _ensure_path_exists(path: pathlib.Path) -> None
+
+      Ensures the specified path exists.
+
+      :param path: The path to ensure exists.
+
+
+   .. py:method:: _run_export_function(data: Any, destination: pathlib.Path, export_type: ExportType) -> None
+
+
+   .. py:method:: _hash_data(data: Any, export_type: ExportType) -> str
+
+      Generates a hash for the given data.
+
+      :param data: Data to generate a hash for.
+
+      :returns: A hash of the data.
+
+
+

@@ -1,0 +1,133 @@
+:py:mod:`mleko.dataset.transform.composite_transformer`
+=======================================================
+
+.. py:module:: mleko.dataset.transform.composite_transformer
+
+.. autoapi-nested-parse::
+
+   Module for the composite transformer.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.composite_transformer.CompositeTransformer
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.dataset.transform.composite_transformer.logger
+
+
+.. py:data:: logger
+
+   A module-level logger for the module.
+
+.. py:class:: CompositeTransformer(transformers: list[mleko.dataset.transform.base_transformer.BaseTransformer] | tuple[mleko.dataset.transform.base_transformer.BaseTransformer, Ellipsis], cache_directory: str | pathlib.Path = 'data/composite-transformer', cache_size: int = 1)
+
+   Bases: :py:obj:`mleko.dataset.transform.base_transformer.BaseTransformer`
+
+   A transformer that combines multiple transformers.
+
+   It is possible to combine multiple transformers into a single transformer. This can be useful when multiple
+   transformers need to be applied to a DataFrame and storing the intermediate DataFrames is not desired.
+
+   Initializes the composite transformer.
+
+   The composite transformer will combine the transformers into a single transformer. Each transformer will be
+   applied to the DataFrame in the order they are specified. Caching of the intermediate DataFrames is disabled
+   and will only be performed on the final DataFrame.
+
+   :param transformers: List of transformers to be combined.
+   :param cache_directory: Directory where the cache will be stored locally.
+   :param cache_size: The maximum number of entries to keep in the cache.
+
+   .. rubric:: Examples
+
+   >>> import vaex
+   >>> from mleko.dataset.transform import (
+   ...     CompositeTransformer,
+   ...     LabelEncoderTransformer,
+   ...     FrequencyEncoderTransformer
+   ... )
+   >>> df = vaex.from_arrays(
+   ...     a=["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+   ...     b=["a", "a", "a", "a", None, None, None, None, None, None],
+   ... )
+   >>> ds = DataSchema(
+   ...     categorical=["a", "b"],
+   ... )
+   >>> transformer = CompositeTransformer(
+   ...     transformers=[
+   ...         LabelEncoderTransformer(
+   ...             features=["a"],
+   ...         ),
+   ...         FrequencyEncoderTransformer(
+   ...             features=["b"],
+   ...         ),
+   ...     ],
+   ... )
+   >>> _, _, df = transformer.fit_transform(ds, df)
+   >>> df["a"].tolist()
+   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+   >>> df["b"].tolist()
+   [0.4, 0.4, 0.4, 0.4, nan, nan, nan, nan, nan, nan]
+
+   .. py:method:: _fit(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, list[Any]]
+
+      Fits the transformer to the specified DataFrame.
+
+      :param data_schema: Data schema of the DataFrame.
+      :param dataframe: DataFrame to be fitted.
+
+      :returns: Updated data schema and list of fitted transformers.
+
+
+   .. py:method:: _transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, vaex.DataFrame]
+
+      Returns the updated data schema transformed DataFrame.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Updated data schema and transformed DataFrame.
+
+
+   .. py:method:: _fit_transform(data_schema: mleko.dataset.data_schema.DataSchema, dataframe: vaex.DataFrame) -> tuple[mleko.dataset.data_schema.DataSchema, Any, vaex.DataFrame]
+
+      Fits the transformer to the specified DataFrame and performs the transformation on the DataFrame.
+
+      :param data_schema: The data schema of the DataFrame.
+      :param dataframe: The DataFrame to transform.
+
+      :returns: Tuple of updated data schema, fitted transformer and transformed DataFrame.
+
+
+   .. py:method:: _assign_transformer(transformer: Any) -> None
+
+      Assigns the specified transformer to the transformer attribute.
+
+      Can be overridden by subclasses to assign the transformer using a different method.
+
+      :param transformer: Transformer to be assigned.
+
+
+   .. py:method:: _fingerprint() -> Hashable
+
+      Returns the fingerprint of the transformer.
+
+      :returns: A hashable object that uniquely identifies the transformer.
+
+
+

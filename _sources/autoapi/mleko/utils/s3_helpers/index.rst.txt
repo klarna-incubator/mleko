@@ -1,0 +1,188 @@
+:py:mod:`mleko.utils.s3_helpers`
+================================
+
+.. py:module:: mleko.utils.s3_helpers
+
+.. autoapi-nested-parse::
+
+   This module contains helper functions for working with AWS S3.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.s3_helpers.S3FileManifest
+   mleko.utils.s3_helpers.S3Client
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   mleko.utils.s3_helpers.logger
+
+
+.. py:data:: logger
+
+   A module-level custom logger.
+
+.. py:class:: S3FileManifest
+
+   Manifest entry for a single S3 file.
+
+   .. py:attribute:: key
+      :type: pathlib.Path
+
+      Key of the file, the full path of the file in the S3 bucket including the key prefix.
+
+   .. py:attribute:: size
+      :type: int
+
+      Size of the file in bytes.
+
+   .. py:attribute:: last_modified
+      :type: datetime.datetime
+
+      Last modified date of the file.
+
+
+.. py:class:: S3Client(aws_profile_name: str | None = None, aws_region_name: str = 'eu-west-1')
+
+   Helper class for working with AWS S3.
+
+   Initializes an S3 client with the specified AWS profile and region.
+
+   :param aws_profile_name: AWS profile name to use. Defaults to None.
+   :param aws_region_name: AWS region name where the S3 bucket is located.
+
+   .. py:method:: get_s3_client(aws_profile_name: str | None, aws_region_name: str)
+      :staticmethod:
+
+      Creates an S3 client using the provided AWS profile and region.
+
+      :param aws_profile_name: AWS profile name to use.
+      :param aws_region_name: AWS region name where the S3 bucket is located.
+
+      :returns: An S3 client configured with the specified profile and region.
+
+
+   .. py:method:: refresh_client() -> None
+
+      Refreshes the S3 client in case the credentials have changed.
+
+
+   .. py:method:: download_file(destination_directory: pathlib.Path, bucket_name: str, key: str, num_workers: int = 1, multipart_threshold_gb: float = 0.5) -> pathlib.Path
+
+      Downloads a file from S3 and saves it to the destination directory.
+
+      :param destination_directory: Destination directory where the file should be saved.
+      :param bucket_name: Name of the S3 bucket.
+      :param key: Key of the file to fetch.
+      :param num_workers: Number of workers to use for downloading the file. Set to 1 for single-threaded download.
+      :param multipart_threshold_gb: Threshold in GB for multipart transfer. If the file size is greater than this
+                                     threshold, the file will be downloaded using multipart transfer.
+
+      :returns: Path where the file is saved.
+
+
+   .. py:method:: upload_file(file_path: pathlib.Path, bucket_name: str, key_prefix: str, extra_args: dict[str, Any] | None = None, num_workers: int = 1, multipart_threshold_gb: float = 0.5) -> S3FileManifest
+
+      Uploads a file to S3.
+
+      :param file_path: Path to the file to upload.
+      :param bucket_name: Name of the S3 bucket.
+      :param key_prefix: Key prefix to use for the file in the S3 bucket. The file will be uploaded to
+                         `f"{key_prefix}/{file_path.name}"`.
+      :param extra_args: Extra arguments to pass to the S3 client.
+      :param num_workers: Number of workers to use for uploading the file. Set to 1 for single-threaded upload.
+      :param multipart_threshold_gb: Threshold in GB for multipart transfer. If the file size is greater than this
+                                     threshold, the file will be uploaded using multipart transfer.
+
+      :returns: S3 manifest entry for the uploaded file.
+
+
+   .. py:method:: read_object(bucket_name: str, key: str) -> bytes
+
+      Reads the contents of a object from S3.
+
+      :param bucket_name: The name of the S3 bucket.
+      :param key: Key of the object to read.
+
+      :returns: Contents of the object as bytes.
+
+
+   .. py:method:: write_object(bucket_name: str, key: str, body: bytes | str) -> str
+
+      Writes an object to S3.
+
+      :param bucket_name: The name of the S3 bucket.
+      :param key: Key of the object to write.
+      :param body: Body of the object to write.
+
+
+   .. py:method:: get_s3_manifest(bucket_name: str, key_prefix: str, manifest_file_name: str | None = 'manifest', file_pattern: str | list[str] = '*') -> list[S3FileManifest]
+
+      Gets the S3 manifest for the files in the S3 bucket.
+
+      :param bucket_name: Name of the S3 bucket.
+      :param key_prefix: Key prefix to the files in the S3 bucket.
+      :param manifest_file_name: Optional name of a manifest file located on S3. If provided, the manifest from S3 will
+                                 be used to determine the files to include, before applying the file pattern.
+      :param file_pattern: Pattern to match the files to download, e.g. `*.csv` or [`*.csv`, `*.json`], etc.
+                           For more information, see https://docs.python.org/3/library/fnmatch.html.
+
+      :raises FileNotFoundError: If no files matching the file pattern are found in the S3 bucket.
+
+      :returns: A list of `S3FileManifest` objects containing the S3 keys, sizes, and last modified dates of the files in
+                the S3 bucket.
+
+
+   .. py:method:: put_s3_manifest(bucket_name: str, key: str, s3_manifest: list[S3FileManifest]) -> None
+
+      Puts a S3 manifest to the specified key in the S3 bucket.
+
+      :param bucket_name: Name of the S3 bucket.
+      :param key: Key of the manifest file in the S3 bucket.
+      :param s3_manifest: S3 manifest to write to the S3 bucket.
+
+
+   .. py:method:: is_local_dataset_up_to_date(local_directory: pathlib.Path | str, s3_manifest: list[S3FileManifest]) -> bool
+
+      Checks if the local dataset is up to date with the S3 manifest.
+
+      :param local_directory: Local directory where the files are stored.
+      :param s3_manifest: S3 manifest containing the files to compare.
+
+      :returns: True if the local dataset is up to date with the S3 manifest, False otherwise.
+
+
+   .. py:method:: is_s3_dataset_up_to_date(local_directory: list[pathlib.Path] | list[str], s3_manifest: list[S3FileManifest]) -> bool
+
+      Checks if the S3 dataset is up to date with the local files.
+
+      :param local_directory: Local directory where the files are stored.
+      :param s3_manifest: S3 manifest containing the files to compare.
+
+      :returns: True if the S3 dataset is up to date with the local files, False otherwise.
+
+
+   .. py:method:: _get_boto_transfer_config(num_workers: int, multipart_threshold_gb: float) -> boto3.s3.transfer.TransferConfig
+
+      Returns a Boto transfer configuration based on the number of workers and multipart threshold.
+
+      :param num_workers: Number of workers to use for downloading the file.
+      :param multipart_threshold_gb: Threshold in GB for multipart transfer.
+
+      :returns: Boto transfer configuration.
+
+
+
